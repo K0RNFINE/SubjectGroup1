@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตารางเรียน ม.5/1</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #7be2ff, #3683ff);
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+      transition: transform 0.25s ease, background-color 0.25s ease;
+      overflow-wrap: break-word;
+      position: relative;
+    }
+
+    th {
+      background-color: #4f81c7;
+      color: white;
+    }
+
+    td {
+      background-color: #fefefe;
+    }
+
+    td:hover:not(.free)::after {
+      content: attr(data-message);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #444;
+      color: #ffffff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 2;
+      opacity: 0.95;
+    }
+
+        /* the background of button when touch */
+    td:hover:not(.free) {
+      background-color: #0084ff;
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+      z-index: 1;
+      cursor: pointer;
+    }
+    tr.bottom-row td:hover::after {
+        top: auto;
+        bottom: 100%;
+    }
+
+    .free {
+      background-color: #515cff;
+    }
+
+    td:empty {
+      background-color: #f9f9f9;
+    }
+
+    td:empty:hover {
+      background-color: #088bfe;
+    }
+  </style>
+</head>
+<body>
+  <h1>ตารางเรียน ม.5/1 กลุ่ม 1 ภาคเรียนที่ 1/2568</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>คาบที่</th>
+        <th>08.30-09.20</th>
+        <th>09.20-10.10</th>
+        <th>10.20-11.10</th>
+        <th>11.10-12.00</th>
+        <th>12.00-12.50</th>
+        <th>12.50-13.40</th>
+        <th>13.50-14.40</th>
+        <th>14.40-15.30</th>
+        <th>15.30-16.20</th>
+        <th>16.20-17.10</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>จันทร์</th>
+        <td data-message="ครูปภาวริน ห้อง 514">นาฏศิลป์<br>ครูปภาวริน<br>514</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
+        <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
+        <td>พักกลางวัน</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">สังคมศึกษา<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">สังคมศึกษา<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครู Beatriz ห้อง 325">ภาษาอังกฤษเพื่อการสื่อสาร 3<br>ครูBeatriz<br>325</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>อังคาร</th>
+        <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
+        <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
+        <td data-message="ครูฉัตรชัย ห้อง 613">แนะแนว<br>ครูฉัตรชัย<br>613</td>
+        <td data-message="ครูธาราวุฒิ ห้อง 536">ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
+        <td>พักกลางวัน</td>
+        <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
+        <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
+        <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
+        <td>ประชุมสี</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>พุธ</th>
+        <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
+        <td data-message="ครูมนต์ดี ห้อง 245">สุขศึกษาและพลศึกษา<br>ครูมนต์ดี<br>245</td>
+        <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td>พักกลางวัน</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูพิทักษ์ ห้อง 436">ชีววิทยา 3<br>ครูพิทักษ์<br>436</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">สังคมศึกษา<br>ครูวราภรณ์<br>426</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>พฤหัสบดี</th>
+        <td data-message="ครูสุทธิวรรณ ห้อง 415">เคมี 3<br>ครูสุทธิวรรณ<br>415</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 415">เคมี 3<br>ครูสุทธิวรรณ<br>415</td>
+        <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
+        <td data-message="ครูฉัตรชัย ห้อง 627">ภาษาไทย<br>ครูฉัตรชัย<br>627</td>
+        <td>พักกลางวัน</td>
+        <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
+        <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
+        <td>ชุมนุม</td>
+        <td>ซ่อมเสริม</td>
+        <td></td>
+      </tr>
+      <tr class="bottom-row">
+        <th>ศุกร์</th>
+        <td data-message="ครูกนิษฐา ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกนิษฐา<br>133</td>
+        <td data-message="ครูกนิษฐา ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกนิษฐา<br>133</td>
+        <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
+        <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
+        <td>พักกลางวัน</td>
+        <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
+        <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
+        <td data-message="ครูธารวุฒิ ห้อง 627">ภาษาไทย<br>ครูธารวุฒิ<br>627</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
