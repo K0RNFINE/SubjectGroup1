@@ -26,20 +26,26 @@
       border-collapse: collapse;
       width: 100%;
       table-layout: fixed;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.4); /* 40% transparency (white) */
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-
+    
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 255, 255, 0.6); /* Light border with transparency */
       padding: 12px;
       text-align: center;
       transition: transform 0.25s ease, background-color 0.25s ease;
       overflow-wrap: break-word;
       position: relative;
+      background-color: rgba(255, 255, 255, 0.4); /* 40% transparent background for cells */
     }
+    
+    td:hover:not(.free) {
+      background-color: rgba(0, 132, 255, 0.4); /* 40% transparent hover color */
+    }
+
 
     th {
       background-color: #4f81c7;
@@ -56,7 +62,7 @@
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      background-color: #444;
+      background-color: rgba(0, 132, 255, 0.4);
       color: #ffffff;
       padding: 6px 10px;
       border-radius: 6px;
