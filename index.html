@@ -7,13 +7,16 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('Kohane.jpg'); /* 🔁 เปลี่ยนเป็น URL หรือชื่อไฟล์ภาพของคุณ */
+      background-image: url('Kohane.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       padding: 20px;
       margin: 0;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
@@ -25,29 +28,25 @@
       border-collapse: collapse;
       width: 100%;
       table-layout: fixed;
-      background: rgba(255, 255, 255, 0.4); /* 40% transparency (white) */
+      background: rgba(255, 255, 255, 0.4);
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
     th, td {
-      border: 1px solid rgba(255, 255, 255, 0.6); /* Light border with transparency */
+      border: 1px solid rgba(255, 255, 255, 0.6);
       padding: 12px;
       text-align: center;
       transition: transform 0.25s ease, background-color 0.25s ease;
       overflow-wrap: break-word;
       position: relative;
-      background-color: rgba(255, 255, 255, 0.4); /* 40% transparent background for cells */
+      background-color: rgba(255, 255, 255, 0.4);
     }
 
     th {
       background-color: #4f81c7;
       color: white;
-    }
-
-    td {
-      background-color: rgba(255, 255, 255, 0.4); /* 40% transparent background for table cells */
     }
 
     td:hover:not(.free)::after {
@@ -66,7 +65,7 @@
     }
 
     td:hover:not(.free) {
-      background-color: rgba(0, 132, 255, 0.4); /* 40% transparent hover color */
+      background-color: rgba(0, 132, 255, 0.4);
       transform: scale(1.1);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
       z-index: 1;
@@ -83,14 +82,13 @@
     }
 
     td:empty {
-      background-color: rgba(255, 255, 255, 0.4); /* Empty cells with 40% transparency */
+      background-color: rgba(255, 255, 255, 0.4);
     }
 
     td:empty:hover {
-      background-color: rgba(8, 139, 254, 0.4); /* Empty cell hover with 40% transparency */
+      background-color: rgba(8, 139, 254, 0.4);
     }
 
-    /* 🔄 Rotate body for smartphones */
     @media only screen and (max-width: 768px) {
       body {
         transform: rotate(90deg);
@@ -103,10 +101,69 @@
         left: 0;
       }
     }
+
+    /* Analog clock */
+    .clock-container {
+      margin: 20px 0;
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .analog-clock {
+      width: 200px;
+      height: 200px;
+      border: 8px solid #fff;
+      border-radius: 50%;
+      position: relative;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .analog-clock .number {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      transform-origin: center;
+      font-weight: bold;
+    }
+
+    .hand {
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      background: black;
+      top: 50%;
+      left: 50%;
+      transform-origin: left;
+    }
+
+    .hand.hour { height: 4px; background: #333; }
+    .hand.minute { background: #555; }
+    .hand.second { background: red; height: 1px; }
+
+    /* Digital clock */
+    .digital-clock {
+      font-size: 2rem;
+      color: cyan;
+      font-family: 'Courier New', Courier, monospace;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px cyan;
+    }
   </style>
 </head>
 <body>
   <h1>ตารางเรียน ม.5/1 กลุ่ม 1 ภาคเรียนที่ 1/2568</h1>
+
+  <div class="clock-container">
+    <div class="analog-clock" id="analog-clock"></div>
+    <div class="digital-clock" id="digital-clock">00:00:00</div>
+  </div>
+
   <table>
     <thead>
         <tr>
@@ -130,12 +187,12 @@
           <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
           <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
           <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
-          <td>พักกลางวัน</td>
+          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
           <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
           <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
           <td data-message="ครู Beatriz ห้อง 325">ภาษาอังกฤษเพื่อการสื่อสาร 3<br>ครูBeatriz<br>325</td>
-          <td></td>
-          <td></td>
+          <td>-</td>
+          <td>-</td>
         </tr>
         <tr>
           <th>อังคาร</th>
@@ -143,12 +200,12 @@
           <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
           <td data-message="ครูฉัตรชัย ห้อง 613">แนะแนว<br>ครูฉัตรชัย<br>613</td>
           <td data-message="ครูธาราวุฒิ ห้อง 536">ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
-          <td>พักกลางวัน</td>
+          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
           <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
           <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
           <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
           <td>ประชุมสี</td>
-          <td></td>
+          <td>-</td>
         </tr>
         <tr>
           <th>พุธ</th>
@@ -156,12 +213,12 @@
           <td data-message="ครูนฤมิต ห้อง 245">สุขศึกษาและพลศึกษา<br>ครูนฤมิต<br>245</td>
           <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
           <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
-          <td>พักกลางวัน</td>
+          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
           <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
           <td data-message="ครูพิทักษ์ ห้อง 436">ชีววิทยา 3<br>ครูพิทักษ์<br>436</td>
           <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
-          <td></td>
-          <td></td>
+          <td>-</td>
+          <td>-</td>
         </tr>
         <tr>
           <th>พฤหัสบดี</th>
@@ -169,27 +226,71 @@
           <td data-message="ครูสุทธิวรรณ ห้อง 415">เคมี 3<br>ครูสุทธิวรรณ<br>415</td>
           <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
           <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-          <td>พักกลางวัน</td>
+          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
           <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
           <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
           <td>ชุมนุม</td>
           <td>ซ่อมเสริม</td>
-          <td></td>
+          <td>-</td>
         </tr>
         <tr class="bottom-row">
           <th>ศุกร์</th>
-          <td data-message="ครูกนิษฐา ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกนิษฐา<br>133</td>
-          <td data-message="ครูกนิษฐา ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกนิษฐา<br>133</td>
+          <td data-message="ครูกันตพงศ์ ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกันตพงศ์<br>133</td>
+          <td data-message="ครูกันตพงศ์ ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกันตพงศ์<br>133</td>
           <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
           <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
-          <td>พักกลางวัน</td>
+          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
           <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
           <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
           <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-          <td></td>
-          <td></td>
+          <td>-</td>
+          <td>-</td>
         </tr>
       </tbody>
   </table>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes();
+      const hours = now.getHours();
+
+      const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
+      const minuteDeg = (minutes / 60) * 360;
+      const secondDeg = (seconds / 60) * 360;
+
+      document.getElementById("hour").style.transform = `rotate(${hourDeg}deg)`;
+      document.getElementById("minute").style.transform = `rotate(${minuteDeg}deg)`;
+      document.getElementById("second").style.transform = `rotate(${secondDeg}deg)`;
+
+      document.getElementById("digital-clock").textContent =
+        now.toLocaleTimeString('th-TH', { hour12: false });
+    }
+
+    const clock = document.getElementById("analog-clock");
+    for (let i = 1; i <= 12; i++) {
+      const number = document.createElement("div");
+      number.className = "number";
+      number.textContent = i;
+      const angle = (i * 30) * (Math.PI / 180);
+      const radius = 90;
+      const x = 100 + radius * Math.sin(angle);
+      const y = 100 - radius * Math.cos(angle);
+      number.style.left = `${x - 10}px`;
+      number.style.top = `${y - 10}px`;
+      clock.appendChild(number);
+    }
+
+    ["hour", "minute", "second"].forEach(className => {
+      const hand = document.createElement("div");
+      hand.id = className;
+      hand.className = `hand ${className}`;
+      clock.appendChild(hand);
+    });
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
 </body>
 </html>
