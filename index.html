@@ -1,9 +1,9 @@
-<!-- Full HTML with dynamic subject display based on current time -->
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ตารางเรียน ม.5/1</title>
   <style>
     body {
@@ -32,10 +32,11 @@
       background: rgba(255, 255, 255, 0.4);
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid rgba(255, 255, 255, 0.6);
       padding: 12px;
       text-align: center;
@@ -90,16 +91,19 @@
       background-color: rgba(8, 139, 254, 0.4);
     }
 
+    /* Remove rotation on small screens for clarity */
     @media only screen and (max-width: 768px) {
       body {
-        transform: rotate(90deg);
-        transform-origin: top left;
-        width: 100vh;
-        height: 100vw;
-        overflow-x: hidden;
-        position: absolute;
-        top: 100%;
-        left: 0;
+        /* Removed rotation */
+        width: 100%;
+        height: auto;
+        overflow-x: auto;
+        position: relative;
+        top: auto;
+        left: auto;
+      }
+      table {
+        font-size: 0.9rem;
       }
     }
 
@@ -138,17 +142,28 @@
       top: 50%;
       left: 50%;
       transform-origin: left;
+      
     }
 
-    .hand.hour { height: 4px; background: #333; }
-    .hand.minute { background: #555; }
-    .hand.second { background: red; height: 1px; }
+    .hand.hour {
+      height: 4px;
+      background: #333;
+    }
+
+    .hand.minute {
+      background: #555;
+    }
+
+    .hand.second {
+      background: red;
+      height: 1px;
+    }
 
     .digital-clock {
       font-size: 2rem;
       color: cyan;
       font-family: 'Courier New', Courier, monospace;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.7);
       padding: 10px 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px cyan;
@@ -158,7 +173,7 @@
       font-size: 1.2rem;
       margin-top: 10px;
       color: white;
-      background-color: rgba(0,0,0,0.6);
+      background-color: rgba(0, 0, 0, 0.6);
       padding: 10px;
       border-radius: 10px;
       text-align: center;
@@ -166,6 +181,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1>ตารางเรียน ม.5/1 กลุ่ม 1 ภาคเรียนที่ 1/2568</h1>
 
@@ -177,170 +193,204 @@
     </div>
   </div>
 
-    <table>
+  <table>
     <thead>
-        <tr>
-          <th>คาบที่</th>
-          <th>08.30-09.20</th>
-          <th>09.20-10.10</th>
-          <th>10.20-11.10</th>
-          <th>11.10-12.00</th>
-          <th>12.00-12.50</th>
-          <th>12.50-13.40</th>
-          <th>13.50-14.40</th>
-          <th>14.40-15.30</th>
-          <th>15.30-16.20</th>
-          <th>16.20-17.10</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>จันทร์</th>
-          <td data-message="ครูปภาวริน ห้อง 514">นาฏศิลป์<br>ครูปภาวริน<br>514</td>
-          <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
-          <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
-          <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
-          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-          <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
-          <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
-          <td data-message="ครู Beatriz ห้อง 325">ภาษาอังกฤษเพื่อการสื่อสาร 3<br>ครูBeatriz<br>325</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <th>อังคาร</th>
-          <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
-          <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
-          <td data-message="ครูฉัตรชัย ห้อง 613">แนะแนว<br>ครูฉัตรชัย<br>613</td>
-          <td data-message="ครูธาราวุฒิ ห้อง 536">ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
-          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-          <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
-          <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
-          <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
-          <td>ประชุมสี</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <th>พุธ</th>
-          <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
-          <td data-message="ครูนฤมิต ห้อง 245">สุขศึกษาและพลศึกษา<br>ครูนฤมิต<br>245</td>
-          <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
-          <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
-          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-          <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
-          <td data-message="ครูพิทักษ์ ห้อง 436">ชีววิทยา 3<br>ครูพิทักษ์<br>436</td>
-          <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <th>พฤหัสบดี</th>
-          <td data-message="ครูสุทธิวรรณ ห้อง 415">เคมี 3<br>ครูสุทธิวรรณ<br>415</td>
-          <td data-message="ครูสุทธิวรรณ ห้อง 415">เคมี 3<br>ครูสุทธิวรรณ<br>415</td>
-          <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
-          <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-          <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
-          <td data-message="ครูวราภรณ์ ห้อง 421">ฟิสิกส์ 3<br>ครูวราภรณ์<br>421</td>
-          <td>ชุมนุม</td>
-          <td>ซ่อมเสริม</td>
-          <td>-</td>
-        </tr>
-        <tr class="bottom-row">
-          <th>ศุกร์</th>
-          <td data-message="ครูกันตพงศ์ ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกันตพงศ์<br>133</td>
-          <td data-message="ครูกันตพงศ์ ห้อง 133">วิทยาศาสตร์เทคโนโลยี<br>ครูกันตพงศ์<br>133</td>
-          <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
-          <td data-message="ครูจามจุรี ห้อง 223">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>223</td>
-          <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-          <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
-          <td data-message="ครูอธิธร ห้อง 332">Independent Study 1<br>ครูอธิธร<br>332</td>
-          <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-      </tbody>
+      <tr>
+        <th>วัน/เวลา</th>
+        <th>08.30-09.20</th>
+        <th>09.20-10.10</th>
+        <th>10.20-11.10</th>
+        <th>11.10-12.00</th>
+        <th>12.00-12.50</th>
+        <th>12.50-13.40</th>
+        <th>13.50-14.40</th>
+        <th>14.40-15.30</th>
+        <th>15.30-16.20</th>
+        <th>16.20-17.10</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>จันทร์</th>
+        <td data-message="ครูปภาวริน ห้อง 514">นาฏศิลป์<br>ครูปภาวริน<br>514</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
+        <td data-message="ครูจามจุรี ห้อง 236">คณิตศาสตร์เพิ่มเติม<br>ครูจามจุรี<br>236</td>
+        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครู Beatriz ห้อง 325">ภาษาอังกฤษเพื่อการสื่อสาร 3<br>ครูBeatriz<br>325</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <th>อังคาร</th>
+        <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
+        <td data-message="ครูพิทักษ์ ห้อง 426">ชีววิทยา 3<br>ครูพิทักษ์<br>426</td>
+        <td data-message="ครูฉัตรชัย ห้อง 613">แนะแนว<br>ครูฉัตรชัย<br>613</td>
+        <td data-message="ครูธาราวุฒิ ห้อง 536">ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
+        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
+        <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
+        <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
+        <td data-message="ครูวราภรณ์ ห้อง 212">ฟิสิกส์ 3<br>ครูวราภรณ์<br>212</td>
+        <td>ประชุมสี</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <th>พุธ</th>
+        <td data-message="ครูพีรพัฒน์ ห้อง 525">สังคมศึกษา<br>ครูพีรพัฒน์<br>525</td>
+        <td data-message="ครูนฤมิต ห้อง 245">สุขศึกษาและพลศึกษา<br>ครูนฤมิต<br>245</td>
+        <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูพิทักษ์ ห้อง 436">ชีววิทยา 3<br>ครูพิทักษ์<br>436</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <th>พฤหัสบดี</th>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครูวราภรณ์ ห้อง 426">ฟิสิกส์ พื้นฐาน<br>ครูวราภรณ์<br>426</td>
+        <td data-message="ครูฉัตรชัย ห้อง 613">แนะแนว<br>ครูฉัตรชัย<br>613</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <th>ศุกร์</th>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ครูณัฐพล ห้อง 327">ภาษาอังกฤษ<br>ครูณัฐพล<br>327</td>
+        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td data-message="ครูสุทธิวรรณ ห้อง 433">เคมี 3<br>ครูสุทธิวรรณ<br>433</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+    </tbody>
   </table>
 
   <script>
-    const schedule = {
-      1: { start: "08:30", end: "09:20" },
-      2: { start: "09:20", end: "10:10" },
-      3: { start: "10:20", end: "11:10" },
-      4: { start: "11:10", end: "12:00" },
-      5: { start: "12:00", end: "12:50" },
-      6: { start: "12:50", end: "13:40" },
-      7: { start: "13:50", end: "14:40" },
-      8: { start: "14:40", end: "15:30" },
-      9: { start: "15:30", end: "16:20" },
-      10: { start: "16:20", end: "17:10" }
-    };
+    // Clock drawing logic unchanged but adjusted for #analog-clock container
+    const analogClock = document.getElementById('analog-clock');
+    const digitalClock = document.getElementById('digital-clock');
+    const currentSubject = document.getElementById('current-subject');
 
-    const dayMap = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    // Create clock hands inside analogClock
+    function createHand(className, widthPercent, heightPx, color) {
+      const hand = document.createElement('div');
+      hand.classList.add('hand', className);
+      hand.style.width = widthPercent;
+      hand.style.height = heightPx + 'px';
+      hand.style.backgroundColor = color;
+      analogClock.appendChild(hand);
+      return hand;
+    }
+
+    // Clear existing hands if any
+    analogClock.innerHTML = '';
+    const hourHand = createHand('hour', '35%', 4, '#333');
+    const minuteHand = createHand('minute', '45%', 3, '#555');
+    const secondHand = createHand('second', '50%', 1, 'red');
 
     function updateClock() {
       const now = new Date();
-      const seconds = now.getSeconds();
-      const minutes = now.getMinutes();
-      const hours = now.getHours();
-      const currentTimeStr = now.toTimeString().slice(0, 5);
-      const day = now.getDay();
-      const today = dayMap[day];
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
 
-      document.getElementById("digital-clock").textContent = now.toLocaleTimeString('th-TH', { hour12: false });
+      const hourDeg = (h % 12) * 30 + m * 0.5; // 30 deg per hour + 0.5 per min
+      const minDeg = m * 6 + s * 0.1;          // 6 deg per min + 0.1 per sec
+      const secDeg = s * 6;                    // 6 deg per sec
 
-      const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
-      const minuteDeg = (minutes / 60) * 360;
-      const secondDeg = (seconds / 60) * 360;
+      hourHand.style.transform = `rotate(${hourDeg}deg)`;
+      minuteHand.style.transform = `rotate(${minDeg}deg)`;
+      secondHand.style.transform = `rotate(${secDeg}deg)`;
 
-      document.getElementById("hour").style.transform = `rotate(${hourDeg}deg)`;
-      document.getElementById("minute").style.transform = `rotate(${minuteDeg}deg)`;
-      document.getElementById("second").style.transform = `rotate(${secondDeg}deg)`;
+      // Digital clock
+      digitalClock.textContent =
+        h.toString().padStart(2, '0') + ':' +
+        m.toString().padStart(2, '0') + ':' +
+        s.toString().padStart(2, '0');
 
-      let subjectText = "ขณะนี้ไม่มีคาบเรียน";
+      // Determine current subject from table based on time and day
+      updateCurrentSubject(h, m);
+    }
 
-      const rows = document.querySelectorAll("tbody tr");
-      rows.forEach(row => {
-        const rowDay = row.querySelector("th").textContent.trim();
-        if (rowDay === today) {
-          const cells = row.querySelectorAll("td");
-          cells.forEach((cell, index) => {
-            const slot = schedule[index + 1];
-            if (!slot) return;
-            const { start, end } = slot;
-            if (currentTimeStr >= start && currentTimeStr < end) {
-              subjectText = `ขณะนี้: ${cell.textContent.trim().replace(/\n/g, ' | ')}<br>เวลา: ${start} - ${end}`;
-            }
-          });
+    function updateCurrentSubject(hour, minute) {
+      // Define periods with start/end times (24h)
+      // These match your table times roughly:
+      // 08:30-09:20, 09:20-10:10, 10:20-11:10, 11:10-12:00, 12:00-12:50, 12:50-13:40, 13:50-14:40, 14:40-15:30, 15:30-16:20, 16:20-17:10
+
+      const periods = [
+        { start: [8, 30], end: [9, 20] },
+        { start: [9, 20], end: [10, 10] },
+        { start: [10, 20], end: [11, 10] },
+        { start: [11, 10], end: [12, 0] },
+        { start: [12, 0], end: [12, 50] },
+        { start: [12, 50], end: [13, 40] },
+        { start: [13, 50], end: [14, 40] },
+        { start: [14, 40], end: [15, 30] },
+        { start: [15, 30], end: [16, 20] },
+        { start: [16, 20], end: [17, 10] }
+      ];
+
+      // Get day index: Sunday=0 ... Saturday=6
+      const dayIdx = new Date().getDay();
+
+      // Map day index to your table rows (Mon=1, Tue=2, Wed=3, Thu=4, Fri=5)
+      // Ignore weekends (0,6)
+      if (dayIdx === 0 || dayIdx === 6) {
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+        return;
+      }
+
+      // Get tbody rows, note rows are Mon=0 ... Fri=4
+      const tbody = document.querySelector('tbody');
+      const rowIndex = dayIdx - 1;
+      const row = tbody.rows[rowIndex];
+      if (!row) {
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+        return;
+      }
+
+      // Find current period index based on time
+      let periodIndex = -1;
+      for (let i = 0; i < periods.length; i++) {
+        const p = periods[i];
+        const startMinutes = p.start[0] * 60 + p.start[1];
+        const endMinutes = p.end[0] * 60 + p.end[1];
+        const nowMinutes = hour * 60 + minute;
+        if (nowMinutes >= startMinutes && nowMinutes < endMinutes) {
+          periodIndex = i + 1; // +1 because first cell is day name
+          break;
         }
-      });
+      }
+      if (periodIndex === -1) {
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+        return;
+      }
 
-      document.getElementById("current-subject").innerHTML = subjectText;
+      const currentCell = row.cells[periodIndex];
+      if (!currentCell || currentCell.textContent.trim() === '-' || currentCell.textContent.trim() === '') {
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+        return;
+      }
+
+      currentSubject.textContent = 'ขณะนี้เรียน: ' + currentCell.textContent.replace(/\n/g, ' ');
     }
-
-    const clock = document.getElementById("analog-clock");
-    for (let i = 1; i <= 12; i++) {
-      const number = document.createElement("div");
-      number.className = "number";
-      number.textContent = i;
-      const angle = (i * 30) * (Math.PI / 180);
-      const radius = 90;
-      const x = 100 + radius * Math.sin(angle);
-      const y = 100 - radius * Math.cos(angle);
-      number.style.left = `${x - 10}px`;
-      number.style.top = `${y - 10}px`;
-      clock.appendChild(number);
-    }
-
-    ["hour", "minute", "second"].forEach(className => {
-      const hand = document.createElement("div");
-      hand.id = className;
-      hand.className = `hand ${className}`;
-      clock.appendChild(hand);
-    });
 
     setInterval(updateClock, 1000);
     updateClock();
   </script>
 </body>
+
 </html>
