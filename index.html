@@ -179,93 +179,102 @@
 
   <!-- 🧠 SCRIPT SECTION -->
   <script>
-    const digitalClock = document.getElementById('digital-clock');
-    const currentSubject = document.getElementById('current-subject');
+  const digitalClock = document.getElementById('digital-clock');
+  const currentSubject = document.getElementById('current-subject');
+  const periods = [
+    { start: [8, 30], end: [9, 20] },
+    { start: [9, 20], end: [10, 10] },
+    { start: [10, 20], end: [11, 10] },
+    { start: [11, 10], end: [12, 0] },
+    { start: [12, 0], end: [12, 50] },
+    { start: [12, 50], end: [13, 40] },
+    { start: [13, 50], end: [14, 40] },
+    { start: [14, 40], end: [15, 30] },
+    { start: [15, 30], end: [16, 20] },
+    { start: [16, 20], end: [17, 10] }
+  ];
 
-    const periods = [
-      { start: [8, 30], end: [9, 20] },
-      { start: [9, 20], end: [10, 10] },
-      { start: [10, 20], end: [11, 10] },
-      { start: [11, 10], end: [12, 0] },
-      { start: [12, 0], end: [12, 50] },
-      { start: [12, 50], end: [13, 40] },
-      { start: [13, 50], end: [14, 40] },
-      { start: [14, 40], end: [15, 30] },
-      { start: [15, 30], end: [16, 20] },
-      { start: [16, 20], end: [17, 10] }
-    ];
+  function updateClock() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+    digitalClock.textContent =
+      h.toString().padStart(2, '0') + ':' +
+      m.toString().padStart(2, '0') + ':' +
+      s.toString().padStart(2, '0');
 
-    function updateClock() {
-      const now = new Date();
-      const h = now.getHours();
-      const m = now.getMinutes();
-      const s = now.getSeconds();
+    updateCurrentSubject(h, m);
+  }
 
-      digitalClock.textContent =
-        h.toString().padStart(2, '0') + ':' +
-        m.toString().padStart(2, '0') + ':' +
-        s.toString().padStart(2, '0');
+  function updateCurrentSubject(hour, minute) {
+    const dayIdx = new Date().getDay(); // 0 (Sun) - 6 (Sat)
+    const tbody = document.querySelector('tbody');
+    const rowIndex = dayIdx - 1; // Monday = 0
 
-      updateCurrentSubject(h, m);
+    // Remove previous highlight
+    document.querySelectorAll('td').forEach(td => td.classList.remove('highlighted'));
+
+    // Handle weekends
+    if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
+      currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+      return;
     }
 
-    function updateCurrentSubject(hour, minute) {
-      const dayIdx = new Date().getDay();
-      const tbody = document.querySelector('tbody');
-      const rowIndex = dayIdx - 1;
+    const row = tbody.rows[rowIndex];
+    const nowMinutes = hour * 60 + minute;
 
-      // Clear previous highlights
-      document.querySelectorAll('td').forEach(td => td.classList.remove('highlighted'));
+    let found = false;
 
-      if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
-        return;
-      }
+    for (let i = 0; i < periods.length; i++) {
+      const startMin = periods[i].start[0] * 60 + periods[i].start[1];
+      const endMin = periods[i].end[0] * 60 + periods[i].end[1];
+      const cell = row.cells[i + 1]; // +1 because first cell is day name
 
-      const row = tbody.rows[rowIndex];
-      const nowMinutes = hour * 60 + minute;
-
-      let currentPeriodIndex = -1;
-
-      for (let i = 0; i < periods.length; i++) {
-        const start = periods[i].start[0] * 60 + periods[i].start[1];
-        const end = periods[i].end[0] * 60 + periods[i].end[1];
-        if (nowMinutes >= start && nowMinutes < end) {
-          currentPeriodIndex = i + 1; // +1 to skip day header cell
-          break;
-        }
-      }
-
-      if (currentPeriodIndex !== -1) {
-        const cell = row.cells[currentPeriodIndex];
+      if (nowMinutes >= startMin && nowMinutes < endMin) {
         if (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') {
           cell.classList.add('highlighted');
           currentSubject.textContent = 'ขณะนี้เรียน: ' + cell.textContent.replace(/\n/g, ' ');
         } else {
-          showNextClass(row, currentPeriodIndex);
+          showNextClass(row, i + 1);
         }
-      } else {
-        // We're in between periods or before/after school
-        showNextClass(row, -1);
+        found = true;
+        break;
       }
     }
 
-    function showNextClass(row, fromIndex) {
-      const totalCells = row.cells.length;
-      for (let i = fromIndex + 1; i < totalCells; i++) {
-        const cell = row.cells[i];
-        if (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') {
-          currentSubject.textContent = 'คาบถัดไป: ' + cell.textContent.replace(/\n/g, ' ');
-          return;
-        }
-      }
-      currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+    if (!found) {
+      // Not during any class time, check if next class exists today
+      showNextClass(row, getNextPeriodIndex(nowMinutes));
     }
+  }
 
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
+  function getNextPeriodIndex(nowMinutes) {
+    for (let i = 0; i < periods.length; i++) {
+      const startMin = periods[i].start[0] * 60 + periods[i].start[1];
+      if (nowMinutes < startMin) {
+        return i + 1;
+      }
+    }
+    return -1;
+  }
+
+  function showNextClass(row, fromIndex) {
+    const totalCells = row.cells.length;
+    for (let i = fromIndex; i < totalCells; i++) {
+      const cell = row.cells[i];
+      if (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') {
+        currentSubject.textContent = 'คาบถัดไป: ' + cell.textContent.replace(/\n/g, ' ');
+        return;
+      }
+    }
+    currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+  }
+
+  setInterval(updateClock, 1000);
+  updateClock();
+</script>
+
 </body>
 
 </html>
-
