@@ -20,12 +20,15 @@
       align-items: center;
     }
 
+    /* UI text shadow helper (not applied to table) */
+    .ui-shadow { text-shadow: 0 1px 3px #000; }
+
     h1 {
       text-align: center;
-      color: #fff; /* หัวข้อในหน้าเป็นสีขาว */
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      color: #fff;
       margin-bottom: 12px;
     }
+    h1.ui-shadow { text-shadow: 0 2px 6px #000; }
 
     .digital-clock {
       font-size: 2rem;
@@ -80,6 +83,15 @@
       color: #fff;
     }
 
+    /* subtle "after next" line */
+    .progress-subnote {
+      font-size: 0.9rem;
+      color: #e9f6ff;
+      opacity: 0.95;
+      margin-top: -2px;
+      margin-bottom: 6px;
+    }
+
     .progress-bar {
       width: 100%;
       height: 12px;
@@ -94,7 +106,7 @@
       width: 0%;
       background: linear-gradient(90deg, rgba(79,129,199,1), rgba(0,132,255,1));
       border-radius: 999px;
-      transition: width 0.3s ease; /* ลื่นตา */
+      transition: width 0.3s ease;
     }
 
     .progress-time {
@@ -103,6 +115,7 @@
       color: #03dffc;
     }
 
+    /* Table (no shadow here for crisp text) */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -118,6 +131,7 @@
       padding: 12px;
       text-align: center;
       background-color: rgba(255, 255, 255, 0.4);
+      text-shadow: none; /* keep table text clean */
     }
 
     th {
@@ -134,39 +148,37 @@
     }
 
     @media only screen and (max-width: 768px) {
-      table {
-        font-size: 0.9rem;
-      }
-      .progress-title, .progress-subtitle, .progress-time {
-        text-align: center;
-      }
+      table { font-size: 0.9rem; }
+      .progress-title, .progress-subtitle, .progress-time, .progress-subnote { text-align: center; }
     }
   </style>
 </head>
 
 <body>
-  <h1>ตารางเรียน ม.5/1 กลุ่ม 3 ภาคเรียนที่ 2/2568</h1>
+  <h1 class="ui-shadow">ตารางเรียน ม.5/1 กลุ่ม 3 ภาคเรียนที่ 2/2568</h1>
 
-  <div class="digital-clock" id="digital-clock">00:00:00</div>
+  <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
 
   <!-- Progress bars -->
   <div class="progress-wrap">
     <div class="progress-block">
-      <div class="progress-title">ช่วงเวลาปัจจุบัน</div>
-      <div class="progress-subtitle" id="current-slot-label">ขณะนี้ไม่มีคาบเรียน</div>
+      <div class="progress-title ui-shadow">ช่วงเวลาปัจจุบัน</div>
+      <div class="progress-subtitle ui-shadow" id="current-slot-label">ขณะนี้ไม่มีคาบเรียน</div>
       <div class="progress-bar"><div class="progress-fill" id="current-progress"></div></div>
-      <div class="progress-time" id="current-time-eta"></div>
+      <div class="progress-time ui-shadow" id="current-time-eta"></div>
     </div>
 
     <div class="progress-block" id="next-block" style="display:none;">
-      <div class="progress-title">กำลังจะถึง (จะแสดงล่วงหน้า 10 นาที)</div>
-      <div class="progress-subtitle" id="next-slot-label">-</div>
+      <div class="progress-title ui-shadow">กำลังจะถึง (จะแสดงล่วงหน้า 10 นาที)</div>
+      <div class="progress-subtitle ui-shadow" id="next-slot-label">-</div>
+      <!-- NEW: shows what's after the short break -->
+      <div class="progress-subnote ui-shadow" id="next-after" style="display:none;">-</div>
       <div class="progress-bar"><div class="progress-fill" id="next-progress"></div></div>
-      <div class="progress-time" id="next-time-eta"></div>
+      <div class="progress-time ui-shadow" id="next-time-eta"></div>
     </div>
   </div>
 
-  <div class="current-subject" id="current-subject">ขณะนี้ไม่มีคาบเรียน</div>
+  <div class="current-subject ui-shadow" id="current-subject">ขณะนี้ไม่มีคาบเรียน</div>
 
   <table>
     <thead>
@@ -262,10 +274,11 @@
     const curEta = document.getElementById('current-time-eta');
     const nextBlock = document.getElementById('next-block');
     const nextLabel = document.getElementById('next-slot-label');
+    const nextAfter = document.getElementById('next-after'); // NEW
     const nextProg = document.getElementById('next-progress');
     const nextEta = document.getElementById('next-time-eta');
 
-    const PREVIEW_MIN = 10; // แสดงคาบถัดไปล่วงหน้า 10 นาที (ใช้ความละเอียดวินาที)
+    const PREVIEW_MIN = 10;
 
     const periods = [
       { start: [8, 30], end: [9, 20] },
@@ -282,7 +295,7 @@
 
     // ===== Helpers with seconds precision =====
     function toMinutes(h, m, s = 0) { return h * 60 + m + s / 60; } // float minutes
-    function hmToMinutes([h, m]) { return h * 60 + m; } // whole minutes (for matching table cells)
+    function hmToMinutes([h, m]) { return h * 60 + m; }
     function formatHMM(minsFloat) {
       const totalMin = Math.floor(minsFloat);
       const h = Math.floor(totalMin / 60);
@@ -312,8 +325,12 @@
         const end = hmToMinutes(p.end);
         const cell = row.cells[i + 1];
         const label = (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') ? formatCell(cell) : 'ว่าง';
-        const isBreakLike = /พักกลางวัน/.test(label);
-        segs.push({ type: isBreakLike ? 'break' : 'class', start, end, label });
+
+        const isLunch = /พักกลางวัน/.test(label);
+        // types: lunch | break | class (keep "ว่าง" as class per your preference)
+        const type = isLunch ? 'lunch' : 'class';
+
+        segs.push({ type, start, end, label });
 
         // แทรก "พักระยะสั้น" ระหว่างคาบถ้ามีช่องว่าง
         if (i < periods.length - 1) {
@@ -336,6 +353,22 @@
       return -1;
     }
 
+    // helper: choose next label based on type
+    function nextLabelText(seg) {
+      if (!seg) return '-';
+      if (seg.type === 'lunch') return 'ถัดไป: พักกลางวัน';
+      if (seg.type === 'break') return 'ถัดไป: พักระยะสั้น';
+      return `ถัดไป: ${seg.label}`;
+    }
+
+    // helper: choose "after break" label if next is a short break
+    function afterBreakText(afterSeg) {
+      if (!afterSeg) return '';
+      if (afterSeg.type === 'lunch') return 'หลังจากนั้น: พักกลางวัน';
+      if (afterSeg.type === 'break') return 'หลังจากนั้น: พักระยะสั้น';
+      return `หลังจากนั้น: ${afterSeg.label}`;
+    }
+
     function updateProgressBars(segs, idx, nowMinFloat) {
       // ล้างไฮไลต์ในตาราง
       document.querySelectorAll('td').forEach(td => td.classList.remove('highlighted'));
@@ -345,18 +378,26 @@
         curProg.style.width = '0%';
         curEta.textContent = '';
         nextBlock.style.display = 'none';
+        nextAfter.style.display = 'none';
         currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
         return;
       }
 
       const cur = segs[idx];
-      const durMin = cur.end - cur.start;                   // duration in minutes
+      const durMin = cur.end - cur.start;
       const elapsedMin = Math.max(0, nowMinFloat - cur.start);
       const remainMin = Math.max(0, cur.end - nowMinFloat);
       const pct = Math.min(100, Math.max(0, (elapsedMin / durMin) * 100));
 
       // อัปเดต label และแถบ
-      curLabel.textContent = (cur.type === 'break') ? `ช่วงพัก: ${cur.label}` : `คาบปัจจุบัน: ${cur.label}`;
+      if (cur.type === 'lunch') {
+        curLabel.textContent = 'ช่วงพัก: พักกลางวัน';
+        currentSubject.textContent = 'ขณะนี้: พักกลางวัน';
+      } else {
+        curLabel.textContent = `คาบปัจจุบัน: ${cur.label}`;
+        currentSubject.textContent = 'ขณะนี้เรียน: ' + cur.label;
+      }
+
       curProg.style.width = pct + '%';
       curEta.textContent = `เหลือเวลา ${formatMMSS(remainMin * 60)} (สิ้นสุด ${formatHMM(cur.end)})`;
 
@@ -364,9 +405,7 @@
       const tbody = document.querySelector('tbody');
       const dayIdx = new Date().getDay();
       const rowIndex = dayIdx - 1;
-      if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
-      } else {
+      if (!(dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex])) {
         if (cur.type === 'class') {
           for (let i = 0; i < periods.length; i++) {
             const pStart = hmToMinutes(periods[i].start);
@@ -377,9 +416,6 @@
               break;
             }
           }
-          currentSubject.textContent = 'ขณะนี้เรียน: ' + cur.label;
-        } else {
-          currentSubject.textContent = 'ขณะนี้: ' + cur.label;
         }
       }
 
@@ -387,21 +423,35 @@
       const next = (idx + 1 < segs.length) ? segs[idx + 1] : null;
       if (!next) {
         nextBlock.style.display = 'none';
+        nextAfter.style.display = 'none';
         return;
       }
 
-      // แสดงเมื่ออยู่ในหน้าต่าง 10 นาทีสุดท้ายของช่วงปัจจุบัน
       if (remainMin <= PREVIEW_MIN) {
         nextBlock.style.display = '';
-        nextLabel.textContent = (next.type === 'break') ? `ถัดไป: พักระยะสั้น` : `ถัดไป: ${next.label}`;
+        nextLabel.textContent = nextLabelText(next);
 
-        // ความคืบหน้าแถบถัดไปเทียบกับหน้าต่าง 10 นาที
+        // If upcoming is a short break, show what's after it
+        if (next.type === 'break') {
+          const after = (idx + 2 < segs.length) ? segs[idx + 2] : null;
+          const text = afterBreakText(after);
+          if (text) {
+            nextAfter.style.display = '';
+            nextAfter.textContent = text;
+          } else {
+            nextAfter.style.display = 'none';
+          }
+        } else {
+          nextAfter.style.display = 'none';
+        }
+
         const previewElapsedMin = PREVIEW_MIN - remainMin; // 0..10
         const nextPct = Math.min(100, Math.max(0, (previewElapsedMin / PREVIEW_MIN) * 100));
         nextProg.style.width = nextPct + '%';
         nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)} (อีก ${formatMMSS(remainMin * 60)})`;
       } else {
         nextBlock.style.display = 'none';
+        nextAfter.style.display = 'none';
       }
     }
 
@@ -416,7 +466,7 @@
         m.toString().padStart(2, '0') + ':' +
         s.toString().padStart(2, '0');
 
-      updateState(h, m, s); // ส่งวินาทีเข้าไปให้คำนวณแบบละเอียด
+      updateState(h, m, s);
     }
 
     function updateState(hour, minute, second = 0) {
@@ -426,7 +476,6 @@
 
       // วันหยุด
       if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
-        // ยังแสดง next preview ได้ถ้าใกล้คาบแรกภายใน 10 นาที? -> ไม่มีคาบเพราะวันหยุด
         updateProgressBars([], -1, 0);
         return;
       }
@@ -437,25 +486,40 @@
       const idx = findCurrentSegment(segs, nowMinFloat);
 
       if (idx === -1) {
-        // นอกทุกช่วงวันนี้: อาจก่อนคาบแรกหรือหลังคาบท้าย
+        // ก่อนคาบแรก/หลังคาบสุดท้าย — แสดง preview ถ้าเหลือ <= 10 นาที
         const upcomingIndex = segs.findIndex(s => nowMinFloat < s.start);
         if (upcomingIndex !== -1) {
           const next = segs[upcomingIndex];
           const diffMin = next.start - nowMinFloat;
-          // แสดง “ถัดไป” ถ้าอยู่ใน 10 นาทีแรกก่อนเริ่ม
           if (diffMin <= PREVIEW_MIN) {
             nextBlock.style.display = '';
-            nextLabel.textContent = (next.type === 'break') ? 'ถัดไป: พักระยะสั้น' : `ถัดไป: ${next.label}`;
+            nextLabel.textContent = nextLabelText(next);
+
+            // If upcoming is a short break while idle, also show what's after it
+            if (next.type === 'break') {
+              const after = (upcomingIndex + 1 < segs.length) ? segs[upcomingIndex + 1] : null;
+              const text = afterBreakText(after);
+              if (text) {
+                nextAfter.style.display = '';
+                nextAfter.textContent = text;
+              } else {
+                nextAfter.style.display = 'none';
+              }
+            } else {
+              nextAfter.style.display = 'none';
+            }
+
             const nextPct = Math.min(100, Math.max(0, ((PREVIEW_MIN - diffMin) / PREVIEW_MIN) * 100));
             nextProg.style.width = nextPct + '%';
             nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)} (อีก ${formatMMSS(diffMin * 60)})`;
           } else {
             nextBlock.style.display = 'none';
+            nextAfter.style.display = 'none';
           }
         } else {
           nextBlock.style.display = 'none';
+          nextAfter.style.display = 'none';
         }
-        // กล่องสถานะหลัก
         currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
         curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน';
         curProg.style.width = '0%';
@@ -473,7 +537,3 @@
 
 </body>
 </html>
-
-
-
-
