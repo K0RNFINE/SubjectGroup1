@@ -69,6 +69,7 @@
       padding: 10px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
       backdrop-filter: blur(3px);
+      transition: box-shadow 0.25s ease;
     }
 
     .progress-title {
@@ -115,6 +116,26 @@
       color: #03dffc;
     }
 
+    /* Countdown styles */
+    .next-countdown {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 6px 0 4px;
+      color: #03dffc; /* will be overridden dynamically */
+      text-shadow: 0 1px 3px #000;
+    }
+    .next-countdown.idle {
+      color: #ff3b30; /* red when out of 10-min window */
+    }
+
+    @keyframes blink {
+      0%, 49%   { opacity: 1; }
+      50%, 100% { opacity: 0.25; }
+    }
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
+    }
+
     /* Table (no shadow here for crisp text) */
     table {
       border-collapse: collapse;
@@ -149,7 +170,7 @@
 
     @media only screen and (max-width: 768px) {
       table { font-size: 0.9rem; }
-      .progress-title, .progress-subtitle, .progress-time, .progress-subnote { text-align: center; }
+      .progress-title, .progress-subtitle, .progress-time, .progress-subnote, .next-countdown { text-align: center; }
     }
   </style>
 </head>
@@ -161,20 +182,24 @@
 
   <!-- Progress bars -->
   <div class="progress-wrap">
-    <div class="progress-block">
+    <div class="progress-block" id="current-block">
       <div class="progress-title ui-shadow">ช่วงเวลาปัจจุบัน</div>
       <div class="progress-subtitle ui-shadow" id="current-slot-label">ขณะนี้ไม่มีคาบเรียน</div>
       <div class="progress-bar"><div class="progress-fill" id="current-progress"></div></div>
       <div class="progress-time ui-shadow" id="current-time-eta"></div>
     </div>
 
-    <div class="progress-block" id="next-block" style="display:none;">
-      <div class="progress-title ui-shadow">กำลังจะถึง (จะแสดงล่วงหน้า 10 นาที)</div>
+    <div class="progress-block" id="next-block">
+      <div class="progress-title ui-shadow">คาบ/ช่วงถัดไป</div>
       <div class="progress-subtitle ui-shadow" id="next-slot-label">-</div>
-      <!-- NEW: shows what's after the short break -->
+      <!-- After short break hint -->
       <div class="progress-subnote ui-shadow" id="next-after" style="display:none;">-</div>
+
+      <!-- Always-visible countdown -->
+      <div class="next-countdown ui-shadow idle" id="next-countdown">--:--</div>
+
       <div class="progress-bar"><div class="progress-fill" id="next-progress"></div></div>
-      <div class="progress-time ui-shadow" id="next-time-eta"></div>
+      <div class="progress-time ui-shadow" id="next-time-eta">เริ่มเวลา --:--</div>
     </div>
   </div>
 
@@ -274,11 +299,13 @@
     const curEta = document.getElementById('current-time-eta');
     const nextBlock = document.getElementById('next-block');
     const nextLabel = document.getElementById('next-slot-label');
-    const nextAfter = document.getElementById('next-after'); // NEW
+    const nextAfter = document.getElementById('next-after');
     const nextProg = document.getElementById('next-progress');
     const nextEta = document.getElementById('next-time-eta');
+    const nextCountdown = document.getElementById('next-countdown');
 
-    const PREVIEW_MIN = 10;
+    const PREVIEW_MIN = 10; // window size
+    const PREVIEW_SEC = PREVIEW_MIN * 60;
 
     const periods = [
       { start: [8, 30], end: [9, 20] },
@@ -309,6 +336,19 @@
       return `${mPart}:${sPart}`;
     }
 
+    // simple color lerp
+    function lerp(a,b,t){ return a + (b - a) * t; }
+    // Sky blue (#03dffc) -> Red (#ff3b30)
+    function colorForRemaining(sec) {
+      let t = 1 - Math.min(Math.max(sec, 0), PREVIEW_SEC) / PREVIEW_SEC; // 0 far .. 1 near
+      const from = {r: 3, g: 223, b: 252};
+      const to   = {r: 255, g: 59, b: 48};
+      const r = Math.round(lerp(from.r, to.r, t));
+      const g = Math.round(lerp(from.g, to.g, t));
+      const b = Math.round(lerp(from.b, to.b, t));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
     // จัดข้อความให้เว้นวรรคเดียวระหว่าง "วิชา ครู ห้อง"
     function formatCell(cell) {
       const raw = (cell.innerText || cell.textContent || '').trim();
@@ -325,11 +365,8 @@
         const end = hmToMinutes(p.end);
         const cell = row.cells[i + 1];
         const label = (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') ? formatCell(cell) : 'ว่าง';
-
         const isLunch = /พักกลางวัน/.test(label);
-        // types: lunch | break | class (keep "ว่าง" as class per your preference)
         const type = isLunch ? 'lunch' : 'class';
-
         segs.push({ type, start, end, label });
 
         // แทรก "พักระยะสั้น" ระหว่างคาบถ้ามีช่องว่าง
@@ -369,6 +406,78 @@
       return `หลังจากนั้น: ${afterSeg.label}`;
     }
 
+    function updateNextBox(segs, nowMinFloat) {
+      // determine the upcoming segment (first with start > now)
+      const upcomingIndex = segs.findIndex(s => nowMinFloat < s.start);
+      const next = upcomingIndex !== -1 ? segs[upcomingIndex] : null;
+
+      // Labels
+      nextLabel.textContent = nextLabelText(next);
+      nextAfter.style.display = 'none';
+
+      if (next && next.type === 'break') {
+        const after = (upcomingIndex + 1 < segs.length) ? segs[upcomingIndex + 1] : null;
+        const text = afterBreakText(after);
+        if (text) {
+          nextAfter.style.display = '';
+          nextAfter.textContent = text;
+        }
+      }
+
+      // Start time
+      if (next) {
+        nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)}`;
+      } else {
+        nextEta.textContent = `เริ่มเวลา --:--`;
+      }
+
+      // Countdown logic (always visible)
+      if (!next) {
+        nextCountdown.textContent = '--:--';
+        nextCountdown.classList.add('idle');
+        nextCountdown.classList.remove('blink');
+        // box glow red
+        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
+        // progress bar reset
+        nextProg.style.width = '0%';
+        return;
+      }
+
+      const diffSec = Math.max(0, (next.start - nowMinFloat) * 60);
+      const withinWindow = diffSec <= PREVIEW_SEC && diffSec > 0;
+
+      if (!withinWindow) {
+        // out of 10-min window
+        nextCountdown.textContent = '--:--';
+        nextCountdown.classList.add('idle');
+        nextCountdown.classList.remove('blink');
+        nextCountdown.style.color = '#ff3b30';
+        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
+        nextProg.style.width = '0%';
+      } else {
+        // show mm:ss and color shift from sky blue -> red as it approaches 0
+        nextCountdown.textContent = formatMMSS(diffSec);
+        nextCountdown.classList.remove('idle');
+
+        // color & glow based on remaining time
+        const c = colorForRemaining(diffSec);
+        nextCountdown.style.color = c;
+        nextBlock.style.boxShadow = `0 0 18px 2px ${c.replace('rgb', 'rgba').replace(')', ',0.8)')}`;
+
+        // 30s warning blink
+        if (diffSec <= 30) {
+          nextCountdown.classList.add('blink');
+        } else {
+          nextCountdown.classList.remove('blink');
+        }
+
+        // progress bar for the 10-min preview window
+        const previewElapsed = PREVIEW_SEC - diffSec; // 0..PREVIEW_SEC
+        const nextPct = Math.min(100, Math.max(0, (previewElapsed / PREVIEW_SEC) * 100));
+        nextProg.style.width = nextPct + '%';
+      }
+    }
+
     function updateProgressBars(segs, idx, nowMinFloat) {
       // ล้างไฮไลต์ในตาราง
       document.querySelectorAll('td').forEach(td => td.classList.remove('highlighted'));
@@ -377,9 +486,8 @@
         curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน';
         curProg.style.width = '0%';
         curEta.textContent = '';
-        nextBlock.style.display = 'none';
-        nextAfter.style.display = 'none';
         currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
+        // Next box still handled separately (always visible)
         return;
       }
 
@@ -418,41 +526,6 @@
           }
         }
       }
-
-      // คาบ/ช่วงถัดไป
-      const next = (idx + 1 < segs.length) ? segs[idx + 1] : null;
-      if (!next) {
-        nextBlock.style.display = 'none';
-        nextAfter.style.display = 'none';
-        return;
-      }
-
-      if (remainMin <= PREVIEW_MIN) {
-        nextBlock.style.display = '';
-        nextLabel.textContent = nextLabelText(next);
-
-        // If upcoming is a short break, show what's after it
-        if (next.type === 'break') {
-          const after = (idx + 2 < segs.length) ? segs[idx + 2] : null;
-          const text = afterBreakText(after);
-          if (text) {
-            nextAfter.style.display = '';
-            nextAfter.textContent = text;
-          } else {
-            nextAfter.style.display = 'none';
-          }
-        } else {
-          nextAfter.style.display = 'none';
-        }
-
-        const previewElapsedMin = PREVIEW_MIN - remainMin; // 0..10
-        const nextPct = Math.min(100, Math.max(0, (previewElapsedMin / PREVIEW_MIN) * 100));
-        nextProg.style.width = nextPct + '%';
-        nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)} (อีก ${formatMMSS(remainMin * 60)})`;
-      } else {
-        nextBlock.style.display = 'none';
-        nextAfter.style.display = 'none';
-      }
     }
 
     function updateClock() {
@@ -476,7 +549,20 @@
 
       // วันหยุด
       if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
-        updateProgressBars([], -1, 0);
+        // No current segments, but still update next box (could be next day — we won't predict cross-day)
+        curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+        curProg.style.width = '0%';
+        curEta.textContent = '';
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+        // keep next box showing --:--
+        nextLabel.textContent = '-';
+        nextEta.textContent = 'เริ่มเวลา --:--';
+        nextCountdown.textContent = '--:--';
+        nextCountdown.classList.add('idle');
+        nextCountdown.classList.remove('blink');
+        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
+        nextProg.style.width = '0%';
+        nextAfter.style.display = 'none';
         return;
       }
 
@@ -485,49 +571,9 @@
       const nowMinFloat = toMinutes(hour, minute, second);
       const idx = findCurrentSegment(segs, nowMinFloat);
 
-      if (idx === -1) {
-        // ก่อนคาบแรก/หลังคาบสุดท้าย — แสดง preview ถ้าเหลือ <= 10 นาที
-        const upcomingIndex = segs.findIndex(s => nowMinFloat < s.start);
-        if (upcomingIndex !== -1) {
-          const next = segs[upcomingIndex];
-          const diffMin = next.start - nowMinFloat;
-          if (diffMin <= PREVIEW_MIN) {
-            nextBlock.style.display = '';
-            nextLabel.textContent = nextLabelText(next);
-
-            // If upcoming is a short break while idle, also show what's after it
-            if (next.type === 'break') {
-              const after = (upcomingIndex + 1 < segs.length) ? segs[upcomingIndex + 1] : null;
-              const text = afterBreakText(after);
-              if (text) {
-                nextAfter.style.display = '';
-                nextAfter.textContent = text;
-              } else {
-                nextAfter.style.display = 'none';
-              }
-            } else {
-              nextAfter.style.display = 'none';
-            }
-
-            const nextPct = Math.min(100, Math.max(0, ((PREVIEW_MIN - diffMin) / PREVIEW_MIN) * 100));
-            nextProg.style.width = nextPct + '%';
-            nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)} (อีก ${formatMMSS(diffMin * 60)})`;
-          } else {
-            nextBlock.style.display = 'none';
-            nextAfter.style.display = 'none';
-          }
-        } else {
-          nextBlock.style.display = 'none';
-          nextAfter.style.display = 'none';
-        }
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
-        curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน';
-        curProg.style.width = '0%';
-        curEta.textContent = '';
-        return;
-      }
-
+      // Update both current box and next box
       updateProgressBars(segs, idx, nowMinFloat);
+      updateNextBox(segs, nowMinFloat);
     }
 
     // อัปเดตทุกวินาที
