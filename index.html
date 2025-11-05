@@ -20,7 +20,18 @@
       align-items: center;
     }
 
-    /* UI text shadow helper (not applied to table) */
+    /* วางนาฬิกาจริง + นาฬิกานับถอยหลัง ข้างกัน */
+    .clocks {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 1000px;
+      margin-bottom: 8px;
+    }
+
+    /* UI text shadow (ไม่ไปยุ่งกับตัวอักษรในตาราง) */
     .ui-shadow { text-shadow: 0 1px 3px #000; }
 
     h1 {
@@ -38,7 +49,23 @@
       padding: 10px 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px cyan;
-      margin-bottom: 8px;
+      min-width: 240px;
+      text-align: center;
+    }
+
+    /* นาฬิกานับถอยหลัง ใช้หน้าตาเดียวกับ digital-clock */
+    .countdown-clock {
+      font-size: 2rem;
+      color: #ff3b30; /* เริ่มต้นเป็นแดง (นอก 10 นาที) */
+      box-shadow: 0 0 20px rgba(255,59,48,0.9);
+    }
+
+    @keyframes blink {
+      0%, 49%   { opacity: 1; }
+      50%, 100% { opacity: 0.25; }
+    }
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
     }
 
     .current-subject {
@@ -53,7 +80,7 @@
       box-shadow: 0 0 10px white;
     }
 
-    /* Progress bars */
+    /* กล่องสถานะ/แถบความคืบหน้า */
     .progress-wrap {
       width: 100%;
       max-width: 1000px;
@@ -84,7 +111,6 @@
       color: #fff;
     }
 
-    /* subtle "after next" line */
     .progress-subnote {
       font-size: 0.9rem;
       color: #e9f6ff;
@@ -116,27 +142,7 @@
       color: #03dffc;
     }
 
-    /* Countdown styles */
-    .next-countdown {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin: 6px 0 4px;
-      color: #03dffc; /* will be overridden dynamically */
-      text-shadow: 0 1px 3px #000;
-    }
-    .next-countdown.idle {
-      color: #ff3b30; /* red when out of 10-min window */
-    }
-
-    @keyframes blink {
-      0%, 49%   { opacity: 1; }
-      50%, 100% { opacity: 0.25; }
-    }
-    .blink {
-      animation: blink 1s steps(2, start) infinite;
-    }
-
-    /* Table (no shadow here for crisp text) */
+    /* ตาราง (คงเดิม ไม่ใส่เงาอักษร) */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -146,19 +152,14 @@
       overflow: hidden;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-
     th, td {
       border: 1px solid rgba(255, 255, 255, 0.6);
       padding: 12px;
       text-align: center;
       background-color: rgba(255, 255, 255, 0.4);
-      text-shadow: none; /* keep table text clean */
+      text-shadow: none;
     }
-
-    th {
-      background-color: #4f81c7;
-      color: white;
-    }
+    th { background-color: #4f81c7; color: white; }
 
     .highlighted {
       background-color: rgba(0, 132, 255, 0.4) !important;
@@ -168,9 +169,10 @@
       position: relative;
     }
 
-    @media only screen and (max-width: 768px) {
+    @media (max-width: 768px) {
       table { font-size: 0.9rem; }
-      .progress-title, .progress-subtitle, .progress-time, .progress-subnote, .next-countdown { text-align: center; }
+      .progress-title, .progress-subtitle, .progress-time, .progress-subnote { text-align: center; }
+      .digital-clock, .countdown-clock { min-width: 200px; width: 100%; }
     }
   </style>
 </head>
@@ -178,9 +180,13 @@
 <body>
   <h1 class="ui-shadow">ตารางเรียน ม.5/1 กลุ่ม 3 ภาคเรียนที่ 2/2568</h1>
 
-  <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
+  <!-- แถวแสดงนาฬิกา: เวลาปัจจุบัน + นับถอยหลัง -->
+  <div class="clocks">
+    <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
+    <div class="digital-clock ui-shadow countdown-clock" id="countdown-clock">--:--</div>
+  </div>
 
-  <!-- Progress bars -->
+  <!-- กล่องสถานะและคาบถัดไป (เหมือนเดิม แต่อยู่โดยไม่มี countdown ข้างในแล้ว) -->
   <div class="progress-wrap">
     <div class="progress-block" id="current-block">
       <div class="progress-title ui-shadow">ช่วงเวลาปัจจุบัน</div>
@@ -192,12 +198,7 @@
     <div class="progress-block" id="next-block">
       <div class="progress-title ui-shadow">คาบ/ช่วงถัดไป</div>
       <div class="progress-subtitle ui-shadow" id="next-slot-label">-</div>
-      <!-- After short break hint -->
       <div class="progress-subnote ui-shadow" id="next-after" style="display:none;">-</div>
-
-      <!-- Always-visible countdown -->
-      <div class="next-countdown ui-shadow idle" id="next-countdown">--:--</div>
-
       <div class="progress-bar"><div class="progress-fill" id="next-progress"></div></div>
       <div class="progress-time ui-shadow" id="next-time-eta">เริ่มเวลา --:--</div>
     </div>
@@ -205,6 +206,7 @@
 
   <div class="current-subject ui-shadow" id="current-subject">ขณะนี้ไม่มีคาบเรียน</div>
 
+  <!-- ตารางเดิม -->
   <table>
     <thead>
       <tr>
@@ -224,87 +226,83 @@
     <tbody>
       <tr>
         <th>จันทร์</th>
-        <td data-message="ครูภณิตา ห้อง 232">คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
-        <td data-message="ครูภณิตา ห้อง 232">คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
-        <td data-message="ครูอชิร ห้อง 332">Ind Study<br>ครูอชิร<br>332</td>
-        <td data-message="ครูอชิร ห้อง 322">Ind Study<br>ครูอชิร<br>332</td>
-        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-        <td data-message="ครูกัลยา ห้อง 432">เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
-        <td data-message="ครูกัลยา ห้อง 432">เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
-        <td data-message="ร้อยตรีวัชชัย ห้อง ฝึกงาน2">การงานอาชีพ<br>ร้อยตรีวัชชัย<br>ฝึกงาน2</td>
-        <td>-</td>
-        <td>-</td>
+        <td>คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
+        <td>คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
+        <td>Ind Study<br>ครูอชิร<br>332</td>
+        <td>Ind Study<br>ครูอชิร<br>332</td>
+        <td>พักกลางวัน<br>โรงอาหาร</td>
+        <td>เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
+        <td>เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
+        <td>การงานอาชีพ<br>ร้อยตรีวัชชัย<br>ฝึกงาน2</td>
+        <td>-</td><td>-</td>
       </tr>
       <tr>
         <th>อังคาร</th>
-        <td data-message="ครูพงศกร ห้อง 433">วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร(เพชร)<br>433</td>
-        <td data-message="ครูพงศกร ห้อง 433">วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร(เพชร)<br>433</td>
-        <td data-message="ครูกัลยา ห้อง 432">เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
-        <td data-message="ครูเจษฎา ห้อง 213">ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
-        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-        <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-        <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
-        <td data-message="ครูนฤมิต ห้อง อเนกประสงค์5">สุขะพละ<br>ครูนฤมิต<br>อเนกประสงค์5</td>
-        <td>ประชุมสี</td>
-        <td>-</td>
+        <td>วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร(เพชร)<br>433</td>
+        <td>วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร(เพชร)<br>433</td>
+        <td>เคมีเพิ่มเติม<br>ครูกัลยา<br>432</td>
+        <td>ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
+        <td>พักกลางวัน<br>โรงอาหาร</td>
+        <td>ภาษาไทย<br>ครูอรทัย<br>627</td>
+        <td>คณิตศาสตร์<br>ครูวินัย<br>234</td>
+        <td>สุขะพละ<br>ครูนฤมิต<br>อเนกประสงค์5</td>
+        <td>ประชุมสี</td><td>-</td>
       </tr>
       <tr>
         <th>พุธ</th>
-        <td data-message="ครูทองแข ห้อง 216(SMAT ม.4)">ฟิสิกส์เพิ่ม<br>ครูทองแข<br>216(SMAT ม.4)</td>
-        <td data-message="ครูทองแข ห้อง 216(SMAT ม.4)">ฟิสิกส์เพิ่ม<br>ครูทองแข<br>216(SMAT ม.4)</td>
-        <td data-message="ครูธิติมา ห้อง 613">แนะแนว<br>ครูธิติมา<br>613</td>
-        <td data-message="ครูณัฐพล ห้อง 321">ภาษาอังกฤษ<br>ครูณัฐพล<br>321</td>
-        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-        <td data-message="ครูเจษฎา ห้อง 213">ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
-        <td data-message="ครูเจษฎา ห้อง 213">ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
-        <td data-message="ว่าง">ว่าง<br>ครู -<br>N/A</td>
-        <td>-</td>
-        <td>-</td>
+        <td>ฟิสิกส์เพิ่ม<br>ครูทองแข<br>216(SMAT ม.4)</td>
+        <td>ฟิสิกส์เพิ่ม<br>ครูทองแข<br>216(SMAT ม.4)</td>
+        <td>แนะแนว<br>ครูธิติมา<br>613</td>
+        <td>ภาษาอังกฤษ<br>ครูณัฐพล<br>321</td>
+        <td>พักกลางวัน<br>โรงอาหาร</td>
+        <td>ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
+        <td>ชีวะเพิ่ม<br>ครูเจษฎา<br>213</td>
+        <td>ว่าง<br>ครู -<br>N/A</td>
+        <td>-</td><td>-</td>
       </tr>
       <tr>
         <th>พฤหัสบดี</th>
-        <td data-message="ครูวินัย ห้อง 234">คณิตศาสตร์<br>ครูวินัย<br>234</td>
-        <td data-message="ครูอรทัย ห้อง 627">ภาษาไทย<br>ครูอรทัย<br>627</td>
-        <td data-message="ครูภณิตา ห้อง 232">คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
-        <td data-message="ครูภณิตา ห้อง 232">คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
-        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-        <td data-message="ครูนวรัตน์ ห้อง 534">สังคม<br>ครูนวรัตน์<br>534</td>
-        <td data-message="ครูพงศกร ห้อง 433">วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร<br>433</td>
-        <td data-message="ครูวราภรณ์ ห้อง ชมนุม">ดาราศาสตร์<br>ครูวราภรณ์<br>ชุมนุม</td>
-        <td>ซ่อมเสริม</td>
-        <td>-</td>
+        <td>คณิตศาสตร์<br>ครูวินัย<br>234</td>
+        <td>ภาษาไทย<br>ครูอรทัย<br>627</td>
+        <td>คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
+        <td>คณิตศาสตร์เพิ่ม<br>ครูภณิตา<br>232</td>
+        <td>พักกลางวัน<br>โรงอาหาร</td>
+        <td>สังคม<br>ครูนวรัตน์<br>534</td>
+        <td>วิทยาศาสตร์โลกและอวกาศ<br>ครูพงศกร<br>433</td>
+        <td>ดาราศาสตร์<br>ครูวราภรณ์<br>ชุมนุม</td>
+        <td>ซ่อมเสริม</td><td>-</td>
       </tr>
       <tr class="bottom-row">
         <th>ศุกร์</th>
-        <td data-message="ครูทองแข ห้อง 218(SMAT ม.6)">ฟิสิกส์เพิ่ม<br>ครูทองแข<br>218(SMAT ม.6)</td>
-        <td data-message="ครูทองแข ห้อง 218(SMAT ม.6)">ฟิสิกส์เพิ่ม<br>ครูทองแข<br>218(SMAT ม.6)</td>
-        <td data-message="ครูธาราวุฒิ ห้อง 536">ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
-        <td data-message="ครูณัฐพล ห้อง 321">ภาษาอังกฤษ<br>ครูณัฐพล<br>321</td>
-        <td data-message="ไปกินข้าว">พักกลางวัน<br>โรงอาหาร</td>
-        <td data-message="ครูนวรัตน์ ห้อง 534">สังคม<br>ครูนวรัตน์<br>534</td>
-        <td data-message="ครูสุเมธ ห้อง 311">ดนตรี<br>ครูสุเมธ<br>311</td>
-        <td data-message="ครูMbah Kingsley ห้อง 328">English Addon<br>ครูMbah Kingsley<br>328</td>
-        <td>-</td>
-        <td>-</td>
+        <td>ฟิสิกส์เพิ่ม<br>ครูทองแข<br>218(SMAT ม.6)</td>
+        <td>ฟิสิกส์เพิ่ม<br>ครูทองแข<br>218(SMAT ม.6)</td>
+        <td>ประวัติศาสตร์<br>ครูธาราวุฒิ<br>536</td>
+        <td>ภาษาอังกฤษ<br>ครูณัฐพล<br>321</td>
+        <td>พักกลางวัน<br>โรงอาหาร</td>
+        <td>สังคม<br>ครูนวรัตน์<br>534</td>
+        <td>ดนตรี<br>ครูสุเมธ<br>311</td>
+        <td>English Addon<br>ครูMbah Kingsley<br>328</td>
+        <td>-</td><td>-</td>
       </tr>
     </tbody>
   </table>
 
-  <!-- 🧠 SCRIPT SECTION -->
   <script>
-    const digitalClock = document.getElementById('digital-clock');
+    const digitalClock   = document.getElementById('digital-clock');
+    const countdownClock = document.getElementById('countdown-clock');
+
     const currentSubject = document.getElementById('current-subject');
     const curLabel = document.getElementById('current-slot-label');
-    const curProg = document.getElementById('current-progress');
-    const curEta = document.getElementById('current-time-eta');
+    const curProg  = document.getElementById('current-progress');
+    const curEta   = document.getElementById('current-time-eta');
+
     const nextBlock = document.getElementById('next-block');
     const nextLabel = document.getElementById('next-slot-label');
     const nextAfter = document.getElementById('next-after');
-    const nextProg = document.getElementById('next-progress');
-    const nextEta = document.getElementById('next-time-eta');
-    const nextCountdown = document.getElementById('next-countdown');
+    const nextProg  = document.getElementById('next-progress');
+    const nextEta   = document.getElementById('next-time-eta');
 
-    const PREVIEW_MIN = 10; // window size
+    const PREVIEW_MIN = 10;
     const PREVIEW_SEC = PREVIEW_MIN * 60;
 
     const periods = [
@@ -320,207 +318,189 @@
       { start: [16, 20], end: [17, 10] }
     ];
 
-    // ===== Helpers with seconds precision =====
-    function toMinutes(h, m, s = 0) { return h * 60 + m + s / 60; } // float minutes
-    function hmToMinutes([h, m]) { return h * 60 + m; }
-    function formatHMM(minsFloat) {
+    /* ===== Utils ===== */
+    function toMinutes(h,m,s=0){ return h*60 + m + s/60; }
+    function hmToMinutes([h,m]){ return h*60 + m; }
+    function formatHMM(minsFloat){
       const totalMin = Math.floor(minsFloat);
-      const h = Math.floor(totalMin / 60);
-      const m = totalMin % 60;
-      return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+      const h = Math.floor(totalMin/60);
+      const m = totalMin%60;
+      return h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
     }
-    function formatMMSS(seconds) {
+    function formatMMSS(seconds){
       const s = Math.max(0, Math.ceil(seconds));
-      const mPart = Math.floor(s / 60).toString().padStart(2, '0');
-      const sPart = (s % 60).toString().padStart(2, '0');
+      const mPart = Math.floor(s/60).toString().padStart(2,'0');
+      const sPart = (s%60).toString().padStart(2,'0');
       return `${mPart}:${sPart}`;
     }
-
-    // simple color lerp
-    function lerp(a,b,t){ return a + (b - a) * t; }
-    // Sky blue (#03dffc) -> Red (#ff3b30)
-    function colorForRemaining(sec) {
-      let t = 1 - Math.min(Math.max(sec, 0), PREVIEW_SEC) / PREVIEW_SEC; // 0 far .. 1 near
-      const from = {r: 3, g: 223, b: 252};
-      const to   = {r: 255, g: 59, b: 48};
-      const r = Math.round(lerp(from.r, to.r, t));
-      const g = Math.round(lerp(from.g, to.g, t));
-      const b = Math.round(lerp(from.b, to.b, t));
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    // Sky blue -> red
+    function colorForRemaining(sec){
+      let t = 1 - Math.min(Math.max(sec, 0), PREVIEW_SEC) / PREVIEW_SEC; // 0 .. 1
+      const from = {r: 3, g: 223, b: 252};   // #03dffc
+      const to   = {r: 255, g: 59, b: 48};   // #ff3b30
+      const r = Math.round(lerp(from.r,to.r,t));
+      const g = Math.round(lerp(from.g,to.g,t));
+      const b = Math.round(lerp(from.b,to.b,t));
       return `rgb(${r}, ${g}, ${b})`;
     }
-
-    // จัดข้อความให้เว้นวรรคเดียวระหว่าง "วิชา ครู ห้อง"
-    function formatCell(cell) {
+    function formatCell(cell){
       const raw = (cell.innerText || cell.textContent || '').trim();
-      const parts = raw.split(/\s*[\r\n]+\s*/).map(s => s.trim()).filter(Boolean);
-      return parts.join(' ').replace(/\s+/g, ' ');
+      const parts = raw.split(/\s*[\r\n]+\s*/).map(s=>s.trim()).filter(Boolean);
+      return parts.join(' ').replace(/\s+/g,' ');
     }
 
-    // สร้าง "ช่วงเวลา" ของวันนี้ (รวมเวลาพักระหว่างคาบ)
-    function buildSegments(row) {
+    /* ===== Timeline building (include short breaks) ===== */
+    function buildSegments(row){
       const segs = [];
-      for (let i = 0; i < periods.length; i++) {
+      for(let i=0;i<periods.length;i++){
         const p = periods[i];
         const start = hmToMinutes(p.start);
-        const end = hmToMinutes(p.end);
-        const cell = row.cells[i + 1];
-        const label = (cell && cell.textContent.trim() && cell.textContent.trim() !== '-') ? formatCell(cell) : 'ว่าง';
+        const end   = hmToMinutes(p.end);
+        const cell  = row.cells[i+1];
+        const label = (cell && cell.textContent.trim() && cell.textContent.trim()!=='-') ? formatCell(cell) : 'ว่าง';
         const isLunch = /พักกลางวัน/.test(label);
         const type = isLunch ? 'lunch' : 'class';
-        segs.push({ type, start, end, label });
+        segs.push({type, start, end, label});
 
-        // แทรก "พักระยะสั้น" ระหว่างคาบถ้ามีช่องว่าง
-        if (i < periods.length - 1) {
-          const nextStart = hmToMinutes(periods[i + 1].start);
-          if (end < nextStart) {
-            segs.push({ type: 'break', start: end, end: nextStart, label: 'พักระยะสั้น' });
+        if(i<periods.length-1){
+          const nextStart = hmToMinutes(periods[i+1].start);
+          if(end < nextStart){
+            segs.push({type:'break', start:end, end:nextStart, label:'พักระยะสั้น'});
           }
         }
       }
-      segs.sort((a, b) => a.start - b.start);
+      segs.sort((a,b)=>a.start-b.start);
       return segs;
     }
-
-    function findCurrentSegment(segs, nowMinFloat) {
-      for (let i = 0; i < segs.length; i++) {
-        if (nowMinFloat >= segs[i].start && nowMinFloat < segs[i].end) {
-          return i;
-        }
+    function findCurrentSegment(segs, nowMin){
+      for(let i=0;i<segs.length;i++){
+        if(nowMin>=segs[i].start && nowMin<segs[i].end) return i;
       }
       return -1;
     }
 
-    // helper: choose next label based on type
-    function nextLabelText(seg) {
-      if (!seg) return '-';
-      if (seg.type === 'lunch') return 'ถัดไป: พักกลางวัน';
-      if (seg.type === 'break') return 'ถัดไป: พักระยะสั้น';
+    /* ===== NEXT BOX (label/progress) ===== */
+    function nextLabelText(seg){
+      if(!seg) return '-';
+      if(seg.type==='lunch') return 'ถัดไป: พักกลางวัน';
+      if(seg.type==='break') return 'ถัดไป: พักระยะสั้น';
       return `ถัดไป: ${seg.label}`;
     }
-
-    // helper: choose "after break" label if next is a short break
-    function afterBreakText(afterSeg) {
-      if (!afterSeg) return '';
-      if (afterSeg.type === 'lunch') return 'หลังจากนั้น: พักกลางวัน';
-      if (afterSeg.type === 'break') return 'หลังจากนั้น: พักระยะสั้น';
-      return `หลังจากนั้น: ${afterSeg.label}`;
+    function afterBreakText(seg){
+      if(!seg) return '';
+      if(seg.type==='lunch') return 'หลังจากนั้น: พักกลางวัน';
+      if(seg.type==='break') return 'หลังจากนั้น: พักระยะสั้น';
+      return `หลังจากนั้น: ${seg.label}`;
     }
-
-    function updateNextBox(segs, nowMinFloat) {
-      // determine the upcoming segment (first with start > now)
-      const upcomingIndex = segs.findIndex(s => nowMinFloat < s.start);
+    function updateNextBox(segs, nowMin){
+      const upcomingIndex = segs.findIndex(s => nowMin < s.start);
       const next = upcomingIndex !== -1 ? segs[upcomingIndex] : null;
 
-      // Labels
       nextLabel.textContent = nextLabelText(next);
       nextAfter.style.display = 'none';
-
-      if (next && next.type === 'break') {
-        const after = (upcomingIndex + 1 < segs.length) ? segs[upcomingIndex + 1] : null;
-        const text = afterBreakText(after);
-        if (text) {
-          nextAfter.style.display = '';
-          nextAfter.textContent = text;
-        }
-      }
-
-      // Start time
-      if (next) {
+      if(next){
         nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)}`;
+        if(next.type==='break'){
+          const after = (upcomingIndex+1<segs.length)?segs[upcomingIndex+1]:null;
+          const t = afterBreakText(after);
+          if(t){ nextAfter.style.display=''; nextAfter.textContent = t; }
+        }
       } else {
-        nextEta.textContent = `เริ่มเวลา --:--`;
+        nextEta.textContent = 'เริ่มเวลา --:--';
       }
 
-      // Countdown logic (always visible)
-      if (!next) {
-        nextCountdown.textContent = '--:--';
-        nextCountdown.classList.add('idle');
-        nextCountdown.classList.remove('blink');
-        // box glow red
-        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
-        // progress bar reset
-        nextProg.style.width = '0%';
+      // อัปเดต progress (แถบ 10 นาที)
+      if(!next){ nextProg.style.width='0%'; return; }
+      const diffSec = Math.max(0, (next.start - nowMin)*60);
+      if(diffSec > PREVIEW_SEC){
+        nextProg.style.width='0%';
+      } else {
+        const pct = (PREVIEW_SEC - diffSec) / PREVIEW_SEC * 100;
+        nextProg.style.width = Math.min(100, Math.max(0, pct)) + '%';
+      }
+    }
+
+    /* ===== COUNTDOWN CLOCK (บล็อกนาฬิกาแยก) ===== */
+    function updateCountdownClock(segs, nowMin){
+      const upcomingIndex = segs.findIndex(s => nowMin < s.start);
+      const next = upcomingIndex !== -1 ? segs[upcomingIndex] : null;
+
+      if(!next){
+        // ไม่มีคาบ/ช่วงถัดไปวันนี้
+        countdownClock.textContent = '--:--';
+        countdownClock.style.color = '#ff3b30';
+        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
+        countdownClock.classList.remove('blink');
         return;
       }
 
-      const diffSec = Math.max(0, (next.start - nowMinFloat) * 60);
-      const withinWindow = diffSec <= PREVIEW_SEC && diffSec > 0;
+      const diffSec = Math.max(0, (next.start - nowMin)*60);
+      if(diffSec === 0){
+        countdownClock.textContent = '00:00';
+        countdownClock.style.color = '#ff3b30';
+        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
+        countdownClock.classList.add('blink');
+        return;
+      }
 
-      if (!withinWindow) {
-        // out of 10-min window
-        nextCountdown.textContent = '--:--';
-        nextCountdown.classList.add('idle');
-        nextCountdown.classList.remove('blink');
-        nextCountdown.style.color = '#ff3b30';
-        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
-        nextProg.style.width = '0%';
+      if(diffSec > PREVIEW_SEC){
+        // นอกหน้าต่าง 10 นาที
+        countdownClock.textContent = '--:--';
+        countdownClock.style.color = '#ff3b30';
+        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
+        countdownClock.classList.remove('blink');
       } else {
-        // show mm:ss and color shift from sky blue -> red as it approaches 0
-        nextCountdown.textContent = formatMMSS(diffSec);
-        nextCountdown.classList.remove('idle');
-
-        // color & glow based on remaining time
+        // ใน 10 นาทีสุดท้าย: แสดงเวลาจริง + ไล่สี
+        countdownClock.textContent = formatMMSS(diffSec);
         const c = colorForRemaining(diffSec);
-        nextCountdown.style.color = c;
-        nextBlock.style.boxShadow = `0 0 18px 2px ${c.replace('rgb', 'rgba').replace(')', ',0.8)')}`;
-
-        // 30s warning blink
-        if (diffSec <= 30) {
-          nextCountdown.classList.add('blink');
-        } else {
-          nextCountdown.classList.remove('blink');
-        }
-
-        // progress bar for the 10-min preview window
-        const previewElapsed = PREVIEW_SEC - diffSec; // 0..PREVIEW_SEC
-        const nextPct = Math.min(100, Math.max(0, (previewElapsed / PREVIEW_SEC) * 100));
-        nextProg.style.width = nextPct + '%';
+        countdownClock.style.color = c;
+        // แปลง rgb(...) -> rgba(...,0.9) แบบง่าย
+        countdownClock.style.boxShadow = `0 0 20px ${c.replace('rgb','rgba').replace(')',',0.9)')}`;
+        if(diffSec <= 30){ countdownClock.classList.add('blink'); } else { countdownClock.classList.remove('blink'); }
       }
     }
 
-    function updateProgressBars(segs, idx, nowMinFloat) {
-      // ล้างไฮไลต์ในตาราง
-      document.querySelectorAll('td').forEach(td => td.classList.remove('highlighted'));
+    /* ===== CURRENT BLOCK ===== */
+    function updateCurrentBlock(segs, idx, nowMin){
+      document.querySelectorAll('td').forEach(td=>td.classList.remove('highlighted'));
 
-      if (idx === -1) {
+      if(idx === -1){
         curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน';
         curProg.style.width = '0%';
         curEta.textContent = '';
         currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
-        // Next box still handled separately (always visible)
         return;
       }
 
       const cur = segs[idx];
       const durMin = cur.end - cur.start;
-      const elapsedMin = Math.max(0, nowMinFloat - cur.start);
-      const remainMin = Math.max(0, cur.end - nowMinFloat);
+      const elapsedMin = Math.max(0, nowMin - cur.start);
+      const remainMin  = Math.max(0, cur.end - nowMin);
       const pct = Math.min(100, Math.max(0, (elapsedMin / durMin) * 100));
 
-      // อัปเดต label และแถบ
-      if (cur.type === 'lunch') {
+      if(cur.type === 'lunch'){
         curLabel.textContent = 'ช่วงพัก: พักกลางวัน';
         currentSubject.textContent = 'ขณะนี้: พักกลางวัน';
       } else {
         curLabel.textContent = `คาบปัจจุบัน: ${cur.label}`;
         currentSubject.textContent = 'ขณะนี้เรียน: ' + cur.label;
       }
-
       curProg.style.width = pct + '%';
-      curEta.textContent = `เหลือเวลา ${formatMMSS(remainMin * 60)} (สิ้นสุด ${formatHMM(cur.end)})`;
+      curEta.textContent = `เหลือเวลา ${formatMMSS(remainMin*60)} (สิ้นสุด ${formatHMM(cur.end)})`;
 
-      // ไฮไลต์ cell เฉพาะเมื่อเป็นคาบเรียน
+      // ไฮไลต์เซลล์หากเป็นคาบเรียน
       const tbody = document.querySelector('tbody');
       const dayIdx = new Date().getDay();
       const rowIndex = dayIdx - 1;
-      if (!(dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex])) {
-        if (cur.type === 'class') {
-          for (let i = 0; i < periods.length; i++) {
+      if(!(dayIdx===0 || dayIdx===6 || !tbody.rows[rowIndex])){
+        if(cur.type === 'class'){
+          for(let i=0;i<periods.length;i++){
             const pStart = hmToMinutes(periods[i].start);
-            const pEnd = hmToMinutes(periods[i].end);
-            if (cur.start === pStart && cur.end === pEnd) {
-              const cell = tbody.rows[rowIndex].cells[i + 1];
-              if (cell) cell.classList.add('highlighted');
+            const pEnd   = hmToMinutes(periods[i].end);
+            if(cur.start===pStart && cur.end===pEnd){
+              const cell = tbody.rows[rowIndex].cells[i+1];
+              if(cell) cell.classList.add('highlighted');
               break;
             }
           }
@@ -528,57 +508,54 @@
       }
     }
 
-    function updateClock() {
+    /* ===== Main tick ===== */
+    function tick(){
       const now = new Date();
-      const h = now.getHours();
-      const m = now.getMinutes();
-      const s = now.getSeconds();
+      const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 
+      // นาฬิกาจริง
       digitalClock.textContent =
-        h.toString().padStart(2, '0') + ':' +
-        m.toString().padStart(2, '0') + ':' +
-        s.toString().padStart(2, '0');
+        h.toString().padStart(2,'0') + ':' +
+        m.toString().padStart(2,'0') + ':' +
+        s.toString().padStart(2,'0');
 
-      updateState(h, m, s);
-    }
-
-    function updateState(hour, minute, second = 0) {
-      const dayIdx = new Date().getDay(); // 0-6
-      const tbody = document.querySelector('tbody');
+      const dayIdx = now.getDay(); // 0-6
+      const tbody  = document.querySelector('tbody');
       const rowIndex = dayIdx - 1; // Monday=0
 
-      // วันหยุด
-      if (dayIdx === 0 || dayIdx === 6 || !tbody.rows[rowIndex]) {
-        // No current segments, but still update next box (could be next day — we won't predict cross-day)
+      // วันหยุด: current ไม่มี / next ไม่ทำนายข้ามวัน
+      if(dayIdx===0 || dayIdx===6 || !tbody.rows[rowIndex]){
+        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
         curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
         curProg.style.width = '0%';
         curEta.textContent = '';
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
-        // keep next box showing --:--
+
+        // Countdown (เซ็ตเป็น --:--)
+        countdownClock.textContent = '--:--';
+        countdownClock.style.color = '#ff3b30';
+        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
+        countdownClock.classList.remove('blink');
+
+        // Next box (ไม่คาดการณ์ข้ามวัน)
         nextLabel.textContent = '-';
-        nextEta.textContent = 'เริ่มเวลา --:--';
-        nextCountdown.textContent = '--:--';
-        nextCountdown.classList.add('idle');
-        nextCountdown.classList.remove('blink');
-        nextBlock.style.boxShadow = '0 0 18px 2px rgba(255,59,48,0.8)';
-        nextProg.style.width = '0%';
         nextAfter.style.display = 'none';
+        nextEta.textContent = 'เริ่มเวลา --:--';
+        nextProg.style.width = '0%';
         return;
       }
 
       const row = tbody.rows[rowIndex];
       const segs = buildSegments(row);
-      const nowMinFloat = toMinutes(hour, minute, second);
-      const idx = findCurrentSegment(segs, nowMinFloat);
+      const nowMin = toMinutes(h,m,s);
+      const idx = findCurrentSegment(segs, nowMin);
 
-      // Update both current box and next box
-      updateProgressBars(segs, idx, nowMinFloat);
-      updateNextBox(segs, nowMinFloat);
+      updateCurrentBlock(segs, idx, nowMin);
+      updateNextBox(segs, nowMin);
+      updateCountdownClock(segs, nowMin);
     }
 
-    // อัปเดตทุกวินาที
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(tick, 1000);
+    tick();
   </script>
 
 </body>
