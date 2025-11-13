@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Anime Control Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-main: #020818;
+      --accent-cyan: #03dffc;
+      --accent-blue: #0084ff;
+      --accent-purple: #8a2be2;
+      --accent-pink: #ff4fd9;
+      --accent-yellow: #ffd700;
+      --text-main: #e8f7ff;
+      --text-soft: #aacde8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(0, 180, 255, 0.2), transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(200, 0, 255, 0.18), transparent 60%),
+        #020818;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(to bottom,
+          rgba(255, 255, 255, 0.04) 1px,
+          transparent 1px);
+      background-size: 100% 3px;
+      opacity: 0.18;
+      z-index: 0;
+    }
+
+    .glow-orbit {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+          rgba(3, 223, 252, 0.12),
+          transparent 70%);
+      top: -100px;
+      right: -80px;
+      filter: blur(1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .title-main {
+      font-size: 1.4rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 12px rgba(3, 223, 252, 0.9);
+    }
+
+    .title-sub {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--text-soft);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .header-chip {
+      background: linear-gradient(120deg, rgba(3, 223, 252, 0.06), rgba(138, 43, 226, 0.18));
+      border-radius: 999px;
+      padding: 6px 12px;
+      border: 1px solid rgba(3, 223, 252, 0.6);
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #00e676;
+      box-shadow: 0 0 8px #00e676;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .header-right {
+        align-items: flex-start;
+      }
+    }
+
+    /* Panel base */
+    .panel {
+      position: relative;
+      background: linear-gradient(135deg,
+          rgba(0, 10, 30, 0.95),
+          rgba(10, 20, 50, 0.95));
+      border-radius: 14px;
+      padding: 12px 14px 12px;
+      border: 1px solid rgba(3, 223, 252, 0.38);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        0 10px 40px rgba(0, 0, 0, 0.9),
+        0 0 26px rgba(3, 223, 252, 0.18);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg,
+          rgba(3, 223, 252, 0.14),
+          transparent 40%,
+          transparent 60%,
+          rgba(138, 43, 226, 0.18));
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .panel-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 8px rgba(3, 223, 252, 0.9);
+    }
+
+    .panel-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(3, 223, 252, 0.7),
+          rgba(255, 79, 217, 0.8),
+          transparent);
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+
+    /* Clock panel */
+    .clock-display {
+      font-family: "Courier New", monospace;
+      font-size: 2rem;
+      color: var(--accent-cyan);
+      text-shadow:
+        0 0 14px rgba(3, 223, 252, 0.9),
+        0 0 4px rgba(3, 223, 252, 0.9);
+      margin-bottom: 4px;
+    }
+
+    .clock-date {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 0.78rem;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(3, 223, 252, 0.5);
+      background: radial-gradient(circle at 0 0,
+          rgba(3, 223, 252, 0.4),
+          transparent 60%);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-pill span.label {
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.7rem;
+    }
+
+    /* Metrics grid */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 700px) {
+      .metrics {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric {
+      padding: 8px 8px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(3, 223, 252, 0.4);
+      background: radial-gradient(circle at 0 0,
+          rgba(3, 223, 252, 0.28),
+          transparent 60%);
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+    }
+
+    .metric-sub {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .meter-bar {
+      position: relative;
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(5, 15, 35, 0.95);
+      overflow: hidden;
+      margin-top: 6px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+    }
+
+    .meter-fill {
+      position: absolute;
+      inset: 0;
+      width: 40%;
+      border-radius: inherit;
+      background: linear-gradient(90deg,
+          var(--accent-cyan),
+          var(--accent-blue),
+          var(--accent-purple),
+          var(--accent-pink));
+      box-shadow:
+        0 0 10px rgba(3, 223, 252, 0.9),
+        0 0 18px rgba(255, 79, 217, 0.7);
+      transform-origin: left center;
+    }
+
+    /* Right column small panels */
+    .mini-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .status-cell {
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(3, 223, 252, 0.4);
+      background: radial-gradient(circle at 50% 0,
+          rgba(3, 223, 252, 0.3),
+          transparent 70%);
+      font-size: 0.75rem;
+    }
+
+    .status-label {
+      color: var(--text-soft);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+    }
+
+    .status-value {
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .bullet {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      margin-right: 4px;
+      box-shadow: 0 0 7px currentColor;
+    }
+
+    .ok {
+      color: #00e676;
+    }
+
+    .warn {
+      color: #ffeb3b;
+    }
+
+    .crit {
+      color: #ff5252;
+    }
+
+    /* Next event panel */
+    .event-main {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .event-main span.label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+      margin-right: 4px;
+    }
+
+    .event-time {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .event-note {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    /* Decorative orbit chart */
+    .orbit-wrap {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orbit {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 1px dashed rgba(3, 223, 252, 0.6);
+      box-shadow: 0 0 14px rgba(3, 223, 252, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orbit-core {
+      position: absolute;
+      inset: 35%;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+          rgba(3, 223, 252, 0.45),
+          rgba(3, 223, 252, 0.02));
+      box-shadow:
+        0 0 16px rgba(3, 223, 252, 0.9),
+        0 0 34px rgba(255, 79, 217, 0.7);
+    }
+
+    .orbit-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--accent-pink);
+      box-shadow:
+        0 0 12px rgba(255, 79, 217, 0.9),
+        0 0 24px rgba(3, 223, 252, 0.7);
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: orbit 6s linear infinite;
+      transform-origin: 50% 56px;
+    }
+
+    @keyframes orbit {
+      0% {
+        transform: translateX(-50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translateX(-50%) rotate(360deg);
+      }
+    }
+
+    /* Tiny scrolling code stripe */
+    .code-stripe {
+      margin-top: 10px;
+      font-family: "Courier New", monospace;
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .code-stripe span {
+      position: relative;
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollCode 18s linear infinite;
+    }
+
+    @keyframes scrollCode {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scanlines"></div>
+  <div class="glow-orbit"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="title-block">
+        <div class="title-main">ANIME CONTROL PANEL</div>
+        <div class="title-sub">client-side status overlay v1.0</div>
+      </div>
+      <div class="header-right">
+        <div class="header-chip">
+          <div class="dot"></div>
+          <span>SESSION: ACTIVE</span>
+        </div>
+        <div>ENV: BROWSER ONLY · NO SQL · NO SERVER</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: main system panel -->
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="panel-header">
+            <div class="panel-title">SYSTEM CLOCK / SESSION STATUS</div>
+            <div class="panel-tag">MODE: LOCAL CLIENT</div>
+          </div>
+          <div class="divider"></div>
+
+          <div class="clock-display" id="clock-time">00:00:00</div>
+          <div class="clock-date" id="clock-date">LOADING DATE…</div>
+
+          <div class="status-row">
+            <div class="status-pill">
+              <span class="label">UPTIME</span>
+              <span id="uptime-label">00:00:00</span>
+            </div>
+            <div class="status-pill">
+              <span class="label">SESSION</span>
+              <span>MEM-ONLY / NO DB</span>
+            </div>
+            <div class="status-pill">
+              <span class="label">PROFILE</span>
+              <span>STUDENT · LOCAL DEV</span>
+            </div>
+          </div>
+
+          <div class="metrics">
+            <!-- Temperature -->
+            <div class="metric">
+              <div class="metric-label">TEMP SENSOR</div>
+              <div class="metric-value" id="temp-value">--.- °C</div>
+              <div class="metric-sub" id="temp-status">estimating natural range…</div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="temp-bar"></div>
+              </div>
+            </div>
+
+            <!-- CPU load -->
+            <div class="metric">
+              <div class="metric-label">CPU LOAD</div>
+              <div class="metric-value" id="cpu-value">-- %</div>
+              <div class="metric-sub">simulated client processing load</div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="cpu-bar"></div>
+              </div>
+            </div>
+
+            <!-- Memory -->
+            <div class="metric">
+              <div class="metric-label">MEMORY USAGE</div>
+              <div class="metric-value" id="mem-value">-- %</div>
+              <div class="metric-sub">front-end data + ui buffers only</div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="mem-bar"></div>
+              </div>
+            </div>
+
+            <!-- Task info placeholder -->
+            <div class="metric">
+              <div class="metric-label">TASK MONITOR</div>
+              <div class="metric-value" id="task-count">0 tasks</div>
+              <div class="metric-sub">
+                this panel can be linked to your homework tracker page later
+              </div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="task-bar" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-stripe">
+            <span>
+              &gt;&gt; SYSTEM LOG: session-online=true; storage="sessionStorage"; db_used=false;
+              ui_theme="futuristic-anime"; last_error=null; student_mode="ON"; safety_lock="ENGAGED";
+              async_process="[clock, temp, cpu, mem] running in parallel...";
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: mini panels stack -->
+      <section class="mini-stack">
+        <!-- Status lights -->
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="panel-header">
+              <div class="panel-title">REALTIME STATUS INDICATORS</div>
+              <div class="panel-tag">NODE: CLIENT-HUD</div>
+            </div>
+            <div class="divider"></div>
+
+            <div class="status-grid">
+              <div class="status-cell">
+                <div class="status-label">NETWORK</div>
+                <div class="status-value ok">
+                  <span class="bullet ok"></span>OK
+                </div>
+                <div class="metric-sub">github / local files</div>
+              </div>
+              <div class="status-cell">
+                <div class="status-label">BACKEND</div>
+                <div class="status-value warn">
+                  <span class="bullet warn"></span>NONE
+                </div>
+                <div class="metric-sub">all logic: javascript only</div>
+              </div>
+              <div class="status-cell">
+                <div class="status-label">SECURITY</div>
+                <div class="status-value ok">
+                  <span class="bullet ok"></span>LOCAL
+                </div>
+                <div class="metric-sub">no external database</div>
+              </div>
+              <div class="status-cell">
+                <div class="status-label">SESSION DATA</div>
+                <div class="status-value ok">
+                  <span class="bullet ok"></span>VOLATILE
+                </div>
+                <div class="metric-sub">clears on tab close</div>
+              </div>
+              <div class="status-cell">
+                <div class="status-label">TEMP RANGE</div>
+                <div class="status-value" id="temp-range-label">
+                  27–38 °C
+                </div>
+                <div class="metric-sub">natural estimate for system</div>
+              </div>
+              <div class="status-cell">
+                <div class="status-label">MODE</div>
+                <div class="status-value ok">
+                  <span class="bullet ok"></span>ANIME UI
+                </div>
+                <div class="metric-sub">visual only · no sensors</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next event / orbit -->
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="panel-header">
+              <div class="panel-title">NEXT EVENT / SCHEDULE HOOK</div>
+              <div class="panel-tag">SOURCE: MANUAL ENTRY</div>
+            </div>
+            <div class="divider"></div>
+
+            <div class="event-main">
+              <span class="label">NEXT EVENT</span>
+              <span id="next-event-name">Homework session</span>
+            </div>
+            <div class="event-time" id="next-event-time">
+              Est. start: whenever you open your homework page 😄
+            </div>
+            <div class="event-note">
+              This panel is just a visual dummy for now.  
+              You can later connect it to your real homework-manager HTML file if you want.
+            </div>
+
+            <div class="orbit-wrap">
+              <div class="orbit">
+                <div class="orbit-core"></div>
+                <div class="orbit-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ===== CLOCK & DATE ===== */
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock-time").textContent = `${h}:${m}:${s}`;
+
+      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      const day = days[now.getDay()];
+      const dd = String(now.getDate()).padStart(2, "0");
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const yyyy = now.getFullYear();
+
+      document.getElementById("clock-date").textContent =
+        `${day} · ${dd}/${mm}/${yyyy}`;
+    }
+
+    /* ===== UPTIME ===== */
+    const startTime = Date.now();
+
+    function updateUptime() {
+      const diffMs = Date.now() - startTime;
+      let totalSeconds = Math.floor(diffMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      totalSeconds %= 3600;
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const hh = String(hours).padStart(2, "0");
+      const mm = String(minutes).padStart(2, "0");
+      const ss = String(seconds).padStart(2, "0");
+      document.getElementById("uptime-label").textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    /* ===== SIMULATED METRICS ===== */
+
+    // System temp: random in 27–38 °C
+    function randomTemp() {
+      const min = 27;
+      const max = 38;
+      return min + Math.random() * (max - min);
+    }
+
+    function updateTemp() {
+      const temp = randomTemp();
+      const tempRounded = temp.toFixed(1);
+      document.getElementById("temp-value").textContent = `${tempRounded} °C`;
+
+      const min = 27;
+      const max = 38;
+      const ratio = (temp - min) / (max - min);
+      const clamped = Math.max(0, Math.min(1, ratio));
+
+      const bar = document.getElementById("temp-bar");
+      bar.style.transform = `scaleX(${0.25 + clamped * 0.75})`;
+
+      const statusEl = document.getElementById("temp-status");
+      if (temp < 30) {
+        statusEl.textContent = "cool & stable · comfy client temperature";
+      } else if (temp < 35) {
+        statusEl.textContent = "normal range · typical device temperature";
+      } else {
+        statusEl.textContent = "a bit warm · still within natural range";
+      }
+    }
+
+    // CPU, Memory simulation (smooth-ish random walk)
+    let cpuLoad = 35;
+    let memLoad = 42;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function updateCpuMem() {
+      cpuLoad = clamp(cpuLoad + (Math.random() * 20 - 10), 5, 96);
+      memLoad = clamp(memLoad + (Math.random() * 12 - 6), 10, 92);
+
+      const cpuVal = document.getElementById("cpu-value");
+      const memVal = document.getElementById("mem-value");
+      const cpuBar = document.getElementById("cpu-bar");
+      const memBar = document.getElementById("mem-bar");
+
+      cpuVal.textContent = `${Math.round(cpuLoad)} %`;
+      memVal.textContent = `${Math.round(memLoad)} %`;
+
+      cpuBar.style.transform = `scaleX(${cpuLoad / 100})`;
+      memBar.style.transform = `scaleX(${memLoad / 100})`;
+    }
+
+    // Dummy "task count" for the look
+    function updateTaskCount() {
+      // Just a fun fake range: between 0–5
+      const count = Math.floor(Math.random() * 6);
+      const label = document.getElementById("task-count");
+      const bar = document.getElementById("task-bar");
+      label.textContent = `${count} task${count === 1 ? "" : "s"}`;
+      const width = 10 + count * 15;
+      bar.style.width = `${width}%`;
+    }
+
+    // Interval timers
+    updateClock();
+    updateUptime();
+    updateTemp();
+    updateCpuMem();
+    updateTaskCount();
+
+    setInterval(updateClock, 1000);
+    setInterval(updateUptime, 1000);
+    setInterval(updateTemp, 4000);     // every 4s new temp in 27–38 °C
+    setInterval(updateCpuMem, 2500);   // cpu/mem wiggle
+    setInterval(updateTaskCount, 7000);
+  </script>
+</body>
+
+</html>
