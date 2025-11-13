@@ -84,7 +84,7 @@
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.7);
       padding: 8px 10px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
       color: #ffffff;
       outline: none;
       box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
@@ -92,14 +92,17 @@
 
     textarea {
       width: 100%;
-      min-height: 80px;
+      min-height: 120px;           /* ใหญ่ขึ้น */
       resize: vertical;
+      font-size: 1rem;             /* ตัวใหญ่ขึ้น */
+      line-height: 1.4;
     }
 
     input[type="date"],
     input[type="time"] {
       flex: 1 1 120px;
       min-width: 120px;
+      font-size: 0.95rem;
     }
 
     textarea::placeholder {
@@ -142,6 +145,12 @@
       box-shadow: 0 3px 8px rgba(244, 67, 54, 0.7);
     }
 
+    .btn-priority {
+      background: rgba(255, 215, 0, 0.98);
+      color: #3b2a00;
+      box-shadow: 0 3px 8px rgba(255, 215, 0, 0.8);
+    }
+
     .lists-container {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -177,9 +186,15 @@
       gap: 4px;
       padding: 8px 10px;
       border-radius: 10px;
-      background: rgba(0, 0, 0, 0.45);
-      border-left: 4px solid rgba(3, 223, 252, 0.8);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      /* สีสดขึ้น + ไล่เฉดนิด ๆ */
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), rgba(0, 40, 80, 0.9));
+      border-left: 4px solid rgba(3, 223, 252, 0.9);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .task-priority {
+      border-left-color: rgba(255, 215, 0, 0.98);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
     }
 
     .task-top-row {
@@ -190,7 +205,7 @@
     }
 
     .task-text {
-      font-size: 0.95rem;
+      font-size: 1rem;             /* ใหญ่ขึ้น */
       color: #ffffff;
     }
 
@@ -226,6 +241,7 @@
     .task-completed {
       border-left-color: rgba(160, 160, 160, 0.9);
       background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
     }
 
     @media (max-width: 768px) {
@@ -254,7 +270,7 @@
     <div class="card">
       <div class="card-title ui-shadow">บันทึกงานการบ้านประจำวัน</div>
       <div class="list-subtitle ui-shadow">
-        พิมพ์งานการบ้าน เลือกวันและเวลาส่ง จากนั้นกด <b>เพิ่มงาน</b> งานจะเรียงจากใกล้ถึงกำหนดมาก่อน
+        พิมพ์งานการบ้าน เลือกวันและเวลาส่ง แล้วกด <b>เพิ่มงาน</b> หรือ <b>บันทึกการแก้ไข</b> งานจะเรียงจากใกล้กำหนด + งานสำคัญอยู่บนสุด
       </div>
 
       <div class="form-row">
@@ -273,7 +289,7 @@
       <div class="card">
         <div class="list-title ui-shadow">งานที่ต้องทำ (To-Do)</div>
         <div class="list-subtitle ui-shadow">
-          งานจะจัดลำดับเหมือน Leaderboard: งานที่ใกล้ถึงกำหนดมากที่สุดอยู่ด้านบน
+          งานเรียงเหมือน Leaderboard: งานสำคัญ + ใกล้ถึงกำหนดอยู่ด้านบนสุด
         </div>
         <div id="pending-list" class="task-list"></div>
       </div>
@@ -282,7 +298,7 @@
       <div class="card">
         <div class="list-title ui-shadow">งานที่ทำเสร็จแล้ว</div>
         <div class="list-subtitle ui-shadow">
-          งานที่กดทำเสร็จจะย้ายมาที่นี่ และแสดงเป็นสีเทา
+          งานที่กดทำเสร็จแล้วจะถูกย้ายมาที่นี่ และจะถูกลบอัตโนมัติเมื่อเกิน 7 วัน
         </div>
         <div id="completed-list" class="task-list"></div>
       </div>
@@ -316,6 +332,7 @@
     const completedListEl = document.getElementById('completed-list');
 
     let tasks = [];
+    let editingId = null;   // ถ้าไม่ null แปลว่ากำลังแก้ไขงานอยู่
 
     function loadTasks() {
       try {
@@ -333,6 +350,7 @@
       } catch (e) {
         tasks = [];
       }
+      cleanupCompleted(); // ล้างงานเก่าที่ครบ 7 วันแล้ว
     }
 
     function saveTasks() {
@@ -393,16 +411,15 @@
       const blue = { r: 3, g: 223, b: 252 };  // #03dffc
 
       if (ms <= 0) {
-        // เลยกำหนดแล้ว: เข้มขึ้นหน่อย
+        // เลยกำหนดแล้ว: เข้มหน่อย
         return 'rgb(255, 20, 20)';
       }
 
-      // ภายใน 1 วัน -> เน้นแดง
       if (ms <= oneDayMs) {
+        // ภายใน 1 วัน ไปทางแดง
         return 'rgb(255, 59, 48)';
       }
 
-      // เกิน 1 วัน: ไล่จากแดง -> ฟ้า ภายในช่วง 7 วัน
       const sevenDayMs = 7 * oneDayMs;
       const tRaw = (ms - oneDayMs) / (sevenDayMs - oneDayMs);
       const t = Math.max(0, Math.min(1, tRaw));
@@ -414,13 +431,37 @@
       return `rgb(${r}, ${g}, ${b})`;
     }
 
+    // ลบงานที่ completed เกิน 7 วัน
+    function cleanupCompleted() {
+      const now = Date.now();
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      const before = tasks.length;
+      tasks = tasks.filter(t => {
+        if (!t.completed) return true;
+        if (!t.completedAt) return true;
+        return (now - t.completedAt) <= sevenDays;
+      });
+      if (tasks.length !== before) {
+        saveTasks();
+      }
+    }
+
     function renderTasks() {
+      cleanupCompleted();
+
       pendingListEl.innerHTML = '';
       completedListEl.innerHTML = '';
 
       const pending = tasks
         .filter(t => !t.completed)
-        .sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime());
+        .sort((a, b) => {
+          // จัดลำดับ: priority ก่อน, จากนั้นใกล้กำหนดก่อน, ถ้าเท่ากันดู createdAt
+          if (a.priority && !b.priority) return -1;
+          if (!a.priority && b.priority) return 1;
+          const da = new Date(a.due).getTime() - new Date(b.due).getTime();
+          if (da !== 0) return da;
+          return (a.createdAt || 0) - (b.createdAt || 0);
+        });
 
       const completed = tasks
         .filter(t => t.completed)
@@ -447,7 +488,6 @@
         completedListEl.appendChild(createTaskElement(t, true));
       }
 
-      // อัปเดตสีและข้อความเวลาเหลือหลัง render
       updateRemainingDisplayAll();
     }
 
@@ -456,7 +496,9 @@
       const ms = computeRemainingMs(due);
 
       const wrapper = document.createElement('div');
-      wrapper.className = 'task-item ui-shadow' + (isCompleted ? ' task-completed' : '');
+      wrapper.className = 'task-item ui-shadow' +
+        (isCompleted ? ' task-completed' : '') +
+        (task.priority && !isCompleted ? ' task-priority' : '');
       wrapper.dataset.id = task.id;
 
       const topRow = document.createElement('div');
@@ -490,11 +532,25 @@
       btnRow.className = 'task-buttons';
 
       if (!isCompleted) {
+        const priorityBtn = document.createElement('button');
+        priorityBtn.className = 'btn-priority ui-shadow';
+        priorityBtn.textContent = task.priority ? '⭐ ยกเลิกสำคัญ' : '⭐ ตั้งเป็นงานสำคัญ';
+        priorityBtn.dataset.id = task.id;
+        priorityBtn.dataset.action = 'priority';
+        btnRow.appendChild(priorityBtn);
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-main ui-shadow';
+        editBtn.textContent = '✏️ แก้ไข';
+        editBtn.dataset.id = task.id;
+        editBtn.dataset.action = 'edit';
+        btnRow.appendChild(editBtn);
+
         const completeBtn = document.createElement('button');
         completeBtn.className = 'btn-complete ui-shadow';
         completeBtn.textContent = '✅ ทำเสร็จแล้ว';
         completeBtn.dataset.id = task.id;
-
+        completeBtn.dataset.action = 'complete';
         btnRow.appendChild(completeBtn);
       }
 
@@ -502,7 +558,7 @@
       deleteBtn.className = 'btn-delete ui-shadow';
       deleteBtn.textContent = '🗑 ลบงาน';
       deleteBtn.dataset.id = task.id;
-
+      deleteBtn.dataset.action = 'delete';
       btnRow.appendChild(deleteBtn);
 
       wrapper.appendChild(topRow);
@@ -523,13 +579,19 @@
           const c = remainingColor(ms);
           remainingEl.style.color = c;
           if (textEl) {
-            textEl.style.color = c;
+            textEl.style.color = c;  // ตัวงานมีสีไล่ตาม deadline → ดูมีชีวิตขึ้น
           }
         } else if (t.completed && remainingEl && textEl) {
           remainingEl.textContent = 'เสร็จแล้ว';
-          // สีเทาใน completed box ถูกกำหนดจาก CSS class อยู่แล้ว
         }
       }
+    }
+
+    function resetForm() {
+      taskTextInput.value = '';
+      // ไม่บังคับ clear date/time เผื่อมีงานหลายงานวันเดียวกัน
+      editingId = null;
+      addTaskBtn.textContent = '＋ เพิ่มงาน';
     }
 
     addTaskBtn.addEventListener('click', () => {
@@ -548,54 +610,91 @@
         return;
       }
 
-      const task = {
-        id: createId(),
-        text,
-        due: due.toISOString(),
-        completed: false,
-        createdAt: Date.now(),
-        completedAt: null
-      };
+      if (editingId) {
+        // แก้ไขงานเดิม
+        const t = tasks.find(t => t.id === editingId);
+        if (t) {
+          t.text = text;
+          t.due = due.toISOString();
+        }
+      } else {
+        // สร้างงานใหม่
+        const task = {
+          id: createId(),
+          text,
+          due: due.toISOString(),
+          completed: false,
+          createdAt: Date.now(),
+          completedAt: null,
+          priority: false
+        };
+        tasks.push(task);
+      }
 
-      tasks.push(task);
       saveTasks();
       renderTasks();
-
-      // ล้างช่องกรอก
-      taskTextInput.value = '';
+      resetForm();
     });
 
-    // จัดการปุ่ม Complete / Delete ด้วย event delegation
     function handleListClick(e) {
       const target = e.target;
       if (!(target instanceof HTMLElement)) return;
       const id = target.dataset.id;
-      if (!id) return;
+      const action = target.dataset.action;
+      if (!id || !action) return;
 
-      if (target.classList.contains('btn-delete')) {
-        tasks = tasks.filter(t => t.id !== id);
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+
+      if (action === 'delete') {
+        tasks = tasks.filter(task => task.id !== id);
         saveTasks();
         renderTasks();
-      } else if (target.classList.contains('btn-complete')) {
-        const t = tasks.find(t => t.id === id);
-        if (t && !t.completed) {
+      } else if (action === 'complete') {
+        if (!t.completed) {
           t.completed = true;
           t.completedAt = Date.now();
           saveTasks();
           renderTasks();
         }
+      } else if (action === 'priority') {
+        t.priority = !t.priority;
+        saveTasks();
+        renderTasks();
+      } else if (action === 'edit') {
+        if (t.completed) return; // ไม่แก้ไขงานที่เสร็จแล้ว
+        // ดึงค่ามาใส่ช่องด้านบน
+        const d = new Date(t.due);
+        const yyyy = d.getFullYear();
+        const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+        const dd = d.getDate().toString().padStart(2, '0');
+        const hh = d.getHours().toString().padStart(2, '0');
+        const min = d.getMinutes().toString().padStart(2, '0');
+
+        taskTextInput.value = t.text;
+        taskDateInput.value = `${yyyy}-${mm}-${dd}`;
+        taskTimeInput.value = `${hh}:${min}`;
+
+        editingId = t.id;
+        addTaskBtn.textContent = '💾 บันทึกการแก้ไข';
+
+        // เลื่อนขึ้นไปด้านบนให้เห็นช่องแก้ไข
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
     pendingListEl.addEventListener('click', handleListClick);
     completedListEl.addEventListener('click', handleListClick);
 
-    // โหลดข้อมูลเดิม (ในแท็บนี้) แล้วแสดง
+    // โหลดข้อมูลเดิม + แสดง
     loadTasks();
     renderTasks();
 
-    // อัปเดตข้อความ/สีของเวลาเหลือทุก 20 วินาที (พอแล้ว ไม่ต้องทุก 1 วิ)
-    setInterval(updateRemainingDisplayAll, 20000);
+    // อัปเดตข้อความ/สีของเวลาเหลือทุก 20 วินาที
+    setInterval(() => {
+      cleanupCompleted();
+      renderTasks();
+    }, 20000);
   </script>
 
 </body>
