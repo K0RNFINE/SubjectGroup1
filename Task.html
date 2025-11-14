@@ -696,6 +696,7 @@
       renderTasks();
     }, 20000);
   </script>
+
 <!-- ⭐ LEO/NEED LO-FI ANIME HUD (SIDEBAR) ⭐ -->
 <div id="ln-toggle" class="ln-toggle ui-shadow">▶</div>
 
@@ -708,11 +709,7 @@
 
   <div class="ln-header">
     <span class="ln-title">Leo/need · TASK HUD</span>
-    <span id="ln-close" class="ln-close">✖</span>
   </div>
-
-  <!-- ปุ่มซ่อน (ดันกลับเข้าไป) -->
-  <div id="ln-hide" class="ln-hide ui-shadow">◀</div>
 
   <div class="ln-section">
     <div class="ln-label">TIME</div>
@@ -736,7 +733,7 @@
 </div>
 
 <style>
-  /* ---------- Toggle Button (เปิด HUD) ---------- */
+  /* ---------- Toggle Button (เปิด/ปิด HUD ปุ่มเดียว) ---------- */
   .ln-toggle {
     position: fixed;
     left: 0;
@@ -752,6 +749,13 @@
     z-index: 9999;
     box-shadow: 0 0 16px rgba(120, 160, 255, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: left 0.38s ease, border-radius 0.38s ease;
+  }
+
+  /* ตอน panel เปิด ให้ปุ่มไปอยู่ขอบขวาของ panel */
+  .ln-toggle.open {
+    left: 290px;                    /* เท่ากับความกว้าง panel */
+    border-radius: 14px 0 0 14px;   /* กลับด้าน */
   }
 
   /* ---------- Sidebar Panel ---------- */
@@ -819,27 +823,14 @@
   }
 
   @keyframes ln-glow {
-    from {
-      opacity: 0.4;
-    }
-
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
   }
 
   @keyframes ln-floaty {
-    0% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-12px);
-    }
-
-    100% {
-      transform: translateY(0px);
-    }
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
   }
 
   /* ---------- Header ---------- */
@@ -858,30 +849,6 @@
     letter-spacing: 0.09em;
     font-weight: 700;
     text-shadow: 0 0 12px rgba(160, 180, 255, 1);
-  }
-
-  .ln-close {
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: #d7e7ff;
-  }
-
-  /* ---------- ปุ่มซ่อน (◀) ---------- */
-  .ln-hide {
-    position: absolute;
-    right: -18px;
-    top: 48%;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, #9bb2ff, #6c90ff);
-    color: #001018;
-    padding: 6px 9px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 800;
-    box-shadow: 0 0 12px rgba(140, 170, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 9999;
   }
 
   /* ---------- Sections ---------- */
@@ -918,15 +885,15 @@
 </style>
 
 <script>
-  // --- Slide Toggle ---
-  const lnPanel = document.getElementById("ln-panel");
+  // --- Slide Toggle (ปุ่มเดียว เปิด/ปิด + เปลี่ยนสัญลักษณ์) ---
+  const lnPanel  = document.getElementById("ln-panel");
   const lnToggle = document.getElementById("ln-toggle");
-  const lnClose = document.getElementById("ln-close");
-  const lnHide = document.getElementById("ln-hide");
 
-  lnToggle.onclick = () => lnPanel.classList.add("open");
-  lnClose.onclick = () => lnPanel.classList.remove("open");
-  lnHide.onclick = () => lnPanel.classList.remove("open");
+  lnToggle.onclick = () => {
+    const isOpen = lnPanel.classList.toggle("open");
+    lnToggle.classList.toggle("open", isOpen);
+    lnToggle.textContent = isOpen ? "◀" : "▶";
+  };
 
   // --- Real Time Clock ---
   function lnClock() {
