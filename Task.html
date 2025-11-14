@@ -696,13 +696,11 @@
       renderTasks();
     }, 20000);
   </script>
-
-    <!-- ⭐ LEO/NEED LO-FI ANIME SIDEBAR ⭐ -->
+<!-- ⭐ LEO/NEED LO-FI ANIME HUD (SIDEBAR) ⭐ -->
 <div id="ln-toggle" class="ln-toggle ui-shadow">▶</div>
 
 <div id="ln-panel" class="ln-panel">
-  
-  <!-- neon stripes -->
+  <!-- neon deco lines & circles -->
   <div class="ln-deco-line ln-line1"></div>
   <div class="ln-deco-line ln-line2"></div>
   <div class="ln-deco-circle ln-c1"></div>
@@ -712,6 +710,9 @@
     <span class="ln-title">Leo/need · TASK HUD</span>
     <span id="ln-close" class="ln-close">✖</span>
   </div>
+
+  <!-- ปุ่มซ่อน (ดันกลับเข้าไป) -->
+  <div id="ln-hide" class="ln-hide ui-shadow">◀</div>
 
   <div class="ln-section">
     <div class="ln-label">TIME</div>
@@ -723,7 +724,7 @@
     <div class="ln-value ln-multi" id="ln-next">-</div>
   </div>
 
-  <div class="ln-section">
+  <div class="ln-section ln-task-left">
     <div class="ln-label">TASK LEFT</div>
     <div class="ln-value" id="ln-left">0</div>
   </div>
@@ -735,186 +736,257 @@
 </div>
 
 <style>
-/* ---------- Toggle Button ---------- */
-.ln-toggle {
-  position: fixed;
-  left: 0;
-  top: 45%;
-  transform: translateY(-50%);
-  background: linear-gradient(135deg, #74a0ff, #9bb2ff);
-  color: #001018;
-  padding: 8px 12px;
-  border-radius: 0 14px 14px 0;
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 1.2rem;
-  z-index: 9999;
-  box-shadow: 0 0 16px rgba(120,160,255, 0.8);
-  border: 1px solid rgba(255,255,255,0.3);
-}
+  /* ---------- Toggle Button (เปิด HUD) ---------- */
+  .ln-toggle {
+    position: fixed;
+    left: 0;
+    top: 45%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #74a0ff, #9bb2ff);
+    color: #001018;
+    padding: 8px 12px;
+    border-radius: 0 14px 14px 0;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1.2rem;
+    z-index: 9999;
+    box-shadow: 0 0 16px rgba(120, 160, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
 
-/* ---------- Sidebar Panel ---------- */
-.ln-panel {
-  position: fixed;
-  left: -290px;
-  top: 0;
-  width: 290px;
-  height: 100vh;
-  padding: 18px;
-  background: rgba(20, 25, 45, 0.62);
-  backdrop-filter: blur(10px);
-  border-right: 2px solid rgba(140,180,255, 0.35);
-  box-shadow: 
-    0 0 22px rgba(120,160,255,0.45),
-    inset 0 0 20px rgba(140,160,255,0.25);
-  transition: left 0.38s ease;
-  z-index: 9998;
-  overflow: hidden;
-}
+  /* ---------- Sidebar Panel ---------- */
+  .ln-panel {
+    position: fixed;
+    left: -290px;
+    top: 0;
+    width: 290px;
+    height: 100vh;
+    padding: 18px;
+    background: rgba(20, 25, 45, 0.62);
+    backdrop-filter: blur(10px);
+    border-right: 2px solid rgba(140, 180, 255, 0.35);
+    box-shadow:
+      0 0 22px rgba(120, 160, 255, 0.45),
+      inset 0 0 20px rgba(140, 160, 255, 0.25);
+    transition: left 0.38s ease;
+    z-index: 9998;
+    overflow: hidden;
+  }
 
-/* เปิด */
-.ln-panel.open {
-  left: 0;
-}
+  .ln-panel.open {
+    left: 0;
+  }
 
-/* ---------- Decorations ---------- */
-.ln-deco-line {
-  position: absolute;
-  height: 2px;
-  width: 160px;
-  background: linear-gradient(90deg, rgba(150,180,255,0.8), rgba(255,255,255,0));
-  opacity: 0.7;
-  animation: glow 3s infinite alternate;
-}
-.ln-line1 { top: 70px; left: 10px; }
-.ln-line2 { top: 220px; left: 10px; }
+  /* ---------- Decorations ---------- */
+  .ln-deco-line {
+    position: absolute;
+    height: 2px;
+    width: 160px;
+    background: linear-gradient(90deg, rgba(150, 180, 255, 0.8), rgba(255, 255, 255, 0));
+    opacity: 0.7;
+    animation: ln-glow 3s infinite alternate;
+  }
 
-.ln-deco-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(150,180,255,0.5), rgba(150,180,255,0));
-  animation: floaty 4s infinite ease-in-out;
-}
-.ln-c1 { width: 90px; height: 90px; top: 120px; right: -30px; }
-.ln-c2 { width: 60px; height: 60px; bottom: 80px; left: -20px; }
+  .ln-line1 {
+    top: 70px;
+    left: 10px;
+  }
 
-@keyframes glow {
-  from { opacity: 0.4; }
-  to   { opacity: 1; }
-}
-@keyframes floaty {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-12px); }
-  100% { transform: translateY(0px); }
-}
+  .ln-line2 {
+    top: 220px;
+    left: 10px;
+  }
 
-/* ---------- Header ---------- */
-.ln-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-}
+  .ln-deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(150, 180, 255, 0.5), rgba(150, 180, 255, 0));
+    animation: ln-floaty 4s infinite ease-in-out;
+  }
 
-.ln-title {
-  color: #bcd7ff;
-  font-size: 1.05rem;
-  letter-spacing: 0.09em;
-  font-weight: 700;
-  text-shadow: 0 0 12px rgba(160,180,255,1);
-}
+  .ln-c1 {
+    width: 90px;
+    height: 90px;
+    top: 120px;
+    right: -30px;
+  }
 
-.ln-close {
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #d7e7ff;
-}
+  .ln-c2 {
+    width: 60px;
+    height: 60px;
+    bottom: 80px;
+    left: -20px;
+  }
 
-/* ---------- Section ---------- */
-.ln-section {
-  margin-bottom: 26px;
-}
+  @keyframes ln-glow {
+    from {
+      opacity: 0.4;
+    }
 
-.ln-label {
-  color: #9ec5ff;
-  font-size: 0.75rem;
-  letter-spacing: 0.13em;
-  margin-bottom: 3px;
-}
+    to {
+      opacity: 1;
+    }
+  }
 
-.ln-value {
-  font-family: "Courier New", monospace;
-  color: #dceaff;
-  font-size: 1.45rem;
-  text-shadow: 0 0 14px rgba(170,200,255,1);
-  line-height: 1.3;
-}
+  @keyframes ln-floaty {
+    0% {
+      transform: translateY(0px);
+    }
 
-.ln-multi {
-  font-size: 1.1rem;
-  line-height: 1.2;
-}
+    50% {
+      transform: translateY(-12px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  /* ---------- Header ---------- */
+  .ln-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ln-title {
+    color: #bcd7ff;
+    font-size: 1.05rem;
+    letter-spacing: 0.09em;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(160, 180, 255, 1);
+  }
+
+  .ln-close {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #d7e7ff;
+  }
+
+  /* ---------- ปุ่มซ่อน (◀) ---------- */
+  .ln-hide {
+    position: absolute;
+    right: -18px;
+    top: 48%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #9bb2ff, #6c90ff);
+    color: #001018;
+    padding: 6px 9px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 800;
+    box-shadow: 0 0 12px rgba(140, 170, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 9999;
+  }
+
+  /* ---------- Sections ---------- */
+  .ln-section {
+    margin-bottom: 26px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* TASK LEFT เลื่อนลงนิดให้พ้นเส้น */
+  .ln-task-left {
+    margin-top: 40px;
+  }
+
+  .ln-label {
+    color: #9ec5ff;
+    font-size: 0.75rem;
+    letter-spacing: 0.13em;
+    margin-bottom: 3px;
+  }
+
+  .ln-value {
+    font-family: "Courier New", monospace;
+    color: #dceaff;
+    font-size: 1.45rem;
+    text-shadow: 0 0 14px rgba(170, 200, 255, 1);
+    line-height: 1.3;
+  }
+
+  .ln-multi {
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
 </style>
 
 <script>
-// --- Slide Toggle ---
-const lnPanel = document.getElementById("ln-panel");
-const lnToggle = document.getElementById("ln-toggle");
-const lnClose  = document.getElementById("ln-close");
+  // --- Slide Toggle ---
+  const lnPanel = document.getElementById("ln-panel");
+  const lnToggle = document.getElementById("ln-toggle");
+  const lnClose = document.getElementById("ln-close");
+  const lnHide = document.getElementById("ln-hide");
 
-lnToggle.onclick = () => lnPanel.classList.add("open");
-lnClose.onclick  = () => lnPanel.classList.remove("open");
+  lnToggle.onclick = () => lnPanel.classList.add("open");
+  lnClose.onclick = () => lnPanel.classList.remove("open");
+  lnHide.onclick = () => lnPanel.classList.remove("open");
 
-// --- Real Time Clock ---
-function lnClock() {
-  let n = new Date();
-  let h = String(n.getHours()).padStart(2,'0');
-  let m = String(n.getMinutes()).padStart(2,'0');
-  let s = String(n.getSeconds()).padStart(2,'0');
-  document.getElementById("ln-time").textContent = `${h}:${m}:${s}`;
-}
-
-// --- Uptime ---
-let lnStart = Date.now();
-function lnUptime() {
-  let sec = Math.floor((Date.now() - lnStart)/1000);
-  let h = Math.floor(sec/3600);
-  sec %= 3600;
-  let m = Math.floor(sec/60);
-  let s = sec%60;
-  document.getElementById("ln-uptime").textContent =
-    `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-
-// --- Connect to Task Data ---
-function lnUpdateTasks() {
-  let raw = sessionStorage.getItem("homework-tasks-session");
-  if (!raw) {
-    document.getElementById("ln-next").textContent = "-";
-    document.getElementById("ln-left").textContent = "0";
-    return;
+  // --- Real Time Clock ---
+  function lnClock() {
+    const n = new Date();
+    const h = String(n.getHours()).padStart(2, '0');
+    const m = String(n.getMinutes()).padStart(2, '0');
+    const s = String(n.getSeconds()).padStart(2, '0');
+    document.getElementById("ln-time").textContent = `${h}:${m}:${s}`;
   }
 
-  let list = JSON.parse(raw);
-  let pending = list.filter(t => !t.completed);
-
-  document.getElementById("ln-left").textContent = pending.length;
-
-  if (pending.length === 0) {
-    document.getElementById("ln-next").textContent = "-";
-    return;
+  // --- Uptime ---
+  let lnStart = Date.now();
+  function lnUptime() {
+    let sec = Math.floor((Date.now() - lnStart) / 1000);
+    let h = Math.floor(sec / 3600);
+    sec %= 3600;
+    let m = Math.floor(sec / 60);
+    let s = sec % 60;
+    document.getElementById("ln-uptime").textContent =
+      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
-  pending.sort((a,b)=>new Date(a.due) - new Date(b.due));
-  document.getElementById("ln-next").textContent = pending[0].text;
-}
+  // --- Connect to Homework Tasks in sessionStorage ---
+  function lnUpdateTasks() {
+    const raw = sessionStorage.getItem("homework-tasks-session");
+    if (!raw) {
+      document.getElementById("ln-next").textContent = "-";
+      document.getElementById("ln-left").textContent = "0";
+      return;
+    }
 
-// update loop
-setInterval(lnClock, 500);
-setInterval(lnUptime, 1000);
-setInterval(lnUpdateTasks, 2000);
+    let list;
+    try {
+      list = JSON.parse(raw);
+    } catch (e) {
+      document.getElementById("ln-next").textContent = "-";
+      document.getElementById("ln-left").textContent = "0";
+      return;
+    }
 
-lnClock(); lnUptime(); lnUpdateTasks();
+    const pending = list.filter(t => !t.completed);
+    document.getElementById("ln-left").textContent = pending.length;
+
+    if (pending.length === 0) {
+      document.getElementById("ln-next").textContent = "-";
+      return;
+    }
+
+    pending.sort((a, b) => new Date(a.due) - new Date(b.due));
+    document.getElementById("ln-next").textContent = pending[0].text || "-";
+  }
+
+  // --- Update Loops ---
+  lnClock();
+  lnUptime();
+  lnUpdateTasks();
+
+  setInterval(lnClock, 500);
+  setInterval(lnUptime, 1000);
+  setInterval(lnUpdateTasks, 2000);
 </script>
   
 </body>
