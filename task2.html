@@ -1,800 +1,191 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Anime Reactor Control Panel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Item Preview</title>
 
-  <style>
+<style>
     :root {
-      --bg-dark: #050913;
-      --bg-panel: rgba(10, 20, 40, 0.92);
-      --border-glow: #09e6ff;
-      --accent: #00f5ff;
-      --accent2: #ff4d9d;
-      --text-main: #f8fbff;
-      --text-sub: #93baff;
-    }
-
-    * {
-      box-sizing: border-box;
+        --accent: #00eaff;
+        --glow: rgba(0, 234, 255, 0.6);
     }
 
     body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(circle at top, #1b2440 0, #050913 50%, #000 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
+        margin: 0;
+        background: #060a12;
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
     }
 
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 100% 3px;
-      mix-blend-mode: soft-light;
-      opacity: 0.5;
-      z-index: 1;
+    .title {
+        margin-top: 14px;
+        font-size: 1.3rem;
+        text-shadow: 0 0 10px var(--accent);
+        letter-spacing: 1px;
     }
 
-    header {
-      position: relative;
-      z-index: 2;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-      box-shadow: 0 4px 18px rgba(0,0,0,0.7);
-      background: linear-gradient(90deg, rgba(5,10,25,0.95), rgba(5,10,35,0.9));
+    .preview-container {
+        margin-top: 20px;
+        width: 90%;
+        max-width: 420px;
+        perspective: 900px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .preview-box {
+        width: 100%;
+        height: 360px;
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 0 15px var(--glow);
+        border-radius: 14px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s ease-out;
     }
 
-    .logo-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-      position: relative;
-      overflow: hidden;
+    .preview-box img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        transition: transform 0.15s ease-out;
+        pointer-events: none;
     }
 
-    .logo-mark::before {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      border-radius: 50%;
-      border: 2px solid rgba(0,255,255,0.7);
-      box-shadow: 0 0 20px rgba(0,255,255,0.5);
-      animation: spin 6s linear infinite;
+    .dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
     }
 
-    .logo-text-main {
-      font-weight: 700;
-      font-size: 1.2rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px #00faff;
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        cursor: pointer;
+        transition: 0.2s;
     }
-
-    .logo-text-sub {
-      font-size: 0.75rem;
-      color: var(--text-sub);
+    .dot.active {
+        background: var(--accent);
+        box-shadow: 0 0 8px var(--accent);
     }
-
-    .header-right {
-      text-align: right;
-      font-size: 0.8rem;
-      color: var(--text-sub);
-    }
-
-    .header-right span {
-      display: block;
-    }
-
-    main {
-      position: relative;
-      z-index: 2;
-      padding: 16px;
-      max-width: 1200px;
-      margin: 0 auto 24px;
-      width: 100%;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1.2fr 1fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: var(--bg-panel);
-      border-radius: 14px;
-      border: 1px solid rgba(0, 255, 255, 0.2);
-      box-shadow:
-        0 0 10px rgba(0, 0, 0, 0.8),
-        0 0 18px rgba(0, 255, 255, 0.18);
-      padding: 10px 12px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      inset: -50%;
-      background: radial-gradient(circle at top, rgba(0,255,255,0.16), transparent 65%);
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .panel-title {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-    }
-
-    .panel-tag {
-      font-size: 0.7rem;
-      color: var(--text-sub);
-    }
-
-    .panel-body {
-      position: relative;
-      z-index: 2;
-      font-size: 0.9rem;
-      color: var(--text-main);
-    }
-
-    .metric-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 4px 0;
-      gap: 8px;
-    }
-
-    .metric-label {
-      font-size: 0.8rem;
-      color: var(--text-sub);
-    }
-
-    .metric-value {
-      font-family: "Consolas", "Courier New", monospace;
-      font-size: 0.95rem;
-      color: var(--accent);
-    }
-
-    .metric-value.critical {
-      color: #ff4d6a;
-    }
-
-    .metric-value.warn {
-      color: #ffc857;
-    }
-
-    .bar-track {
-      width: 100%;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      overflow: hidden;
-      margin-top: 2px;
-      position: relative;
-    }
-
-    .bar-fill {
-      height: 100%;
-      width: 30%;
-      background: linear-gradient(90deg, #0ff, #0ff, #ff66ff);
-      box-shadow: 0 0 10px rgba(0,255,255,0.7);
-      transform-origin: left center;
-      transition: width 0.15s linear;
-    }
-
-    .bar-scan {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 30%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: translateX(-100%);
-      animation: scan 2.5s linear infinite;
-    }
-
-    .mini-label {
-      font-size: 0.72rem;
-      color: var(--text-sub);
-      margin-top: 6px;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(0,255,255,0.4);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #0f0;
-      box-shadow: 0 0 8px #0f0;
-    }
-
-    .status-pill.warn .status-dot {
-      background: #ffc857;
-      box-shadow: 0 0 8px #ffc857;
-    }
-
-    .status-pill.crit .status-dot {
-      background: #ff4d6a;
-      box-shadow: 0 0 8px #ff4d6a;
-    }
-
-    .btn {
-      border: 1px solid rgba(0,255,255,0.5);
-      background: rgba(5, 15, 35, 0.9);
-      color: var(--accent);
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      margin-top: 6px;
-      text-shadow: 0 0 6px rgba(0,255,255,0.8);
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .btn:hover {
-      background: rgba(20, 40, 80, 0.95);
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn.red {
-      border-color: rgba(255,77,106,0.7);
-      color: #ffb1c7;
-      text-shadow: 0 0 6px rgba(255,77,106,0.8);
-    }
-
-    .mic-level {
-      margin-top: 6px;
-      height: 24px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .mic-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00faff, #35ff95, #ffeb3b, #ff5722);
-      box-shadow: 0 0 12px rgba(0,250,255,0.9);
-      transition: width 0.05s linear;
-    }
-
-    .mic-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.8);
-      pointer-events: none;
-      text-shadow: 0 0 6px rgba(0,0,0,0.9);
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes scan {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(150%); }
-    }
-  </style>
+</style>
 </head>
+
 <body>
 
-<div class="scanlines"></div>
+<div class="title">Item Preview (3D + Swipe)</div>
 
-<header>
-  <div class="logo">
-    <div class="logo-mark"></div>
-    <div>
-      <div class="logo-text-main">REACTOR CTRL</div>
-      <div class="logo-text-sub">ANIME SYSTEM PANEL v1.0</div>
+<div class="preview-container">
+    <div class="preview-box" id="previewBox">
+        <img id="previewImg" src="item1.png" alt="">
     </div>
-  </div>
-  <div class="header-right">
-    <span id="header-clock">--:--:--</span>
-    <span id="header-date">--/--/----</span>
-  </div>
-</header>
+</div>
 
-<main>
-  <div class="grid">
-    <!-- PANEL: CORE TIME / UPTIME / FPS -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">CORE TIME MATRIX</div>
-        <div class="panel-tag">CLUSTER A01</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Local Time</div>
-          <div class="metric-value" id="core-clock">--:--:--</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Uptime</div>
-          <div class="metric-value" id="uptime">00:00:00</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Frame Rate</div>
-          <div class="metric-value" id="fps">-- FPS</div>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill" id="fps-bar"></div>
-          <div class="bar-scan"></div>
-        </div>
-        <div class="mini-label">Time &amp; render loop are computed locally (no backend).</div>
-      </div>
-    </section>
-
-    <!-- PANEL: POWER & NETWORK (Battery + Connection) -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">POWER / NETWORK NODE</div>
-        <div class="panel-tag">GRID B17</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Battery Level</div>
-          <div class="metric-value" id="battery-level">N/A</div>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill" id="battery-bar"></div>
-          <div class="bar-scan"></div>
-        </div>
-        <div class="metric-row" style="margin-top:6px;">
-          <div class="metric-label">Battery Status</div>
-          <div>
-            <span class="status-pill" id="battery-status-pill">
-              <span class="status-dot"></span>
-              <span id="battery-status-text">Unknown / Unsupported</span>
-            </span>
-          </div>
-        </div>
-        <div class="metric-row" style="margin-top:10px;">
-          <div class="metric-label">Network</div>
-          <div class="metric-value" id="network-status">Checking...</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Network Type</div>
-          <div class="metric-value" id="network-type">N/A</div>
-        </div>
-        <div class="mini-label">Battery &amp; network info depend on browser/device support.</div>
-      </div>
-    </section>
-
-    <!-- PANEL: MIC MONITOR -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">AUDIO MONITOR</div>
-        <div class="panel-tag">CHANNEL M-01</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Mic Level</div>
-          <div class="metric-value" id="mic-db">N/A</div>
-        </div>
-        <div class="mic-level">
-          <div class="mic-fill" id="mic-fill"></div>
-          <div class="mic-text" id="mic-text">Mic disabled</div>
-        </div>
-        <button class="btn" id="btn-mic-toggle">Enable Mic Monitor</button>
-        <div class="mini-label">Requires permission. Audio never sent to server (processed locally only).</div>
-      </div>
-    </section>
-
-    <!-- PANEL: ORIENTATION / MOTION -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">DEVICE ORIENTATION</div>
-        <div class="panel-tag">IMU D-AXIS</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Alpha (Z)</div>
-          <div class="metric-value" id="ori-alpha">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Beta (X)</div>
-          <div class="metric-value" id="ori-beta">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Gamma (Y)</div>
-          <div class="metric-value" id="ori-gamma">N/A</div>
-        </div>
-        <button class="btn" id="btn-ori-permission">Request Orientation Access</button>
-        <div class="mini-label">On iOS / some devices, you must tap the button to grant sensor access.</div>
-      </div>
-    </section>
-
-    <!-- PANEL: ACCELERATION -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">MOTION VECTOR</div>
-        <div class="panel-tag">ACC-3D</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Accel X</div>
-          <div class="metric-value" id="acc-x">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Accel Y</div>
-          <div class="metric-value" id="acc-y">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Accel Z</div>
-          <div class="metric-value" id="acc-z">N/A</div>
-        </div>
-        <div class="mini-label">Motion data is from device sensors (if available).</div>
-      </div>
-    </section>
-
-    <!-- PANEL: GEOLOCATION -->
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">POSITIONING</div>
-        <div class="panel-tag">GEO-LINK</div>
-      </div>
-      <div class="panel-body">
-        <div class="metric-row">
-          <div class="metric-label">Latitude</div>
-          <div class="metric-value" id="geo-lat">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Longitude</div>
-          <div class="metric-value" id="geo-lng">N/A</div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-label">Accuracy</div>
-          <div class="metric-value" id="geo-acc">N/A</div>
-        </div>
-        <button class="btn" id="btn-geo">Get Location</button>
-        <div class="mini-label">Location requires permission and may be approximate.</div>
-      </div>
-    </section>
-  </div>
-</main>
+<div class="dots" id="dots"></div>
 
 <script>
-  // ===== CLOCK & UPTIME =====
-  const headerClockEl = document.getElementById('header-clock');
-  const headerDateEl  = document.getElementById('header-date');
-  const coreClockEl   = document.getElementById('core-clock');
-  const uptimeEl      = document.getElementById('uptime');
+/* =========================================================
+   IMAGE LIST — ADD AS MANY PNGs AS YOU WANT HERE
+   ========================================================= */
+const items = [
+    "Kohane.jpg",
+    "Haruka.jpg",
+    "item3.png"
+];
 
-  const startTime = Date.now();
+// DOM
+const previewImg = document.getElementById("previewImg");
+const previewBox = document.getElementById("previewBox");
+const dots = document.getElementById("dots");
 
-  function pad2(n) {
-    return n.toString().padStart(2, '0');
-  }
+let index = 0;
 
-  function updateTime() {
-    const now = new Date();
-    const h = pad2(now.getHours());
-    const m = pad2(now.getMinutes());
-    const s = pad2(now.getSeconds());
-
-    if (headerClockEl) headerClockEl.textContent = `${h}:${m}:${s}`;
-    if (coreClockEl)   coreClockEl.textContent   = `${h}:${m}:${s}`;
-
-    const d  = pad2(now.getDate());
-    const mo = pad2(now.getMonth() + 1);
-    const y  = now.getFullYear();
-    if (headerDateEl) headerDateEl.textContent = `${d}/${mo}/${y}`;
-
-    const diff = Math.floor((Date.now() - startTime) / 1000);
-    const uh = pad2(Math.floor(diff / 3600));
-    const um = pad2(Math.floor((diff % 3600) / 60));
-    const us = pad2(diff % 60);
-    if (uptimeEl) uptimeEl.textContent = `${uh}:${um}:${us}`;
-  }
-  setInterval(updateTime, 1000);
-  updateTime();
-
-  // ===== FPS METER =====
-  const fpsEl = document.getElementById('fps');
-  const fpsBar = document.getElementById('fps-bar');
-  let lastFrameTime = performance.now();
-  let frameCount = 0;
-  let fpsAccum = 0;
-
-  function fpsLoop(now) {
-    const delta = now - lastFrameTime;
-    lastFrameTime = now;
-    const currentFps = 1000 / (delta || 1);
-    fpsAccum += currentFps;
-    frameCount++;
-
-    if (frameCount >= 10) {
-      const avgFps = fpsAccum / frameCount;
-      if (fpsEl) fpsEl.textContent = `${avgFps.toFixed(1)} FPS`;
-
-      const pct = Math.max(0, Math.min(1, avgFps / 60));
-      if (fpsBar) fpsBar.style.width = `${pct * 100}%`;
-
-      fpsAccum = 0;
-      frameCount = 0;
-    }
-
-    requestAnimationFrame(fpsLoop);
-  }
-  requestAnimationFrame(fpsLoop);
-
-  // ===== BATTERY =====
-  const batteryLevelEl = document.getElementById('battery-level');
-  const batteryBar = document.getElementById('battery-bar');
-  const batteryStatusPill = document.getElementById('battery-status-pill');
-  const batteryStatusText = document.getElementById('battery-status-text');
-
-  function updateBatteryUI(level, charging) {
-    if (!batteryLevelEl || !batteryBar || !batteryStatusPill || !batteryStatusText) return;
-    const percent = Math.round(level * 100);
-    batteryLevelEl.textContent = `${percent}%`;
-
-    batteryBar.style.width = `${percent}%`;
-
-    batteryStatusPill.classList.remove('warn', 'crit');
-    if (percent <= 20 && !charging) {
-      batteryStatusPill.classList.add('crit');
-    } else if (percent <= 40 && !charging) {
-      batteryStatusPill.classList.add('warn');
-    }
-
-    if (charging) {
-      batteryStatusText.textContent = `Charging (${percent}%)`;
-    } else {
-      batteryStatusText.textContent = `Discharging (${percent}%)`;
-    }
-  }
-
-  if ('getBattery' in navigator) {
-    navigator.getBattery().then(bat => {
-      updateBatteryUI(bat.level, bat.charging);
-      bat.addEventListener('levelchange', () => updateBatteryUI(bat.level, bat.charging));
-      bat.addEventListener('chargingchange', () => updateBatteryUI(bat.level, bat.charging));
-    }).catch(() => {
-      if (batteryStatusText) batteryStatusText.textContent = 'Battery access failed';
+/* =========================================================
+   DOTS (PAGE INDICATORS)
+   ========================================================= */
+function renderDots() {
+    dots.innerHTML = "";
+    items.forEach((_, i) => {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (i === index ? " active" : "");
+        dot.addEventListener("click", () => {
+            index = i;
+            updateImage();
+        });
+        dots.appendChild(dot);
     });
-  } else {
-    if (batteryStatusText) batteryStatusText.textContent = 'Battery API not supported';
-    if (batteryLevelEl) batteryLevelEl.textContent = 'N/A';
-  }
+}
+function updateImage() {
+    previewImg.src = items[index];
+    renderDots();
+}
+renderDots();
 
-  // ===== NETWORK =====
-  const netStatusEl = document.getElementById('network-status');
-  const netTypeEl   = document.getElementById('network-type');
+/* =========================================================
+   SWIPE HANDLING
+   ========================================================= */
+let startX = 0;
+let isSwiping = false;
 
-  function updateNetworkStatus() {
-    const online = navigator.onLine;
-    if (netStatusEl) netStatusEl.textContent = online ? 'ONLINE' : 'OFFLINE';
-    if (!online && netStatusEl) netStatusEl.classList.add('critical');
+previewBox.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    isSwiping = true;
+});
 
-    if ('connection' in navigator && navigator.connection) {
-      const conn = navigator.connection;
-      const type = conn.effectiveType || conn.type || 'unknown';
-      if (netTypeEl) netTypeEl.textContent = type.toUpperCase();
-    } else {
-      if (netTypeEl) netTypeEl.textContent = 'Unknown / Unsupported';
+previewBox.addEventListener("touchmove", (e) => {
+    if (!isSwiping) return;
+    let diff = e.touches[0].clientX - startX;
+
+    if (Math.abs(diff) > 50) {
+        if (diff < 0) nextItem();
+        else prevItem();
+        isSwiping = false;
     }
-  }
-  window.addEventListener('online', updateNetworkStatus);
-  window.addEventListener('offline', updateNetworkStatus);
-  updateNetworkStatus();
+});
 
-  // ===== MIC MONITOR =====
-  const micDbEl   = document.getElementById('mic-db');
-  const micFillEl = document.getElementById('mic-fill');
-  const micTextEl = document.getElementById('mic-text');
-  const micBtn    = document.getElementById('btn-mic-toggle');
+previewBox.addEventListener("touchend", () => {
+    isSwiping = false;
+});
 
-  let micEnabled = false;
-  let micStream  = null;
-  let micAnalyser = null;
-  let micDataArray = null;
+function nextItem() {
+    index = (index + 1) % items.length;
+    updateImage();
+}
 
-  function stopMic() {
-    if (micStream) {
-      micStream.getTracks().forEach(t => t.stop());
-      micStream = null;
-    }
-    micEnabled = false;
-    if (micBtn) micBtn.textContent = 'Enable Mic Monitor';
-    if (micDbEl) micDbEl.textContent = 'N/A';
-    if (micFillEl) micFillEl.style.width = '0%';
-    if (micTextEl) micTextEl.textContent = 'Mic disabled';
-  }
+function prevItem() {
+    index = (index - 1 + items.length) % items.length;
+    updateImage();
+}
 
-  function startMic() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Mic not supported on this browser/device.');
-      return;
-    }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      micStream = stream;
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioContext.createMediaStreamSource(stream);
-      micAnalyser = audioContext.createAnalyser();
-      micAnalyser.fftSize = 512;
-      micDataArray = new Uint8Array(micAnalyser.frequencyBinCount);
-      source.connect(micAnalyser);
+/* =========================================================
+   DEVICE ORIENTATION — 3D TILT EFFECT
+   ========================================================= */
+if (window.DeviceOrientationEvent) {
+    window.addEventListener("deviceorientation", (event) => {
+        let x = event.beta;  
+        let y = event.gamma;
 
-      micEnabled = true;
-      if (micBtn) micBtn.textContent = 'Disable Mic Monitor';
-      if (micTextEl) micTextEl.textContent = 'Listening...';
+        if (x > 50) x = 50;
+        if (x < -50) x = -50;
+        if (y > 50) y = 50;
+        if (y < -50) y = -50;
 
-      function micLoop() {
-        if (!micEnabled || !micAnalyser || !micDataArray) return;
-        micAnalyser.getByteTimeDomainData(micDataArray);
-        let sum = 0;
-        for (let i = 0; i < micDataArray.length; i++) {
-          const v = (micDataArray[i] - 128) / 128;
-          sum += v * v;
-        }
-        const rms = Math.sqrt(sum / micDataArray.length);
-        const db  = 20 * Math.log10(rms || 0.0001);
-        const norm = Math.min(1, Math.max(0, rms * 5));
-
-        if (micDbEl) micDbEl.textContent = `${db.toFixed(1)} dB`;
-        if (micFillEl) micFillEl.style.width = `${norm * 100}%`;
-        if (micTextEl) micTextEl.textContent = norm > 0.05 ? 'Signal detected' : 'Low / No signal';
-
-        requestAnimationFrame(micLoop);
-      }
-      requestAnimationFrame(micLoop);
-    }).catch(err => {
-      console.error('Mic error:', err);
-      alert('Unable to access microphone.');
-      stopMic();
+        previewBox.style.transform =
+            `rotateX(${x * -0.3}deg) rotateY(${y * 0.3}deg)`;
+        previewImg.style.transform =
+            `rotateX(${x * -0.15}deg) rotateY(${y * 0.15}deg) scale(1.03)`;
     });
-  }
-
-  if (micBtn) {
-    micBtn.addEventListener('click', () => {
-      if (micEnabled) {
-        stopMic();
-      } else {
-        startMic();
-      }
-    });
-  }
-
-  // ===== ORIENTATION =====
-  const oriAlphaEl = document.getElementById('ori-alpha');
-  const oriBetaEl  = document.getElementById('ori-beta');
-  const oriGammaEl = document.getElementById('ori-gamma');
-  const oriBtn     = document.getElementById('btn-ori-permission');
-
-  let orientationActive = false;
-
-  function handleOrientation(event) {
-    orientationActive = true;
-    if (oriAlphaEl) oriAlphaEl.textContent = (event.alpha !== null ? event.alpha.toFixed(1) + '°' : 'N/A');
-    if (oriBetaEl)  oriBetaEl.textContent  = (event.beta !== null ? event.beta.toFixed(1) + '°' : 'N/A');
-    if (oriGammaEl) oriGammaEl.textContent = (event.gamma !== null ? event.gamma.toFixed(1) + '°' : 'N/A');
-  }
-
-  function enableOrientation() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().then(response => {
-        if (response === 'granted') {
-          window.addEventListener('deviceorientation', handleOrientation, true);
-        } else {
-          alert('Orientation permission denied.');
-        }
-      }).catch(console.error);
-    } else if (typeof DeviceOrientationEvent !== 'undefined') {
-      window.addEventListener('deviceorientation', handleOrientation, true);
-    } else {
-      alert('Device orientation not supported on this device.');
-    }
-  }
-
-  if (oriBtn) {
-    oriBtn.addEventListener('click', enableOrientation);
-  }
-
-  // ===== ACCELERATION =====
-  const accXEl = document.getElementById('acc-x');
-  const accYEl = document.getElementById('acc-y');
-  const accZEl = document.getElementById('acc-z');
-
-  if (typeof DeviceMotionEvent !== 'undefined') {
-    window.addEventListener('devicemotion', (event) => {
-      const acc = event.accelerationIncludingGravity || event.acceleration;
-      if (!acc) return;
-      if (accXEl) accXEl.textContent = `${(acc.x || 0).toFixed(2)} m/s²`;
-      if (accYEl) accYEl.textContent = `${(acc.y || 0).toFixed(2)} m/s²`;
-      if (accZEl) accZEl.textContent = `${(acc.z || 0).toFixed(2)} m/s²`;
-    }, true);
-  } else {
-    if (accXEl) accXEl.textContent = 'N/A';
-    if (accYEl) accYEl.textContent = 'N/A';
-    if (accZEl) accZEl.textContent = 'N/A';
-  }
-
-  // ===== GEOLOCATION =====
-  const geoLatEl = document.getElementById('geo-lat');
-  const geoLngEl = document.getElementById('geo-lng');
-  const geoAccEl = document.getElementById('geo-acc');
-  const geoBtn   = document.getElementById('btn-geo');
-
-  function updateGeo(position) {
-    const { latitude, longitude, accuracy } = position.coords;
-    if (geoLatEl) geoLatEl.textContent = latitude.toFixed(5);
-    if (geoLngEl) geoLngEl.textContent = longitude.toFixed(5);
-    if (geoAccEl) geoAccEl.textContent = `${Math.round(accuracy)} m`;
-  }
-
-  function getLocation() {
-    if (!navigator.geolocation) {
-      alert('Geolocation not supported.');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(updateGeo, (err) => {
-      console.error(err);
-      alert('Unable to get location.');
-    });
-  }
-
-  if (geoBtn) {
-    geoBtn.addEventListener('click', getLocation);
-  }
+}
 </script>
 
 </body>
