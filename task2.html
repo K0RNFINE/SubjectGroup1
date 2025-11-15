@@ -1,720 +1,801 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ตัวจัดการงานการบ้าน</title>
+  <title>Anime Reactor Control Panel</title>
 
   <style>
+    :root {
+      --bg-dark: #050913;
+      --bg-panel: rgba(10, 20, 40, 0.92);
+      --border-glow: #09e6ff;
+      --accent: #00f5ff;
+      --accent2: #ff4d9d;
+      --text-main: #f8fbff;
+      --text-sub: #93baff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('jpcity.jfif'); /* เปลี่ยนรูปได้ */
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      padding: 20px;
       margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(circle at top, #1b2440 0, #050913 50%, #000 100%);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
     }
 
-    .ui-shadow {
-      text-shadow: 0 1px 3px #000;
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 100% 3px;
+      mix-blend-mode: soft-light;
+      opacity: 0.5;
+      z-index: 1;
     }
 
-    h1 {
-      text-align: center;
-      color: #fff;
-      margin-bottom: 12px;
-    }
-
-    h1.ui-shadow {
-      text-shadow: 0 2px 6px #000;
-    }
-
-    .digital-clock {
-      font-size: 2rem;
-      color: cyan;
-      font-family: 'Courier New', Courier, monospace;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px cyan;
-      min-width: 240px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 1000px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .card {
-      background: rgba(255, 255, 255, 0.35);
-      border-radius: 12px;
+    header {
+      position: relative;
+      z-index: 2;
       padding: 14px 16px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    .form-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    textarea,
-    input[type="date"],
-    input[type="time"] {
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      padding: 8px 10px;
-      background: rgba(0, 0, 0, 0.4);
-      color: #ffffff;
-      outline: none;
-      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      resize: vertical;
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-
-    input[type="date"],
-    input[type="time"] {
-      flex: 1 1 120px;
-      min-width: 120px;
-      font-size: 0.95rem;
-    }
-
-    textarea::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    button {
-      border-radius: 999px;
-      border: none;
-      padding: 6px 14px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      display: inline-flex;
       align-items: center;
-      gap: 4px;
-      white-space: nowrap;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.7);
+      background: linear-gradient(90deg, rgba(5,10,25,0.95), rgba(5,10,35,0.9));
     }
 
-    .btn-main {
-      background: linear-gradient(135deg, #03dffc, #0084ff);
-      color: #001018;
-      box-shadow: 0 4px 10px rgba(0, 132, 255, 0.7);
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .btn-main:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 6px rgba(0, 132, 255, 0.6);
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn-complete {
-      background: rgba(0, 200, 83, 0.95);
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(0, 200, 83, 0.7);
+    .logo-mark::before {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,255,255,0.7);
+      box-shadow: 0 0 20px rgba(0,255,255,0.5);
+      animation: spin 6s linear infinite;
     }
 
-    .btn-delete {
-      background: rgba(244, 67, 54, 0.95);
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(244, 67, 54, 0.7);
+    .logo-text-main {
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #00faff;
     }
 
-    .btn-priority {
-      background: rgba(255, 215, 0, 0.98);
-      color: #3b2a00;
-      box-shadow: 0 3px 8px rgba(255, 215, 0, 0.8);
+    .logo-text-sub {
+      font-size: 0.75rem;
+      color: var(--text-sub);
     }
 
-    .lists-container {
+    .header-right {
+      text-align: right;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .header-right span {
+      display: block;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      padding: 16px;
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      width: 100%;
+    }
+
+    .grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-columns: 1.2fr 1.2fr 1fr;
       gap: 12px;
     }
 
-    .list-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 6px;
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .list-subtitle {
-      font-size: 0.85rem;
-      color: #e0f7ff;
-      margin-bottom: 6px;
-      opacity: 0.9;
+    .panel {
+      background: var(--bg-panel);
+      border-radius: 14px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      box-shadow:
+        0 0 10px rgba(0, 0, 0, 0.8),
+        0 0 18px rgba(0, 255, 255, 0.18);
+      padding: 10px 12px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .task-list {
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background: radial-gradient(circle at top, rgba(0,255,255,0.16), transparent 65%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .panel-header {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .task-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), rgba(0, 40, 80, 0.9));
-      border-left: 4px solid rgba(3, 223, 252, 0.9);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-    }
-
-    .task-priority {
-      border-left-color: rgba(255, 215, 0, 0.98);
-      box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
-    }
-
-    .task-top-row {
-      display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+    }
+
+    .panel-tag {
+      font-size: 0.7rem;
+      color: var(--text-sub);
+    }
+
+    .panel-body {
+      position: relative;
+      z-index: 2;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0;
       gap: 8px;
     }
 
-    .task-text {
-      font-size: 1rem;
-      color: #ffffff;
-    }
-
-    .task-meta {
+    .metric-label {
       font-size: 0.8rem;
-      color: #d0f3ff;
+      color: var(--text-sub);
     }
 
-    .task-remaining {
-      font-size: 0.8rem;
-      color: #ffeb3b;
+    .metric-value {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.95rem;
+      color: var(--accent);
     }
 
-    .task-buttons {
+    .metric-value.critical {
+      color: #ff4d6a;
+    }
+
+    .metric-value.warn {
+      color: #ffc857;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      margin-top: 2px;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, #0ff, #0ff, #ff66ff);
+      box-shadow: 0 0 10px rgba(0,255,255,0.7);
+      transform-origin: left center;
+      transition: width 0.15s linear;
+    }
+
+    .bar-scan {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      animation: scan 2.5s linear infinite;
+    }
+
+    .mini-label {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      margin-top: 6px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(0,255,255,0.4);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0f0;
+      box-shadow: 0 0 8px #0f0;
+    }
+
+    .status-pill.warn .status-dot {
+      background: #ffc857;
+      box-shadow: 0 0 8px #ffc857;
+    }
+
+    .status-pill.crit .status-dot {
+      background: #ff4d6a;
+      box-shadow: 0 0 8px #ff4d6a;
+    }
+
+    .btn {
+      border: 1px solid rgba(0,255,255,0.5);
+      background: rgba(5, 15, 35, 0.9);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      margin-top: 6px;
+      text-shadow: 0 0 6px rgba(0,255,255,0.8);
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: rgba(20, 40, 80, 0.95);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.red {
+      border-color: rgba(255,77,106,0.7);
+      color: #ffb1c7;
+      text-shadow: 0 0 6px rgba(255,77,106,0.8);
+    }
+
+    .mic-level {
+      margin-top: 6px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mic-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00faff, #35ff95, #ffeb3b, #ff5722);
+      box-shadow: 0 0 12px rgba(0,250,255,0.9);
+      transition: width 0.05s linear;
+    }
+
+    .mic-text {
+      position: absolute;
+      inset: 0;
       display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 4px;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      pointer-events: none;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9);
     }
 
-    .task-empty {
-      font-size: 0.9rem;
-      color: #e0f7ff;
-      opacity: 0.8;
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .task-completed .task-text,
-    .task-completed .task-meta,
-    .task-completed .task-remaining {
-      color: #c0c0c0 !important;
-    }
-
-    .task-completed {
-      border-left-color: rgba(160, 160, 160, 0.9);
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .lists-container {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .digital-clock {
-        width: 100%;
-        min-width: auto;
-        text-align: center;
-      }
+    @keyframes scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(150%); }
     }
   </style>
 </head>
-
 <body>
-  <h1 class="ui-shadow">ตัวจัดการงานการบ้าน</h1>
 
-  <!-- นาฬิกาเวลาจริง -->
-  <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
+<div class="scanlines"></div>
 
-  <div class="app-container">
-
-    <!-- กล่องกรอกงานการบ้าน -->
-    <div class="card">
-      <div class="card-title ui-shadow">บันทึกงานการบ้านประจำวัน</div>
-      <div class="list-subtitle ui-shadow">
-        พิมพ์งานการบ้าน เลือกวันและเวลาส่ง แล้วกด <b>เพิ่มงาน</b> หรือ <b>บันทึกการแก้ไข</b><br>
-        งานจะเรียงจากใกล้กำหนด + งานสำคัญอยู่ด้านบนสุด และเก็บใน Firebase Firestore
-      </div>
-
-      <div class="form-row">
-        <textarea id="task-text" class="ui-shadow" placeholder="พิมพ์งานการบ้านที่นี่ เช่น การบ้านคณิต หน้า 52 ข้อ 1-10"></textarea>
-      </div>
-      <div class="form-row">
-        <input type="date" id="task-date" class="ui-shadow">
-        <input type="time" id="task-time" class="ui-shadow">
-        <button id="add-task" class="btn-main ui-shadow">＋ เพิ่มงาน</button>
-      </div>
-    </div>
-
-    <!-- กล่องแสดงงาน -->
-    <div class="lists-container">
-      <!-- งานที่ต้องทำ -->
-      <div class="card">
-        <div class="list-title ui-shadow">งานที่ต้องทำ (To-Do)</div>
-        <div class="list-subtitle ui-shadow">
-          งานเรียงเหมือน Leaderboard: งานสำคัญ + ใกล้ถึงกำหนดอยู่ด้านบนสุด
-        </div>
-        <div id="pending-list" class="task-list"></div>
-      </div>
-
-      <!-- งานที่ทำเสร็จแล้ว -->
-      <div class="card">
-        <div class="list-title ui-shadow">งานที่ทำเสร็จแล้ว</div>
-        <div class="list-subtitle ui-shadow">
-          งานที่กดทำเสร็จแล้วจะถูกย้ายมาที่นี่ และจะถูกลบอัตโนมัติเมื่อเกิน 7 วัน (ลบจาก Firestore)
-        </div>
-        <div id="completed-list" class="task-list"></div>
-      </div>
+<header>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text-main">REACTOR CTRL</div>
+      <div class="logo-text-sub">ANIME SYSTEM PANEL v1.0</div>
     </div>
   </div>
+  <div class="header-right">
+    <span id="header-clock">--:--:--</span>
+    <span id="header-date">--/--/----</span>
+  </div>
+</header>
 
-  <!-- ============ FIREBASE + FIRESTORE SCRIPT ============ -->
-  <script type="module">
-    /********** 1) IMPORT FIREBASE (เปลี่ยน [VERSION] เป็นเวอร์ชันล่าสุด) **********/
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      doc,
-      setDoc,
-      deleteDoc,
-      onSnapshot,
-      query,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+<main>
+  <div class="grid">
+    <!-- PANEL: CORE TIME / UPTIME / FPS -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">CORE TIME MATRIX</div>
+        <div class="panel-tag">CLUSTER A01</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Local Time</div>
+          <div class="metric-value" id="core-clock">--:--:--</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Uptime</div>
+          <div class="metric-value" id="uptime">00:00:00</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Frame Rate</div>
+          <div class="metric-value" id="fps">-- FPS</div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="fps-bar"></div>
+          <div class="bar-scan"></div>
+        </div>
+        <div class="mini-label">Time &amp; render loop are computed locally (no backend).</div>
+      </div>
+    </section>
 
-    /********** 2) CONFIG จากโปรเจกต์ของคุณ **********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyDP66sMOqA0i-k4rke1Vs4RPDrexUSrUkE",
-      authDomain: "homework-task-manager.firebaseapp.com",
-      databaseURL: "https://homework-task-manager-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "homework-task-manager",
-      storageBucket: "homework-task-manager.firebasestorage.app",
-      messagingSenderId: "912847790254",
-      appId: "1:912847790254:web:0bbe7e111e3630b6618d3f",
-      measurementId: "G-NRRRGX4T4K"
-    };
+    <!-- PANEL: POWER & NETWORK (Battery + Connection) -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">POWER / NETWORK NODE</div>
+        <div class="panel-tag">GRID B17</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Battery Level</div>
+          <div class="metric-value" id="battery-level">N/A</div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="battery-bar"></div>
+          <div class="bar-scan"></div>
+        </div>
+        <div class="metric-row" style="margin-top:6px;">
+          <div class="metric-label">Battery Status</div>
+          <div>
+            <span class="status-pill" id="battery-status-pill">
+              <span class="status-dot"></span>
+              <span id="battery-status-text">Unknown / Unsupported</span>
+            </span>
+          </div>
+        </div>
+        <div class="metric-row" style="margin-top:10px;">
+          <div class="metric-label">Network</div>
+          <div class="metric-value" id="network-status">Checking...</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Network Type</div>
+          <div class="metric-value" id="network-type">N/A</div>
+        </div>
+        <div class="mini-label">Battery &amp; network info depend on browser/device support.</div>
+      </div>
+    </section>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const tasksCol = collection(db, "tasks");
+    <!-- PANEL: MIC MONITOR -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">AUDIO MONITOR</div>
+        <div class="panel-tag">CHANNEL M-01</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Mic Level</div>
+          <div class="metric-value" id="mic-db">N/A</div>
+        </div>
+        <div class="mic-level">
+          <div class="mic-fill" id="mic-fill"></div>
+          <div class="mic-text" id="mic-text">Mic disabled</div>
+        </div>
+        <button class="btn" id="btn-mic-toggle">Enable Mic Monitor</button>
+        <div class="mini-label">Requires permission. Audio never sent to server (processed locally only).</div>
+      </div>
+    </section>
 
-    /********** 3) DOM ELEMENTS **********/
-    const digitalClock = document.getElementById('digital-clock');
+    <!-- PANEL: ORIENTATION / MOTION -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">DEVICE ORIENTATION</div>
+        <div class="panel-tag">IMU D-AXIS</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Alpha (Z)</div>
+          <div class="metric-value" id="ori-alpha">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Beta (X)</div>
+          <div class="metric-value" id="ori-beta">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Gamma (Y)</div>
+          <div class="metric-value" id="ori-gamma">N/A</div>
+        </div>
+        <button class="btn" id="btn-ori-permission">Request Orientation Access</button>
+        <div class="mini-label">On iOS / some devices, you must tap the button to grant sensor access.</div>
+      </div>
+    </section>
 
-    const taskTextInput = document.getElementById('task-text');
-    const taskDateInput = document.getElementById('task-date');
-    const taskTimeInput = document.getElementById('task-time');
-    const addTaskBtn = document.getElementById('add-task');
+    <!-- PANEL: ACCELERATION -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">MOTION VECTOR</div>
+        <div class="panel-tag">ACC-3D</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Accel X</div>
+          <div class="metric-value" id="acc-x">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Accel Y</div>
+          <div class="metric-value" id="acc-y">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Accel Z</div>
+          <div class="metric-value" id="acc-z">N/A</div>
+        </div>
+        <div class="mini-label">Motion data is from device sensors (if available).</div>
+      </div>
+    </section>
 
-    const pendingListEl = document.getElementById('pending-list');
-    const completedListEl = document.getElementById('completed-list');
+    <!-- PANEL: GEOLOCATION -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">POSITIONING</div>
+        <div class="panel-tag">GEO-LINK</div>
+      </div>
+      <div class="panel-body">
+        <div class="metric-row">
+          <div class="metric-label">Latitude</div>
+          <div class="metric-value" id="geo-lat">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Longitude</div>
+          <div class="metric-value" id="geo-lng">N/A</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Accuracy</div>
+          <div class="metric-value" id="geo-acc">N/A</div>
+        </div>
+        <button class="btn" id="btn-geo">Get Location</button>
+        <div class="mini-label">Location requires permission and may be approximate.</div>
+      </div>
+    </section>
+  </div>
+</main>
 
-    let tasks = [];
-    let editingId = null;
+<script>
+  // ===== CLOCK & UPTIME =====
+  const headerClockEl = document.getElementById('header-clock');
+  const headerDateEl  = document.getElementById('header-date');
+  const coreClockEl   = document.getElementById('core-clock');
+  const uptimeEl      = document.getElementById('uptime');
 
-    /********** 4) นาฬิกาเวลาจริง **********/
-    function updateRealTimeClock() {
-      const now = new Date();
-      const h = now.getHours().toString().padStart(2, '0');
-      const m = now.getMinutes().toString().padStart(2, '0');
-      const s = now.getSeconds().toString().padStart(2, '0');
-      if (digitalClock) {
-        digitalClock.textContent = `${h}:${m}:${s}`;
+  const startTime = Date.now();
+
+  function pad2(n) {
+    return n.toString().padStart(2, '0');
+  }
+
+  function updateTime() {
+    const now = new Date();
+    const h = pad2(now.getHours());
+    const m = pad2(now.getMinutes());
+    const s = pad2(now.getSeconds());
+
+    if (headerClockEl) headerClockEl.textContent = `${h}:${m}:${s}`;
+    if (coreClockEl)   coreClockEl.textContent   = `${h}:${m}:${s}`;
+
+    const d  = pad2(now.getDate());
+    const mo = pad2(now.getMonth() + 1);
+    const y  = now.getFullYear();
+    if (headerDateEl) headerDateEl.textContent = `${d}/${mo}/${y}`;
+
+    const diff = Math.floor((Date.now() - startTime) / 1000);
+    const uh = pad2(Math.floor(diff / 3600));
+    const um = pad2(Math.floor((diff % 3600) / 60));
+    const us = pad2(diff % 60);
+    if (uptimeEl) uptimeEl.textContent = `${uh}:${um}:${us}`;
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  // ===== FPS METER =====
+  const fpsEl = document.getElementById('fps');
+  const fpsBar = document.getElementById('fps-bar');
+  let lastFrameTime = performance.now();
+  let frameCount = 0;
+  let fpsAccum = 0;
+
+  function fpsLoop(now) {
+    const delta = now - lastFrameTime;
+    lastFrameTime = now;
+    const currentFps = 1000 / (delta || 1);
+    fpsAccum += currentFps;
+    frameCount++;
+
+    if (frameCount >= 10) {
+      const avgFps = fpsAccum / frameCount;
+      if (fpsEl) fpsEl.textContent = `${avgFps.toFixed(1)} FPS`;
+
+      const pct = Math.max(0, Math.min(1, avgFps / 60));
+      if (fpsBar) fpsBar.style.width = `${pct * 100}%`;
+
+      fpsAccum = 0;
+      frameCount = 0;
+    }
+
+    requestAnimationFrame(fpsLoop);
+  }
+  requestAnimationFrame(fpsLoop);
+
+  // ===== BATTERY =====
+  const batteryLevelEl = document.getElementById('battery-level');
+  const batteryBar = document.getElementById('battery-bar');
+  const batteryStatusPill = document.getElementById('battery-status-pill');
+  const batteryStatusText = document.getElementById('battery-status-text');
+
+  function updateBatteryUI(level, charging) {
+    if (!batteryLevelEl || !batteryBar || !batteryStatusPill || !batteryStatusText) return;
+    const percent = Math.round(level * 100);
+    batteryLevelEl.textContent = `${percent}%`;
+
+    batteryBar.style.width = `${percent}%`;
+
+    batteryStatusPill.classList.remove('warn', 'crit');
+    if (percent <= 20 && !charging) {
+      batteryStatusPill.classList.add('crit');
+    } else if (percent <= 40 && !charging) {
+      batteryStatusPill.classList.add('warn');
+    }
+
+    if (charging) {
+      batteryStatusText.textContent = `Charging (${percent}%)`;
+    } else {
+      batteryStatusText.textContent = `Discharging (${percent}%)`;
+    }
+  }
+
+  if ('getBattery' in navigator) {
+    navigator.getBattery().then(bat => {
+      updateBatteryUI(bat.level, bat.charging);
+      bat.addEventListener('levelchange', () => updateBatteryUI(bat.level, bat.charging));
+      bat.addEventListener('chargingchange', () => updateBatteryUI(bat.level, bat.charging));
+    }).catch(() => {
+      if (batteryStatusText) batteryStatusText.textContent = 'Battery access failed';
+    });
+  } else {
+    if (batteryStatusText) batteryStatusText.textContent = 'Battery API not supported';
+    if (batteryLevelEl) batteryLevelEl.textContent = 'N/A';
+  }
+
+  // ===== NETWORK =====
+  const netStatusEl = document.getElementById('network-status');
+  const netTypeEl   = document.getElementById('network-type');
+
+  function updateNetworkStatus() {
+    const online = navigator.onLine;
+    if (netStatusEl) netStatusEl.textContent = online ? 'ONLINE' : 'OFFLINE';
+    if (!online && netStatusEl) netStatusEl.classList.add('critical');
+
+    if ('connection' in navigator && navigator.connection) {
+      const conn = navigator.connection;
+      const type = conn.effectiveType || conn.type || 'unknown';
+      if (netTypeEl) netTypeEl.textContent = type.toUpperCase();
+    } else {
+      if (netTypeEl) netTypeEl.textContent = 'Unknown / Unsupported';
+    }
+  }
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+  updateNetworkStatus();
+
+  // ===== MIC MONITOR =====
+  const micDbEl   = document.getElementById('mic-db');
+  const micFillEl = document.getElementById('mic-fill');
+  const micTextEl = document.getElementById('mic-text');
+  const micBtn    = document.getElementById('btn-mic-toggle');
+
+  let micEnabled = false;
+  let micStream  = null;
+  let micAnalyser = null;
+  let micDataArray = null;
+
+  function stopMic() {
+    if (micStream) {
+      micStream.getTracks().forEach(t => t.stop());
+      micStream = null;
+    }
+    micEnabled = false;
+    if (micBtn) micBtn.textContent = 'Enable Mic Monitor';
+    if (micDbEl) micDbEl.textContent = 'N/A';
+    if (micFillEl) micFillEl.style.width = '0%';
+    if (micTextEl) micTextEl.textContent = 'Mic disabled';
+  }
+
+  function startMic() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Mic not supported on this browser/device.');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      micStream = stream;
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      micAnalyser = audioContext.createAnalyser();
+      micAnalyser.fftSize = 512;
+      micDataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+      source.connect(micAnalyser);
+
+      micEnabled = true;
+      if (micBtn) micBtn.textContent = 'Disable Mic Monitor';
+      if (micTextEl) micTextEl.textContent = 'Listening...';
+
+      function micLoop() {
+        if (!micEnabled || !micAnalyser || !micDataArray) return;
+        micAnalyser.getByteTimeDomainData(micDataArray);
+        let sum = 0;
+        for (let i = 0; i < micDataArray.length; i++) {
+          const v = (micDataArray[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / micDataArray.length);
+        const db  = 20 * Math.log10(rms || 0.0001);
+        const norm = Math.min(1, Math.max(0, rms * 5));
+
+        if (micDbEl) micDbEl.textContent = `${db.toFixed(1)} dB`;
+        if (micFillEl) micFillEl.style.width = `${norm * 100}%`;
+        if (micTextEl) micTextEl.textContent = norm > 0.05 ? 'Signal detected' : 'Low / No signal';
+
+        requestAnimationFrame(micLoop);
       }
-    }
-    setInterval(updateRealTimeClock, 1000);
-    updateRealTimeClock();
+      requestAnimationFrame(micLoop);
+    }).catch(err => {
+      console.error('Mic error:', err);
+      alert('Unable to access microphone.');
+      stopMic();
+    });
+  }
 
-    /********** 5) Utils **********/
-    function makeDueDate(dateStr, timeStr) {
-      if (!dateStr || !timeStr) return null;
-      const iso = `${dateStr}T${timeStr}:00`;
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return null;
-      return d;
-    }
-
-    function formatDueDisplay(d) {
-      const dd = d.getDate().toString().padStart(2, '0');
-      const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-      const yyyy = d.getFullYear();
-      const hh = d.getHours().toString().padStart(2, '0');
-      const min = d.getMinutes().toString().padStart(2, '0');
-      return `${dd}/${mm}/${yyyy} เวลา ${hh}:${min} น.`;
-    }
-
-    function computeRemainingMs(due) {
-      const now = new Date();
-      return due.getTime() - now.getTime();
-    }
-
-    function remainingText(ms) {
-      const sign = ms >= 0 ? 1 : -1;
-      const abs = Math.abs(ms);
-      const totalMinutes = Math.floor(abs / (1000 * 60));
-      const days = Math.floor(totalMinutes / (60 * 24));
-      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-      const minutes = totalMinutes % 60;
-
-      let base = '';
-      if (days > 0) base += `${days} วัน `;
-      if (hours > 0) base += `${hours} ชม. `;
-      if (minutes > 0 || (!days && !hours && minutes === 0)) base += `${minutes} นาที`;
-
-      if (sign >= 0) {
-        return `เหลือเวลา ${base.trim()}`;
+  if (micBtn) {
+    micBtn.addEventListener('click', () => {
+      if (micEnabled) {
+        stopMic();
       } else {
-        return `เลยกำหนดมาแล้ว ${base.trim()}`;
-      }
-    }
-
-    function remainingColor(ms) {
-      const oneDayMs = 24 * 60 * 60 * 1000;
-      const red = { r: 255, g: 59, b: 48 };
-      const blue = { r: 3, g: 223, b: 252 };
-
-      if (ms <= 0) {
-        return 'rgb(255, 20, 20)';
-      }
-
-      if (ms <= oneDayMs) {
-        return 'rgb(255, 59, 48)';
-      }
-
-      const sevenDayMs = 7 * oneDayMs;
-      const tRaw = (ms - oneDayMs) / (sevenDayMs - oneDayMs);
-      const t = Math.max(0, Math.min(1, tRaw));
-      const r = Math.round(red.r + (blue.r - red.r) * t);
-      const g = Math.round(red.g + (blue.g - red.g) * t);
-      const b = Math.round(red.b + (blue.b - red.b) * t);
-
-      return `rgb(${r}, ${g}, ${b})`;
-    }
-
-    /********** 6) ลบงานที่ complete เกิน 7 วัน จาก Firestore **********/
-    async function cleanupCompletedInDb() {
-      const now = Date.now();
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      const toDelete = tasks.filter(
-        t => t.completed && t.completedAt && (now - t.completedAt > sevenDays)
-      );
-      for (const t of toDelete) {
-        try {
-          await deleteDoc(doc(db, "tasks", t.id));
-        } catch (err) {
-          console.error("ลบงานเก่าไม่ได้:", err);
-        }
-      }
-    }
-
-    /********** 7) Render Tasks **********/
-    function renderTasks() {
-      if (!pendingListEl || !completedListEl) return;
-
-      pendingListEl.innerHTML = '';
-      completedListEl.innerHTML = '';
-
-      const pending = tasks
-        .filter(t => !t.completed)
-        .sort((a, b) => {
-          if (a.priority && !b.priority) return -1;
-          if (!a.priority && b.priority) return 1;
-          const da = new Date(a.due).getTime() - new Date(b.due).getTime();
-          if (da !== 0) return da;
-          return (a.createdAt || 0) - (b.createdAt || 0);
-        });
-
-      const completed = tasks
-        .filter(t => t.completed)
-        .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
-
-      if (pending.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'task-empty ui-shadow';
-        empty.textContent = 'ยังไม่มีงานที่ต้องทำ';
-        pendingListEl.appendChild(empty);
-      }
-
-      if (completed.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'task-empty ui-shadow';
-        empty.textContent = 'ยังไม่มีงานที่ทำเสร็จแล้ว';
-        completedListEl.appendChild(empty);
-      }
-
-      for (const t of pending) {
-        pendingListEl.appendChild(createTaskElement(t, false));
-      }
-      for (const t of completed) {
-        completedListEl.appendChild(createTaskElement(t, true));
-      }
-
-      updateRemainingDisplayAll();
-    }
-
-    function createTaskElement(task, isCompleted) {
-      const due = new Date(task.due);
-      const ms = computeRemainingMs(due);
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'task-item ui-shadow' +
-        (isCompleted ? ' task-completed' : '') +
-        (task.priority && !isCompleted ? ' task-priority' : '');
-      wrapper.dataset.id = task.id;
-
-      const topRow = document.createElement('div');
-      topRow.className = 'task-top-row';
-
-      const textEl = document.createElement('div');
-      textEl.className = 'task-text ui-shadow';
-      textEl.id = `task-text-${task.id}`;
-      textEl.textContent = task.text;
-
-      const metaCol = document.createElement('div');
-      metaCol.style.textAlign = 'right';
-
-      const dueEl = document.createElement('div');
-      dueEl.className = 'task-meta ui-shadow';
-      dueEl.textContent = `กำหนดส่ง: ${formatDueDisplay(due)}`;
-
-      const remainingEl = document.createElement('div');
-      remainingEl.className = 'task-remaining ui-shadow';
-      remainingEl.id = `task-remaining-${task.id}`;
-      remainingEl.textContent = remainingText(ms);
-      remainingEl.style.color = remainingColor(ms);
-
-      metaCol.appendChild(dueEl);
-      metaCol.appendChild(remainingEl);
-
-      topRow.appendChild(textEl);
-      topRow.appendChild(metaCol);
-
-      const btnRow = document.createElement('div');
-      btnRow.className = 'task-buttons';
-
-      if (!isCompleted) {
-        const priorityBtn = document.createElement('button');
-        priorityBtn.className = 'btn-priority ui-shadow';
-        priorityBtn.textContent = task.priority ? '⭐ ยกเลิกสำคัญ' : '⭐ ตั้งเป็นงานสำคัญ';
-        priorityBtn.dataset.id = task.id;
-        priorityBtn.dataset.action = 'priority';
-        btnRow.appendChild(priorityBtn);
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn-main ui-shadow';
-        editBtn.textContent = '✏️ แก้ไข';
-        editBtn.dataset.id = task.id;
-        editBtn.dataset.action = 'edit';
-        btnRow.appendChild(editBtn);
-
-        const completeBtn = document.createElement('button');
-        completeBtn.className = 'btn-complete ui-shadow';
-        completeBtn.textContent = '✅ ทำเสร็จแล้ว';
-        completeBtn.dataset.id = task.id;
-        completeBtn.dataset.action = 'complete';
-        btnRow.appendChild(completeBtn);
-      }
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn-delete ui-shadow';
-      deleteBtn.textContent = '🗑 ลบงาน';
-      deleteBtn.dataset.id = task.id;
-      deleteBtn.dataset.action = 'delete';
-      btnRow.appendChild(deleteBtn);
-
-      wrapper.appendChild(topRow);
-      wrapper.appendChild(btnRow);
-
-      return wrapper;
-    }
-
-    function updateRemainingDisplayAll() {
-      for (const t of tasks) {
-        const due = new Date(t.due);
-        const ms = computeRemainingMs(due);
-        const remainingEl = document.getElementById(`task-remaining-${t.id}`);
-        const textEl = document.getElementById(`task-text-${t.id}`);
-
-        if (remainingEl && !t.completed) {
-          remainingEl.textContent = remainingText(ms);
-          const c = remainingColor(ms);
-          remainingEl.style.color = c;
-          if (textEl) {
-            textEl.style.color = c;
-          }
-        } else if (t.completed && remainingEl && textEl) {
-          remainingEl.textContent = 'เสร็จแล้ว';
-        }
-      }
-    }
-
-    function resetForm() {
-      taskTextInput.value = '';
-      editingId = null;
-      addTaskBtn.textContent = '＋ เพิ่มงาน';
-    }
-
-    /********** 8) เพิ่ม/แก้ไขงาน → Firestore **********/
-    addTaskBtn.addEventListener('click', async () => {
-      const text = (taskTextInput.value || '').trim();
-      const dateStr = taskDateInput.value;
-      const timeStr = taskTimeInput.value;
-
-      if (!text) {
-        alert('กรุณาพิมพ์รายละเอียดงานการบ้าน');
-        return;
-      }
-
-      const due = makeDueDate(dateStr, timeStr);
-      if (!due) {
-        alert('กรุณาเลือกวันและเวลาส่งให้ครบถ้วน');
-        return;
-      }
-
-      try {
-        if (editingId) {
-          const ref = doc(db, "tasks", editingId);
-          await setDoc(ref, {
-            text,
-            due: due.toISOString()
-          }, { merge: true });
-        } else {
-          await addDoc(tasksCol, {
-            text,
-            due: due.toISOString(),
-            completed: false,
-            createdAt: Date.now(),
-            completedAt: null,
-            priority: false
-          });
-        }
-        resetForm();
-      } catch (err) {
-        console.error("บันทึกงานไม่สำเร็จ:", err);
-        alert("บันทึกงานไม่สำเร็จ ลองใหม่อีกครั้ง");
+        startMic();
       }
     });
+  }
 
-    /********** 9) คลิกปุ่มต่าง ๆ บนการ์ดงาน **********/
-    async function handleListClick(e) {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const id = target.dataset.id;
-      const action = target.dataset.action;
-      if (!id || !action) return;
+  // ===== ORIENTATION =====
+  const oriAlphaEl = document.getElementById('ori-alpha');
+  const oriBetaEl  = document.getElementById('ori-beta');
+  const oriGammaEl = document.getElementById('ori-gamma');
+  const oriBtn     = document.getElementById('btn-ori-permission');
 
-      const t = tasks.find(t => t.id === id);
-      if (!t) return;
+  let orientationActive = false;
 
-      const ref = doc(db, "tasks", id);
+  function handleOrientation(event) {
+    orientationActive = true;
+    if (oriAlphaEl) oriAlphaEl.textContent = (event.alpha !== null ? event.alpha.toFixed(1) + '°' : 'N/A');
+    if (oriBetaEl)  oriBetaEl.textContent  = (event.beta !== null ? event.beta.toFixed(1) + '°' : 'N/A');
+    if (oriGammaEl) oriGammaEl.textContent = (event.gamma !== null ? event.gamma.toFixed(1) + '°' : 'N/A');
+  }
 
-      try {
-        if (action === 'delete') {
-          await deleteDoc(ref);
-        } else if (action === 'complete') {
-          if (!t.completed) {
-            await setDoc(ref, {
-              completed: true,
-              completedAt: Date.now()
-            }, { merge: true });
-          }
-        } else if (action === 'priority') {
-          await setDoc(ref, {
-            priority: !t.priority
-          }, { merge: true });
-        } else if (action === 'edit') {
-          if (t.completed) return;
-          const d = new Date(t.due);
-          const yyyy = d.getFullYear();
-          const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-          const dd = d.getDate().toString().padStart(2, '0');
-          const hh = d.getHours().toString().padStart(2, '0');
-          const min = d.getMinutes().toString().padStart(2, '0');
-
-          taskTextInput.value = t.text;
-          taskDateInput.value = `${yyyy}-${mm}-${dd}`;
-          taskTimeInput.value = `${hh}:${min}`;
-
-          editingId = t.id;
-          addTaskBtn.textContent = '💾 บันทึกการแก้ไข';
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+  function enableOrientation() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(response => {
+        if (response === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+        } else {
+          alert('Orientation permission denied.');
         }
-      } catch (err) {
-        console.error("อัปเดตงานไม่สำเร็จ:", err);
-      }
+      }).catch(console.error);
+    } else if (typeof DeviceOrientationEvent !== 'undefined') {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    } else {
+      alert('Device orientation not supported on this device.');
     }
+  }
 
-    pendingListEl.addEventListener('click', handleListClick);
-    completedListEl.addEventListener('click', handleListClick);
+  if (oriBtn) {
+    oriBtn.addEventListener('click', enableOrientation);
+  }
 
-    /********** 10) เปิด realtime listener จาก Firestore **********/
-    function startRealtime() {
-      const q = query(tasksCol, orderBy("due"));
-      onSnapshot(q, snapshot => {
-        const newTasks = [];
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          newTasks.push({
-            id: docSnap.id,
-            text: data.text || '',
-            due: data.due,
-            completed: !!data.completed,
-            createdAt: data.createdAt || 0,
-            completedAt: data.completedAt || null,
-            priority: !!data.priority
-          });
-        });
-        tasks = newTasks;
-        renderTasks();
-        cleanupCompletedInDb();
-      });
+  // ===== ACCELERATION =====
+  const accXEl = document.getElementById('acc-x');
+  const accYEl = document.getElementById('acc-y');
+  const accZEl = document.getElementById('acc-z');
+
+  if (typeof DeviceMotionEvent !== 'undefined') {
+    window.addEventListener('devicemotion', (event) => {
+      const acc = event.accelerationIncludingGravity || event.acceleration;
+      if (!acc) return;
+      if (accXEl) accXEl.textContent = `${(acc.x || 0).toFixed(2)} m/s²`;
+      if (accYEl) accYEl.textContent = `${(acc.y || 0).toFixed(2)} m/s²`;
+      if (accZEl) accZEl.textContent = `${(acc.z || 0).toFixed(2)} m/s²`;
+    }, true);
+  } else {
+    if (accXEl) accXEl.textContent = 'N/A';
+    if (accYEl) accYEl.textContent = 'N/A';
+    if (accZEl) accZEl.textContent = 'N/A';
+  }
+
+  // ===== GEOLOCATION =====
+  const geoLatEl = document.getElementById('geo-lat');
+  const geoLngEl = document.getElementById('geo-lng');
+  const geoAccEl = document.getElementById('geo-acc');
+  const geoBtn   = document.getElementById('btn-geo');
+
+  function updateGeo(position) {
+    const { latitude, longitude, accuracy } = position.coords;
+    if (geoLatEl) geoLatEl.textContent = latitude.toFixed(5);
+    if (geoLngEl) geoLngEl.textContent = longitude.toFixed(5);
+    if (geoAccEl) geoAccEl.textContent = `${Math.round(accuracy)} m`;
+  }
+
+  function getLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported.');
+      return;
     }
+    navigator.geolocation.getCurrentPosition(updateGeo, (err) => {
+      console.error(err);
+      alert('Unable to get location.');
+    });
+  }
 
-    startRealtime();
-
-    setInterval(() => {
-      updateRemainingDisplayAll();
-    }, 20000);
-  </script>
+  if (geoBtn) {
+    geoBtn.addEventListener('click', getLocation);
+  }
+</script>
 
 </body>
 </html>
