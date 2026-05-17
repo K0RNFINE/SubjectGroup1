@@ -1,960 +1,779 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ตารางงาน</title>
+  <title>Task Tracker · ม.5/1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:        #080c14;
+      --surface:   rgba(12, 20, 38, 0.82);
+      --glass:     rgba(255,255,255,0.06);
+      --border:    rgba(100,160,255,0.18);
+      --accent:    #5b9fff;
+      --accent2:   #a78bfa;
+      --green:     #34d399;
+      --gold:      #fbbf24;
+      --red:       #f87171;
+      --text:      #e2eeff;
+      --muted:     #7a9cc4;
+      --panel-w:   280px;
+      --radius:    14px;
+      --font-hud:  'Orbitron', monospace;
+      --font-body: 'Sarabun', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('jpcity.jfif');
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        url('jpcity.jfif'),
+        radial-gradient(ellipse at 20% 10%, rgba(91,159,255,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(167,139,250,0.10) 0%, transparent 55%);
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      padding: 20px;
-      margin: 0;
+      background-blend-mode: overlay, normal, normal;
+      color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      transition: padding-left 0.38s ease;
     }
 
-    .ui-shadow {
-      text-shadow: 0 1px 3px #000;
+    /* grain overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.35;
     }
 
-    h1 {
+    /* ── LAYOUT ── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      transition: padding-left 0.38s ease;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
       text-align: center;
-      color: #fff;
-      margin-bottom: 12px;
+      margin-bottom: 28px;
     }
-
-    h1.ui-shadow {
-      text-shadow: 0 2px 6px #000;
+    .site-header h1 {
+      font-family: var(--font-hud);
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+      margin-bottom: 10px;
     }
-
-    .digital-clock {
-      font-size: 2rem;
-      color: cyan;
-      font-family: 'Courier New', Courier, monospace;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px cyan;
-      min-width: 240px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 1000px;
+    .clock-row {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .clock-box {
+      font-family: var(--font-hud);
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      color: var(--accent);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 24px;
+      box-shadow: 0 0 22px rgba(91,159,255,0.25), inset 0 0 12px rgba(91,159,255,0.06);
+      letter-spacing: 0.08em;
+      min-width: 180px;
+      text-align: center;
     }
 
+    /* ── GLASS CARD ── */
     .card {
-      background: rgba(255, 255, 255, 0.35);
-      border-radius: 12px;
-      padding: 14px 16px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(91,159,255,0.4), transparent);
     }
 
     .card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 8px;
+      font-family: var(--font-hud);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
     }
 
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
+    /* ── FORM ── */
+    .form-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
 
-    textarea,
-    input[type="date"],
-    input[type="time"] {
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      padding: 8px 10px;
-      background: rgba(0, 0, 0, 0.4);
-      color: #ffffff;
+    textarea, input[type="date"], input[type="time"] {
+      font-family: var(--font-body);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
       outline: none;
-      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-
+    textarea:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(91,159,255,0.15);
+    }
     textarea {
       width: 100%;
-      min-height: 120px;           /* ใหญ่ขึ้น */
-      resize: vertical;
-      font-size: 1rem;             /* ตัวใหญ่ขึ้น */
-      line-height: 1.4;
-    }
-
-    input[type="date"],
-    input[type="time"] {
-      flex: 1 1 120px;
-      min-width: 120px;
+      min-height: 90px;
+      padding: 10px 14px;
       font-size: 0.95rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    textarea::placeholder { color: var(--muted); }
+
+    .form-row-inline {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input[type="date"], input[type="time"] {
+      flex: 1 1 130px;
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      color-scheme: dark;
     }
 
-    textarea::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
+    /* ── BUTTONS ── */
     button {
-      border-radius: 999px;
+      font-family: var(--font-body);
+      font-weight: 700;
       border: none;
-      padding: 6px 14px;
+      border-radius: 999px;
+      padding: 8px 18px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
     }
+    button:active { transform: scale(0.96); }
 
     .btn-main {
-      background: linear-gradient(135deg, #03dffc, #0084ff);
-      color: #001018;
-      box-shadow: 0 4px 10px rgba(0, 132, 255, 0.7);
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(91,159,255,0.4);
+      flex-shrink: 0;
     }
-
-    .btn-main:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 6px rgba(0, 132, 255, 0.6);
-    }
+    .btn-main:hover { opacity: 0.88; }
 
     .btn-complete {
-      background: rgba(0, 200, 83, 0.95);
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(0, 200, 83, 0.7);
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(52,211,153,0.35);
     }
-
     .btn-delete {
-      background: rgba(244, 67, 54, 0.95);
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(244, 67, 54, 0.7);
+      background: linear-gradient(135deg, var(--red), #dc2626);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(248,113,113,0.35);
     }
-
     .btn-priority {
-      background: rgba(255, 215, 0, 0.98);
-      color: #3b2a00;
-      box-shadow: 0 3px 8px rgba(255, 215, 0, 0.8);
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      color: #1a0e00;
+      box-shadow: 0 3px 10px rgba(251,191,36,0.4);
+    }
+    .btn-edit {
+      background: linear-gradient(135deg, var(--accent2), #7c3aed);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(167,139,250,0.35);
     }
 
-    .lists-container {
+    /* ── LISTS GRID ── */
+    .lists-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: 12px;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 14px;
     }
 
-    .list-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 6px;
-    }
-
-    .list-subtitle {
-      font-size: 0.85rem;
-      color: #e0f7ff;
-      margin-bottom: 6px;
-      opacity: 0.9;
-    }
-
+    /* ── TASK ITEM ── */
     .task-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 380px;
+      max-height: 420px;
       overflow-y: auto;
-      padding-right: 4px;
+      padding-right: 2px;
     }
+    .task-list::-webkit-scrollbar { width: 4px; }
+    .task-list::-webkit-scrollbar-track { background: transparent; }
+    .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
     .task-item {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 10px 12px;
+      animation: fadeUp 0.25s ease both;
+      transition: box-shadow 0.2s;
+    }
+    .task-item:hover { box-shadow: 0 4px 18px rgba(91,159,255,0.15); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-priority { border-left-color: var(--gold); box-shadow: 0 0 14px rgba(251,191,36,0.2); }
+    .task-completed { border-left-color: rgba(120,120,140,0.5); opacity: 0.6; }
+
+    .task-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .task-text { font-size: 0.92rem; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .task-meta { font-size: 0.72rem; color: var(--muted); text-align: right; line-height: 1.5; white-space: nowrap; }
+    .task-remaining { font-size: 0.75rem; font-family: var(--font-hud); margin-top: 2px; }
+    .task-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .task-buttons button { font-size: 0.75rem; padding: 5px 12px; }
+
+    .task-empty { font-size: 0.85rem; color: var(--muted); text-align: center; padding: 20px 0; }
+
+    /* progress bar inside task */
+    .task-progress-track {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .task-progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+    }
+
+    /* ── APP LAYOUT ── */
+    .app-stack { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ══════════════════════════════════
+       SIDEBAR HUD
+    ══════════════════════════════════ */
+    .ln-toggle {
+      position: fixed;
+      left: 0; top: 45%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      padding: 9px 13px;
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 1rem;
+      z-index: 9999;
+      box-shadow: 0 0 18px rgba(91,159,255,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: left 0.38s ease, border-radius 0.38s ease;
+      user-select: none;
+    }
+    .ln-toggle.open {
+      left: var(--panel-w);
+      border-radius: 12px 0 0 12px;
+    }
+
+    .ln-panel {
+      position: fixed;
+      left: calc(-1 * var(--panel-w));
+      top: 0;
+      width: var(--panel-w);
+      height: 100vh;
+      padding: 22px 18px;
+      background: rgba(8, 14, 30, 0.75);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5), inset -1px 0 0 rgba(91,159,255,0.12);
+      transition: left 0.38s cubic-bezier(0.4,0,0.2,1);
+      z-index: 9998;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      /* สีสดขึ้น + ไล่เฉดนิด ๆ */
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), rgba(0, 40, 80, 0.9));
-      border-left: 4px solid rgba(3, 223, 252, 0.9);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      gap: 0;
+    }
+    .ln-panel.open { left: 0; }
+
+    /* deco */
+    .ln-deco {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .ln-deco-1 {
+      width: 180px; height: 180px;
+      top: -60px; right: -60px;
+      background: radial-gradient(circle, rgba(91,159,255,0.18), transparent 70%);
+      animation: lnFloat 6s ease-in-out infinite;
+    }
+    .ln-deco-2 {
+      width: 120px; height: 120px;
+      bottom: 40px; left: -40px;
+      background: radial-gradient(circle, rgba(167,139,250,0.15), transparent 70%);
+      animation: lnFloat 8s ease-in-out infinite reverse;
+    }
+    .ln-scanline {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: rgba(91,159,255,0.3);
+      animation: lnScan 4s linear infinite;
+    }
+    @keyframes lnFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes lnScan  { 0%{top:0%} 100%{top:100%} }
+
+    .ln-title {
+      font-family: var(--font-hud);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      position: relative; z-index: 1;
+      text-shadow: 0 0 10px var(--accent);
     }
 
-    .task-priority {
-      border-left-color: rgba(255, 215, 0, 0.98);
-      box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+    .ln-block {
+      margin-bottom: 22px;
+      position: relative; z-index: 1;
+    }
+    .ln-label {
+      font-family: var(--font-hud);
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ln-value {
+      font-family: var(--font-hud);
+      font-size: 1.35rem;
+      color: var(--text);
+      text-shadow: 0 0 12px rgba(91,159,255,0.7);
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .ln-value.sm { font-size: 0.95rem; }
+    .ln-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 14px 0;
+      position: relative; z-index: 1;
     }
 
-    .task-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .page { padding: 16px 12px 80px; }
+
+      .site-header h1 { font-size: 0.85rem; }
+      .clock-box { font-size: 1.3rem; padding: 8px 16px; min-width: 140px; }
+
+      .lists-grid { grid-template-columns: 1fr; }
+
+      .form-row-inline { flex-direction: column; }
+      input[type="date"], input[type="time"] { width: 100%; }
+
+      .task-top { flex-direction: column; gap: 4px; }
+      .task-meta { text-align: left; }
+      .task-buttons button { font-size: 0.72rem; padding: 5px 10px; }
+
+      /* HUD panel narrows on small screens */
+      :root { --panel-w: 240px; }
+      .ln-value { font-size: 1.1rem; }
     }
 
-    .task-text {
-      font-size: 1rem;             /* ใหญ่ขึ้น */
-      color: #ffffff;
-    }
-
-    .task-meta {
-      font-size: 0.8rem;
-      color: #d0f3ff;
-    }
-
-    .task-remaining {
-      font-size: 0.8rem;
-      color: #ffeb3b;
-    }
-
-    .task-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 4px;
-    }
-
-    .task-empty {
-      font-size: 0.9rem;
-      color: #e0f7ff;
-      opacity: 0.8;
-    }
-
-    .task-completed .task-text,
-    .task-completed .task-meta,
-    .task-completed .task-remaining {
-      color: #c0c0c0 !important;
-    }
-
-    .task-completed {
-      border-left-color: rgba(160, 160, 160, 0.9);
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .lists-container {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .digital-clock {
-        width: 100%;
-        min-width: auto;
-        text-align: center;
-      }
+    @media (max-width: 380px) {
+      .clock-box { font-size: 1.1rem; }
+      .task-text { font-size: 0.85rem; }
     }
   </style>
 </head>
-
 <body>
-  <h1 class="ui-shadow">ตารางเรียน ม.5/1 กลุ่ม 3 ภาคเรียนที่ 2/2568</h1>
 
-  <!-- นาฬิกาเวลาจริง -->
-  <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
+<!-- ══ SIDEBAR HUD ══ -->
+<div class="ln-toggle" id="ln-toggle">▶</div>
+<div class="ln-panel" id="ln-panel">
+  <div class="ln-deco ln-deco-1"></div>
+  <div class="ln-deco ln-deco-2"></div>
+  <div class="ln-scanline"></div>
 
-  <div class="app-container">
+  <div class="ln-title">Leo/need · HUD</div>
 
-    <!-- กล่องกรอกงานการบ้าน -->
-    <div class="card">
-      <div class="card-title ui-shadow">บันทึกงานการบ้านประจำวัน</div>
-      <div class="list-subtitle ui-shadow">
-        พิมพ์งานการบ้าน เลือกวันและเวลาส่ง แล้วกด <b>เพิ่มงาน</b> หรือ <b>บันทึกการแก้ไข</b> งานจะเรียงจากใกล้กำหนด + งานสำคัญอยู่บนสุด
-      </div>
-
-      <div class="form-row">
-        <textarea id="task-text" class="ui-shadow" placeholder="พิมพ์งานการบ้านที่นี่ เช่น การบ้านคณิต หน้า 52 ข้อ 1-10"></textarea>
-      </div>
-      <div class="form-row">
-        <input type="date" id="task-date" class="ui-shadow">
-        <input type="time" id="task-time" class="ui-shadow">
-        <button id="add-task" class="btn-main ui-shadow">＋ เพิ่มงาน</button>
-      </div>
-    </div>
-
-    <!-- กล่องแสดงงาน -->
-    <div class="lists-container">
-      <!-- งานที่ต้องทำ -->
-      <div class="card">
-        <div class="list-title ui-shadow">งานที่ต้องทำ (To-Do)</div>
-        <div class="list-subtitle ui-shadow">
-          งานเรียงเหมือน Leaderboard: งานสำคัญ + ใกล้ถึงกำหนดอยู่ด้านบนสุด
-        </div>
-        <div id="pending-list" class="task-list"></div>
-      </div>
-
-      <!-- งานที่ทำเสร็จแล้ว -->
-      <div class="card">
-        <div class="list-title ui-shadow">งานที่ทำเสร็จแล้ว</div>
-        <div class="list-subtitle ui-shadow">
-          งานที่กดทำเสร็จแล้วจะถูกย้ายมาที่นี่ และจะถูกลบอัตโนมัติเมื่อเกิน 7 วัน
-        </div>
-        <div id="completed-list" class="task-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    /* ====== นาฬิกาเวลาจริง ====== */
-    const digitalClock = document.getElementById('digital-clock');
-
-    function updateRealTimeClock() {
-      const now = new Date();
-      const h = now.getHours().toString().padStart(2, '0');
-      const m = now.getMinutes().toString().padStart(2, '0');
-      const s = now.getSeconds().toString().padStart(2, '0');
-      digitalClock.textContent = `${h}:${m}:${s}`;
-    }
-
-    setInterval(updateRealTimeClock, 1000);
-    updateRealTimeClock();
-
-    /* ====== ระบบงานการบ้าน ====== */
-    const STORAGE_KEY = 'homework-tasks-session';
-
-    const taskTextInput = document.getElementById('task-text');
-    const taskDateInput = document.getElementById('task-date');
-    const taskTimeInput = document.getElementById('task-time');
-    const addTaskBtn = document.getElementById('add-task');
-
-    const pendingListEl = document.getElementById('pending-list');
-    const completedListEl = document.getElementById('completed-list');
-
-    let tasks = [];
-    let editingId = null;   // ถ้าไม่ null แปลว่ากำลังแก้ไขงานอยู่
-
-    function loadTasks() {
-      try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          tasks = [];
-          return;
-        }
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          tasks = parsed;
-        } else {
-          tasks = [];
-        }
-      } catch (e) {
-        tasks = [];
-      }
-      cleanupCompleted(); // ล้างงานเก่าที่ครบ 7 วันแล้ว
-    }
-
-    function saveTasks() {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    }
-
-    function createId() {
-      return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
-    }
-
-    function makeDueDate(dateStr, timeStr) {
-      if (!dateStr || !timeStr) return null;
-      const iso = `${dateStr}T${timeStr}:00`;
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return null;
-      return d;
-    }
-
-    function formatDueDisplay(d) {
-      const dd = d.getDate().toString().padStart(2, '0');
-      const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-      const yyyy = d.getFullYear();
-      const hh = d.getHours().toString().padStart(2, '0');
-      const min = d.getMinutes().toString().padStart(2, '0');
-      return `${dd}/${mm}/${yyyy} เวลา ${hh}:${min} น.`;
-    }
-
-    function computeRemainingMs(due) {
-      const now = new Date();
-      return due.getTime() - now.getTime();
-    }
-
-    // คืนสตริงบอกเวลาเหลือ/เลยกำหนด
-    function remainingText(ms) {
-      const sign = ms >= 0 ? 1 : -1;
-      const abs = Math.abs(ms);
-      const totalMinutes = Math.floor(abs / (1000 * 60));
-      const days = Math.floor(totalMinutes / (60 * 24));
-      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-      const minutes = totalMinutes % 60;
-
-      let base = '';
-      if (days > 0) base += `${days} วัน `;
-      if (hours > 0) base += `${hours} ชม. `;
-      if (minutes > 0 || (!days && !hours && minutes === 0)) base += `${minutes} นาที`;
-
-      if (sign >= 0) {
-        return `เหลือเวลา ${base.trim()}`;
-      } else {
-        return `เลยกำหนดมาแล้ว ${base.trim()}`;
-      }
-    }
-
-    // สีตัวหนังสือตามเวลาเหลือ: แดง (<= 1 วัน) ไล่ไปฟ้าเมื่อห่างมาก
-    function remainingColor(ms) {
-      const oneDayMs = 24 * 60 * 60 * 1000;
-      const red = { r: 255, g: 59, b: 48 };   // #ff3b30
-      const blue = { r: 3, g: 223, b: 252 };  // #03dffc
-
-      if (ms <= 0) {
-        // เลยกำหนดแล้ว: เข้มหน่อย
-        return 'rgb(255, 20, 20)';
-      }
-
-      if (ms <= oneDayMs) {
-        // ภายใน 1 วัน ไปทางแดง
-        return 'rgb(255, 59, 48)';
-      }
-
-      const sevenDayMs = 7 * oneDayMs;
-      const tRaw = (ms - oneDayMs) / (sevenDayMs - oneDayMs);
-      const t = Math.max(0, Math.min(1, tRaw));
-
-      const r = Math.round(red.r + (blue.r - red.r) * t);
-      const g = Math.round(red.g + (blue.g - red.g) * t);
-      const b = Math.round(red.b + (blue.b - red.b) * t);
-
-      return `rgb(${r}, ${g}, ${b})`;
-    }
-
-    // ลบงานที่ completed เกิน 7 วัน
-    function cleanupCompleted() {
-      const now = Date.now();
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      const before = tasks.length;
-      tasks = tasks.filter(t => {
-        if (!t.completed) return true;
-        if (!t.completedAt) return true;
-        return (now - t.completedAt) <= sevenDays;
-      });
-      if (tasks.length !== before) {
-        saveTasks();
-      }
-    }
-
-    function renderTasks() {
-      cleanupCompleted();
-
-      pendingListEl.innerHTML = '';
-      completedListEl.innerHTML = '';
-
-      const pending = tasks
-        .filter(t => !t.completed)
-        .sort((a, b) => {
-          // จัดลำดับ: priority ก่อน, จากนั้นใกล้กำหนดก่อน, ถ้าเท่ากันดู createdAt
-          if (a.priority && !b.priority) return -1;
-          if (!a.priority && b.priority) return 1;
-          const da = new Date(a.due).getTime() - new Date(b.due).getTime();
-          if (da !== 0) return da;
-          return (a.createdAt || 0) - (b.createdAt || 0);
-        });
-
-      const completed = tasks
-        .filter(t => t.completed)
-        .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
-
-      if (pending.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'task-empty ui-shadow';
-        empty.textContent = 'ยังไม่มีงานที่ต้องทำ';
-        pendingListEl.appendChild(empty);
-      }
-
-      if (completed.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'task-empty ui-shadow';
-        empty.textContent = 'ยังไม่มีงานที่ทำเสร็จแล้ว';
-        completedListEl.appendChild(empty);
-      }
-
-      for (const t of pending) {
-        pendingListEl.appendChild(createTaskElement(t, false));
-      }
-      for (const t of completed) {
-        completedListEl.appendChild(createTaskElement(t, true));
-      }
-
-      updateRemainingDisplayAll();
-    }
-
-    function createTaskElement(task, isCompleted) {
-      const due = new Date(task.due);
-      const ms = computeRemainingMs(due);
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'task-item ui-shadow' +
-        (isCompleted ? ' task-completed' : '') +
-        (task.priority && !isCompleted ? ' task-priority' : '');
-      wrapper.dataset.id = task.id;
-
-      const topRow = document.createElement('div');
-      topRow.className = 'task-top-row';
-
-      const textEl = document.createElement('div');
-      textEl.className = 'task-text ui-shadow';
-      textEl.id = `task-text-${task.id}`;
-      textEl.textContent = task.text;
-
-      const metaCol = document.createElement('div');
-      metaCol.style.textAlign = 'right';
-
-      const dueEl = document.createElement('div');
-      dueEl.className = 'task-meta ui-shadow';
-      dueEl.textContent = `กำหนดส่ง: ${formatDueDisplay(due)}`;
-
-      const remainingEl = document.createElement('div');
-      remainingEl.className = 'task-remaining ui-shadow';
-      remainingEl.id = `task-remaining-${task.id}`;
-      remainingEl.textContent = remainingText(ms);
-      remainingEl.style.color = remainingColor(ms);
-
-      metaCol.appendChild(dueEl);
-      metaCol.appendChild(remainingEl);
-
-      topRow.appendChild(textEl);
-      topRow.appendChild(metaCol);
-
-      const btnRow = document.createElement('div');
-      btnRow.className = 'task-buttons';
-
-      if (!isCompleted) {
-        const priorityBtn = document.createElement('button');
-        priorityBtn.className = 'btn-priority ui-shadow';
-        priorityBtn.textContent = task.priority ? '⭐ ยกเลิกสำคัญ' : '⭐ ตั้งเป็นงานสำคัญ';
-        priorityBtn.dataset.id = task.id;
-        priorityBtn.dataset.action = 'priority';
-        btnRow.appendChild(priorityBtn);
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn-main ui-shadow';
-        editBtn.textContent = '✏️ แก้ไข';
-        editBtn.dataset.id = task.id;
-        editBtn.dataset.action = 'edit';
-        btnRow.appendChild(editBtn);
-
-        const completeBtn = document.createElement('button');
-        completeBtn.className = 'btn-complete ui-shadow';
-        completeBtn.textContent = '✅ ทำเสร็จแล้ว';
-        completeBtn.dataset.id = task.id;
-        completeBtn.dataset.action = 'complete';
-        btnRow.appendChild(completeBtn);
-      }
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn-delete ui-shadow';
-      deleteBtn.textContent = '🗑 ลบงาน';
-      deleteBtn.dataset.id = task.id;
-      deleteBtn.dataset.action = 'delete';
-      btnRow.appendChild(deleteBtn);
-
-      wrapper.appendChild(topRow);
-      wrapper.appendChild(btnRow);
-
-      return wrapper;
-    }
-
-    function updateRemainingDisplayAll() {
-      for (const t of tasks) {
-        const due = new Date(t.due);
-        const ms = computeRemainingMs(due);
-        const remainingEl = document.getElementById(`task-remaining-${t.id}`);
-        const textEl = document.getElementById(`task-text-${t.id}`);
-
-        if (remainingEl && !t.completed) {
-          remainingEl.textContent = remainingText(ms);
-          const c = remainingColor(ms);
-          remainingEl.style.color = c;
-          if (textEl) {
-            textEl.style.color = c;  // ตัวงานมีสีไล่ตาม deadline → ดูมีชีวิตขึ้น
-          }
-        } else if (t.completed && remainingEl && textEl) {
-          remainingEl.textContent = 'เสร็จแล้ว';
-        }
-      }
-    }
-
-    function resetForm() {
-      taskTextInput.value = '';
-      // ไม่บังคับ clear date/time เผื่อมีงานหลายงานวันเดียวกัน
-      editingId = null;
-      addTaskBtn.textContent = '＋ เพิ่มงาน';
-    }
-
-    addTaskBtn.addEventListener('click', () => {
-      const text = (taskTextInput.value || '').trim();
-      const dateStr = taskDateInput.value;
-      const timeStr = taskTimeInput.value;
-
-      if (!text) {
-        alert('กรุณาพิมพ์รายละเอียดงานการบ้าน');
-        return;
-      }
-
-      const due = makeDueDate(dateStr, timeStr);
-      if (!due) {
-        alert('กรุณาเลือกวันและเวลาส่งให้ครบถ้วน');
-        return;
-      }
-
-      if (editingId) {
-        // แก้ไขงานเดิม
-        const t = tasks.find(t => t.id === editingId);
-        if (t) {
-          t.text = text;
-          t.due = due.toISOString();
-        }
-      } else {
-        // สร้างงานใหม่
-        const task = {
-          id: createId(),
-          text,
-          due: due.toISOString(),
-          completed: false,
-          createdAt: Date.now(),
-          completedAt: null,
-          priority: false
-        };
-        tasks.push(task);
-      }
-
-      saveTasks();
-      renderTasks();
-      resetForm();
-    });
-
-    function handleListClick(e) {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const id = target.dataset.id;
-      const action = target.dataset.action;
-      if (!id || !action) return;
-
-      const t = tasks.find(t => t.id === id);
-      if (!t) return;
-
-      if (action === 'delete') {
-        tasks = tasks.filter(task => task.id !== id);
-        saveTasks();
-        renderTasks();
-      } else if (action === 'complete') {
-        if (!t.completed) {
-          t.completed = true;
-          t.completedAt = Date.now();
-          saveTasks();
-          renderTasks();
-        }
-      } else if (action === 'priority') {
-        t.priority = !t.priority;
-        saveTasks();
-        renderTasks();
-      } else if (action === 'edit') {
-        if (t.completed) return; // ไม่แก้ไขงานที่เสร็จแล้ว
-        // ดึงค่ามาใส่ช่องด้านบน
-        const d = new Date(t.due);
-        const yyyy = d.getFullYear();
-        const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-        const dd = d.getDate().toString().padStart(2, '0');
-        const hh = d.getHours().toString().padStart(2, '0');
-        const min = d.getMinutes().toString().padStart(2, '0');
-
-        taskTextInput.value = t.text;
-        taskDateInput.value = `${yyyy}-${mm}-${dd}`;
-        taskTimeInput.value = `${hh}:${min}`;
-
-        editingId = t.id;
-        addTaskBtn.textContent = '💾 บันทึกการแก้ไข';
-
-        // เลื่อนขึ้นไปด้านบนให้เห็นช่องแก้ไข
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-
-    pendingListEl.addEventListener('click', handleListClick);
-    completedListEl.addEventListener('click', handleListClick);
-
-    // โหลดข้อมูลเดิม + แสดง
-    loadTasks();
-    renderTasks();
-
-    // อัปเดตข้อความ/สีของเวลาเหลือทุก 20 วินาที
-    setInterval(() => {
-      cleanupCompleted();
-      renderTasks();
-    }, 20000);
-  </script>
-
-<!-- ⭐ LEO/NEED LO-FI ANIME HUD (SIDEBAR) ⭐ -->
-<div id="ln-toggle" class="ln-toggle ui-shadow">▶</div>
-
-<div id="ln-panel" class="ln-panel">
-  <!-- neon deco lines & circles -->
-  <div class="ln-deco-line ln-line1"></div>
-  <div class="ln-deco-line ln-line2"></div>
-  <div class="ln-deco-circle ln-c1"></div>
-  <div class="ln-deco-circle ln-c2"></div>
-
-  <div class="ln-header">
-    <span class="ln-title">Leo/need · TASK HUD</span>
-  </div>
-
-  <div class="ln-section">
-    <div class="ln-label">TIME</div>
+  <div class="ln-block">
+    <div class="ln-label">Time</div>
     <div class="ln-value" id="ln-time">00:00:00</div>
   </div>
 
-  <div class="ln-section">
-    <div class="ln-label">NEXT TASK</div>
-    <div class="ln-value ln-multi" id="ln-next">-</div>
+  <div class="ln-divider"></div>
+
+  <div class="ln-block">
+    <div class="ln-label">Next Due</div>
+    <div class="ln-value sm" id="ln-next">—</div>
   </div>
 
-  <div class="ln-section ln-task-left">
-    <div class="ln-label">TASK LEFT</div>
+  <div class="ln-block">
+    <div class="ln-label">Time Left</div>
+    <div class="ln-value sm" id="ln-due-time">—</div>
+  </div>
+
+  <div class="ln-divider"></div>
+
+  <div class="ln-block">
+    <div class="ln-label">Tasks Left</div>
     <div class="ln-value" id="ln-left">0</div>
   </div>
 
-  <div class="ln-section">
-    <div class="ln-label">UPTIME</div>
+  <div class="ln-block">
+    <div class="ln-label">Uptime</div>
     <div class="ln-value" id="ln-uptime">00:00:00</div>
   </div>
 </div>
 
-<style>
-  /* ---------- Toggle Button (เปิด/ปิด HUD ปุ่มเดียว) ---------- */
-  .ln-toggle {
-    position: fixed;
-    left: 0;
-    top: 45%;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, #74a0ff, #9bb2ff);
-    color: #001018;
-    padding: 8px 12px;
-    border-radius: 0 14px 14px 0;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: 1.2rem;
-    z-index: 9999;
-    box-shadow: 0 0 16px rgba(120, 160, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: left 0.38s ease, border-radius 0.38s ease;
-  }
+<!-- ══ MAIN PAGE ══ -->
+<div class="page" id="page">
 
-  /* ตอน panel เปิด ให้ปุ่มไปอยู่ขอบขวาของ panel */
-  .ln-toggle.open {
-    left: 290px;                    /* เท่ากับความกว้าง panel */
-    border-radius: 14px 0 0 14px;   /* กลับด้าน */
-  }
+  <header class="site-header">
+    <h1>TASK TRACKER · ม.5/1 กลุ่ม 3</h1>
+    <div class="clock-row">
+      <div class="clock-box" id="digital-clock">00:00:00</div>
+    </div>
+  </header>
 
-  /* ---------- Sidebar Panel ---------- */
-  .ln-panel {
-    position: fixed;
-    left: -290px;
-    top: 0;
-    width: 290px;
-    height: 100vh;
-    padding: 18px;
-    background: rgba(20, 25, 45, 0.62);
-    backdrop-filter: blur(10px);
-    border-right: 2px solid rgba(140, 180, 255, 0.35);
-    box-shadow:
-      0 0 22px rgba(120, 160, 255, 0.45),
-      inset 0 0 20px rgba(140, 160, 255, 0.25);
-    transition: left 0.38s ease;
-    z-index: 9998;
-    overflow: hidden;
-  }
+  <div class="app-stack">
 
-  .ln-panel.open {
-    left: 0;
-  }
+    <!-- Add / Edit form -->
+    <div class="card">
+      <div class="card-title">บันทึกงานการบ้าน</div>
+      <div class="card-sub">พิมพ์งาน เลือกวันและเวลาส่ง แล้วกด เพิ่มงาน · งานเรียงตามกำหนดส่ง + งานสำคัญอยู่บนสุด</div>
+      <div class="form-stack">
+        <textarea id="task-text" placeholder="เช่น การบ้านคณิต หน้า 52 ข้อ 1-10"></textarea>
+        <div class="form-row-inline">
+          <input type="date" id="task-date" />
+          <input type="time" id="task-time" />
+          <button class="btn-main" id="add-task">＋ เพิ่มงาน</button>
+        </div>
+      </div>
+    </div>
 
-  /* ---------- Decorations ---------- */
-  .ln-deco-line {
-    position: absolute;
-    height: 2px;
-    width: 160px;
-    background: linear-gradient(90deg, rgba(150, 180, 255, 0.8), rgba(255, 255, 255, 0));
-    opacity: 0.7;
-    animation: ln-glow 3s infinite alternate;
-  }
+    <!-- Lists -->
+    <div class="lists-grid">
+      <div class="card">
+        <div class="card-title">งานที่ต้องทำ</div>
+        <div class="card-sub">⭐ สำคัญ + ใกล้กำหนดอยู่บนสุด</div>
+        <div id="pending-list" class="task-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">เสร็จแล้ว ✅</div>
+        <div class="card-sub">ลบอัตโนมัติหลัง 7 วัน</div>
+        <div id="completed-list" class="task-list"></div>
+      </div>
+    </div>
 
-  .ln-line1 {
-    top: 70px;
-    left: 10px;
-  }
-
-  .ln-line2 {
-    top: 220px;
-    left: 10px;
-  }
-
-  .ln-deco-circle {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(150, 180, 255, 0.5), rgba(150, 180, 255, 0));
-    animation: ln-floaty 4s infinite ease-in-out;
-  }
-
-  .ln-c1 {
-    width: 90px;
-    height: 90px;
-    top: 120px;
-    right: -30px;
-  }
-
-  .ln-c2 {
-    width: 60px;
-    height: 60px;
-    bottom: 80px;
-    left: -20px;
-  }
-
-  @keyframes ln-glow {
-    from { opacity: 0.4; }
-    to   { opacity: 1; }
-  }
-
-  @keyframes ln-floaty {
-    0%   { transform: translateY(0px); }
-    50%  { transform: translateY(-12px); }
-    100% { transform: translateY(0px); }
-  }
-
-  /* ---------- Header ---------- */
-  .ln-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .ln-title {
-    color: #bcd7ff;
-    font-size: 1.05rem;
-    letter-spacing: 0.09em;
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(160, 180, 255, 1);
-  }
-
-  /* ---------- Sections ---------- */
-  .ln-section {
-    margin-bottom: 26px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* TASK LEFT เลื่อนลงนิดให้พ้นเส้น */
-  .ln-task-left {
-    margin-top: 40px;
-  }
-
-  .ln-label {
-    color: #9ec5ff;
-    font-size: 0.75rem;
-    letter-spacing: 0.13em;
-    margin-bottom: 3px;
-  }
-
-  .ln-value {
-    font-family: "Courier New", monospace;
-    color: #dceaff;
-    font-size: 1.45rem;
-    text-shadow: 0 0 14px rgba(170, 200, 255, 1);
-    line-height: 1.3;
-  }
-
-  .ln-multi {
-    font-size: 1.1rem;
-    line-height: 1.2;
-  }
-</style>
+  </div>
+</div>
 
 <script>
-  // --- Slide Toggle (ปุ่มเดียว เปิด/ปิด + เปลี่ยนสัญลักษณ์) ---
-  const lnPanel  = document.getElementById("ln-panel");
-  const lnToggle = document.getElementById("ln-toggle");
+  /* ══ UTILS ══ */
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = 'homework-tasks-v2';
 
-  lnToggle.onclick = () => {
-    const isOpen = lnPanel.classList.toggle("open");
-    lnToggle.classList.toggle("open", isOpen);
-    lnToggle.textContent = isOpen ? "◀" : "▶";
+  /* ══ CLOCK ══ */
+  function tickClock() {
+    const n = new Date();
+    const t = [n.getHours(), n.getMinutes(), n.getSeconds()]
+      .map(v => String(v).padStart(2,'0')).join(':');
+    $('digital-clock').textContent = t;
+    $('ln-time').textContent = t;
+  }
+  setInterval(tickClock, 500); tickClock();
+
+  /* ══ UPTIME ══ */
+  const startTime = Date.now();
+  function tickUptime() {
+    let s = Math.floor((Date.now() - startTime) / 1000);
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60);  s %= 60;
+    $('ln-uptime').textContent = [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
+  }
+  setInterval(tickUptime, 1000); tickUptime();
+
+  /* ══ TASKS ══ */
+  let tasks = [];
+  let editingId = null;
+
+  function load() {
+    try { const r = localStorage.getItem(STORAGE_KEY); tasks = r ? JSON.parse(r) : []; }
+    catch { tasks = []; }
+    cleanup();
+  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+  function cleanup() {
+    const cutoff = Date.now() - 7*24*60*60*1000;
+    const before = tasks.length;
+    tasks = tasks.filter(t => !t.completed || (t.completedAt && t.completedAt > cutoff));
+    if (tasks.length !== before) save();
+  }
+
+  function makeDue(d, t) {
+    if (!d || !t) return null;
+    const dt = new Date(`${d}T${t}:00`);
+    return isNaN(dt) ? null : dt;
+  }
+
+  function fmtDue(d) {
+    const pad = v => String(v).padStart(2,'0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} น.`;
+  }
+
+  function fmtRemaining(ms) {
+    const sign = ms >= 0;
+    const abs = Math.abs(ms);
+    const totalMin = Math.floor(abs / 60000);
+    const d = Math.floor(totalMin / 1440);
+    const h = Math.floor((totalMin % 1440) / 60);
+    const m = totalMin % 60;
+    let s = '';
+    if (d) s += `${d}ว `;
+    if (h) s += `${h}ชม `;
+    s += `${m}น`;
+    return sign ? `⏱ เหลือ ${s.trim()}` : `🔴 เลย ${s.trim()}`;
+  }
+
+  function remainColor(ms) {
+    if (ms <= 0) return 'var(--red)';
+    if (ms < 86400000) return 'var(--red)';
+    if (ms < 3*86400000) return 'var(--gold)';
+    return 'var(--accent)';
+  }
+
+  /* ══ RENDER ══ */
+  function render() {
+    cleanup();
+
+    const pending   = tasks.filter(t => !t.completed).sort((a,b) => {
+      if (a.priority && !b.priority) return -1;
+      if (!a.priority && b.priority) return 1;
+      return new Date(a.due) - new Date(b.due);
+    });
+    const completed = tasks.filter(t => t.completed).sort((a,b) => b.completedAt - a.completedAt);
+
+    const pl = $('pending-list');
+    const cl = $('completed-list');
+    pl.innerHTML = ''; cl.innerHTML = '';
+
+    if (!pending.length)   pl.innerHTML = '<div class="task-empty">ยังไม่มีงานที่ต้องทำ 🎉</div>';
+    if (!completed.length) cl.innerHTML = '<div class="task-empty">ยังไม่มีงานที่เสร็จ</div>';
+
+    pending.forEach(t   => pl.appendChild(makeEl(t, false)));
+    completed.forEach(t => cl.appendChild(makeEl(t, true)));
+
+    updateHUD(pending);
+  }
+
+  function makeEl(task, done) {
+    const due = new Date(task.due);
+    const ms  = due - Date.now();
+
+    const el = document.createElement('div');
+    el.className = 'task-item' +
+      (done              ? ' task-completed' : '') +
+      (task.priority && !done ? ' task-priority' : '');
+    el.dataset.id = task.id;
+
+    /* top row */
+    const top = document.createElement('div');
+    top.className = 'task-top';
+
+    const txt = document.createElement('div');
+    txt.className = 'task-text';
+    txt.id = `tt-${task.id}`;
+    if (task.priority && !done) txt.textContent = '⭐ ' + task.text;
+    else txt.textContent = task.text;
+    if (done) txt.style.textDecoration = 'line-through';
+
+    const meta = document.createElement('div');
+    meta.className = 'task-meta';
+    meta.innerHTML = `กำหนด:<br>${fmtDue(due)}`;
+
+    top.appendChild(txt); top.appendChild(meta);
+
+    /* remaining */
+    const rem = document.createElement('div');
+    rem.className = 'task-remaining';
+    rem.id = `tr-${task.id}`;
+    if (!done) {
+      rem.textContent = fmtRemaining(ms);
+      rem.style.color = remainColor(ms);
+    } else {
+      rem.textContent = '✅ เสร็จแล้ว';
+      rem.style.color = 'var(--green)';
+    }
+
+    /* mini progress bar (% of 7-day window) */
+    const track = document.createElement('div');
+    track.className = 'task-progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'task-progress-fill';
+    if (!done) {
+      const total = due - new Date(task.createdAt);
+      const elapsed = Date.now() - new Date(task.createdAt);
+      const pct = total > 0 ? Math.min(100, Math.max(0, elapsed/total*100)) : 0;
+      fill.style.width = pct + '%';
+      if (ms < 0) fill.style.background = 'var(--red)';
+      else if (ms < 86400000) fill.style.background = `linear-gradient(90deg, var(--gold), var(--red))`;
+    } else {
+      fill.style.width = '100%';
+      fill.style.background = 'var(--green)';
+    }
+    track.appendChild(fill);
+
+    /* buttons */
+    const btns = document.createElement('div');
+    btns.className = 'task-buttons';
+
+    if (!done) {
+      btns.innerHTML = `
+        <button class="btn-priority" data-id="${task.id}" data-action="priority">${task.priority ? '★ ยกเลิกสำคัญ' : '⭐ สำคัญ'}</button>
+        <button class="btn-edit"     data-id="${task.id}" data-action="edit">✏️ แก้ไข</button>
+        <button class="btn-complete" data-id="${task.id}" data-action="complete">✅ เสร็จ</button>
+      `;
+    }
+    btns.innerHTML += `<button class="btn-delete" data-id="${task.id}" data-action="delete">🗑 ลบ</button>`;
+
+    el.appendChild(top);
+    el.appendChild(rem);
+    el.appendChild(track);
+    el.appendChild(btns);
+    return el;
+  }
+
+  /* live remaining update */
+  function liveUpdate() {
+    tasks.filter(t => !t.completed).forEach(t => {
+      const due = new Date(t.due);
+      const ms  = due - Date.now();
+      const rem = $(`tr-${t.id}`);
+      if (rem) { rem.textContent = fmtRemaining(ms); rem.style.color = remainColor(ms); }
+    });
+  }
+  setInterval(liveUpdate, 30000);
+
+  /* ══ HUD UPDATE ══ */
+  function updateHUD(pending) {
+    $('ln-left').textContent = pending.length;
+    if (!pending.length) {
+      $('ln-next').textContent = '—';
+      $('ln-due-time').textContent = '—';
+      return;
+    }
+    const next = pending[0];
+    const ms   = new Date(next.due) - Date.now();
+    $('ln-next').textContent     = next.text.length > 28 ? next.text.slice(0,28)+'…' : next.text;
+    $('ln-due-time').textContent = fmtRemaining(ms);
+  }
+  setInterval(() => {
+    const pending = tasks.filter(t=>!t.completed).sort((a,b)=>{
+      if (a.priority&&!b.priority) return -1;
+      if (!a.priority&&b.priority) return 1;
+      return new Date(a.due)-new Date(b.due);
+    });
+    updateHUD(pending);
+  }, 5000);
+
+  /* ══ ADD / EDIT ══ */
+  $('add-task').addEventListener('click', () => {
+    const text = ($('task-text').value || '').trim();
+    const due  = makeDue($('task-date').value, $('task-time').value);
+    if (!text) { alert('กรุณาพิมพ์รายละเอียดงาน'); return; }
+    if (!due)  { alert('กรุณาเลือกวันและเวลาส่งให้ครบ'); return; }
+
+    if (editingId) {
+      const t = tasks.find(t => t.id === editingId);
+      if (t) { t.text = text; t.due = due.toISOString(); }
+      editingId = null;
+      $('add-task').textContent = '＋ เพิ่มงาน';
+      $('add-task').className = 'btn-main';
+    } else {
+      tasks.push({ id: uid(), text, due: due.toISOString(), completed: false,
+        createdAt: Date.now(), completedAt: null, priority: false });
+    }
+    save(); render();
+    $('task-text').value = '';
+  });
+
+  /* ══ LIST ACTIONS ══ */
+  function handleClick(e) {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const { id, action } = btn.dataset;
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+
+    if (action === 'delete')   { tasks = tasks.filter(t => t.id !== id); save(); render(); }
+    if (action === 'complete') { t.completed = true; t.completedAt = Date.now(); save(); render(); }
+    if (action === 'priority') { t.priority = !t.priority; save(); render(); }
+    if (action === 'edit') {
+      const d = new Date(t.due);
+      const pad = v => String(v).padStart(2,'0');
+      $('task-text').value  = t.text;
+      $('task-date').value  = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      $('task-time').value  = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      editingId = id;
+      $('add-task').textContent = '💾 บันทึกการแก้ไข';
+      $('add-task').className   = 'btn-edit';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  $('pending-list').addEventListener('click',   handleClick);
+  $('completed-list').addEventListener('click', handleClick);
+
+  /* ══ HUD TOGGLE ══ */
+  const panel  = $('ln-panel');
+  const toggle = $('ln-toggle');
+  toggle.onclick = () => {
+    const open = panel.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.textContent = open ? '◀' : '▶';
   };
 
-  // --- Real Time Clock ---
-  function lnClock() {
-    const n = new Date();
-    const h = String(n.getHours()).padStart(2, '0');
-    const m = String(n.getMinutes()).padStart(2, '0');
-    const s = String(n.getSeconds()).padStart(2, '0');
-    document.getElementById("ln-time").textContent = `${h}:${m}:${s}`;
-  }
-
-  // --- Uptime ---
-  let lnStart = Date.now();
-  function lnUptime() {
-    let sec = Math.floor((Date.now() - lnStart) / 1000);
-    let h = Math.floor(sec / 3600);
-    sec %= 3600;
-    let m = Math.floor(sec / 60);
-    let s = sec % 60;
-    document.getElementById("ln-uptime").textContent =
-      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  }
-
-  // --- Connect to Homework Tasks in sessionStorage ---
-  function lnUpdateTasks() {
-    const raw = sessionStorage.getItem("homework-tasks-session");
-    if (!raw) {
-      document.getElementById("ln-next").textContent = "-";
-      document.getElementById("ln-left").textContent = "0";
-      return;
-    }
-
-    let list;
-    try {
-      list = JSON.parse(raw);
-    } catch (e) {
-      document.getElementById("ln-next").textContent = "-";
-      document.getElementById("ln-left").textContent = "0";
-      return;
-    }
-
-    const pending = list.filter(t => !t.completed);
-    document.getElementById("ln-left").textContent = pending.length;
-
-    if (pending.length === 0) {
-      document.getElementById("ln-next").textContent = "-";
-      return;
-    }
-
-    pending.sort((a, b) => new Date(a.due) - new Date(b.due));
-    document.getElementById("ln-next").textContent = pending[0].text || "-";
-  }
-
-  // --- Update Loops ---
-  lnClock();
-  lnUptime();
-  lnUpdateTasks();
-
-  setInterval(lnClock, 500);
-  setInterval(lnUptime, 1000);
-  setInterval(lnUpdateTasks, 2000);
+  /* ══ INIT ══ */
+  load(); render();
 </script>
-  
 </body>
 </html>
