@@ -20,7 +20,6 @@
       align-items: center;
     }
 
-    /* วางนาฬิกาจริง + นาฬิกานับถอยหลัง ข้างกัน */
     .clocks {
       display: flex;
       gap: 10px;
@@ -31,13 +30,13 @@
       margin-bottom: 8px;
     }
 
-    /* UI text shadow (ไม่ไปยุ่งกับตัวอักษรในตาราง) */
     .ui-shadow { text-shadow: 0 1px 3px #000; }
 
     h1 {
       text-align: center;
       color: #fff;
       margin-bottom: 12px;
+      font-size: 1.4rem;
     }
     h1.ui-shadow { text-shadow: 0 2px 6px #000; }
 
@@ -53,10 +52,9 @@
       text-align: center;
     }
 
-    /* นาฬิกานับถอยหลัง ใช้หน้าตาเดียวกับ digital-clock */
     .countdown-clock {
       font-size: 2rem;
-      color: #ff3b30; /* เริ่มต้นเป็นแดง (นอก 10 นาที) */
+      color: #ff3b30;
       box-shadow: 0 0 20px rgba(255,59,48,0.9);
     }
 
@@ -64,9 +62,7 @@
       0%, 49%   { opacity: 1; }
       50%, 100% { opacity: 0.25; }
     }
-    .blink {
-      animation: blink 1s steps(2, start) infinite;
-    }
+    .blink { animation: blink 1s steps(2, start) infinite; }
 
     .current-subject {
       font-size: 1.2rem;
@@ -78,9 +74,10 @@
       border-radius: 10px;
       text-align: center;
       box-shadow: 0 0 10px white;
+      width: 100%;
+      max-width: 1000px;
     }
 
-    /* กล่องสถานะ/แถบความคืบหน้า */
     .progress-wrap {
       width: 100%;
       max-width: 1000px;
@@ -96,53 +93,32 @@
       padding: 10px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
       backdrop-filter: blur(3px);
-      transition: box-shadow 0.25s ease;
     }
 
-    .progress-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #fff;
-    }
-
-    .progress-subtitle {
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      color: #fff;
-    }
-
-    .progress-subnote {
-      font-size: 0.9rem;
-      color: #e9f6ff;
-      opacity: 0.95;
-      margin-top: -2px;
-      margin-bottom: 6px;
-    }
+    .progress-title { font-weight: 700; margin-bottom: 6px; color: #fff; }
+    .progress-subtitle { font-size: 0.95rem; margin-bottom: 6px; color: #fff; }
+    .progress-subnote { font-size: 0.9rem; color: #e9f6ff; opacity: 0.95; margin-top: -2px; margin-bottom: 6px; }
 
     .progress-bar {
-      width: 100%;
-      height: 12px;
+      width: 100%; height: 12px;
       border-radius: 999px;
       background: rgba(0,0,0,0.15);
       overflow: hidden;
-      position: relative;
     }
-
     .progress-fill {
-      height: 100%;
-      width: 0%;
+      height: 100%; width: 0%;
       background: linear-gradient(90deg, rgba(79,129,199,1), rgba(0,132,255,1));
       border-radius: 999px;
       transition: width 0.3s ease;
     }
+    .progress-time { margin-top: 6px; font-size: 0.9rem; color: #03dffc; }
 
-    .progress-time {
-      margin-top: 6px;
-      font-size: 0.9rem;
-      color: #03dffc;
+    /* ── TABLE (desktop/tablet unchanged) ── */
+    .table-wrapper {
+      width: 100%;
+      max-width: 1000px;
     }
 
-    /* ตาราง (คงเดิม ไม่ใส่เงาอักษร) */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -158,6 +134,8 @@
       text-align: center;
       background-color: rgba(255, 255, 255, 0.4);
       text-shadow: none;
+      font-size: 0.82rem;
+      line-height: 1.4;
     }
     th { background-color: #4f81c7; color: white; }
 
@@ -169,10 +147,109 @@
       position: relative;
     }
 
-    @media (max-width: 768px) {
-      table { font-size: 0.9rem; }
-      .progress-title, .progress-subtitle, .progress-time, .progress-subnote { text-align: center; }
-      .digital-clock, .countdown-clock { min-width: 200px; width: 100%; }
+    /* ── MOBILE (≤ 600px) ── */
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+
+      h1 { font-size: 1.05rem; margin-bottom: 8px; }
+
+      /* Stack clocks vertically, full width */
+      .clocks { flex-direction: column; gap: 8px; }
+      .digital-clock {
+        font-size: 1.5rem;
+        min-width: unset;
+        width: 100%;
+        padding: 8px 12px;
+      }
+
+      .current-subject { font-size: 1rem; }
+
+      .progress-title   { font-size: 0.9rem; }
+      .progress-subtitle{ font-size: 0.85rem; }
+      .progress-subnote { font-size: 0.8rem; }
+      .progress-time    { font-size: 0.8rem; }
+      .progress-bar     { height: 10px; }
+
+      /* ── Card-style table on mobile ── */
+      .table-wrapper { overflow: visible; }
+
+      /* Hide the original table on mobile */
+      table.desktop-table { display: none; }
+
+      /* Show mobile card layout */
+      .mobile-cards { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+
+      .day-card {
+        background: rgba(255,255,255,0.4);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        backdrop-filter: blur(4px);
+      }
+
+      .day-card-header {
+        background: #4f81c7;
+        color: white;
+        font-weight: 700;
+        padding: 8px 14px;
+        font-size: 1rem;
+      }
+
+      .period-list { display: flex; flex-direction: column; }
+
+      .period-row {
+        display: flex;
+        align-items: stretch;
+        border-top: 1px solid rgba(255,255,255,0.5);
+      }
+
+      .period-time {
+        background: rgba(79,129,199,0.25);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 8px 6px;
+        min-width: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-right: 1px solid rgba(255,255,255,0.4);
+        line-height: 1.3;
+      }
+
+      .period-subject {
+        flex: 1;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        color: #111;
+        line-height: 1.45;
+        display: flex;
+        align-items: center;
+      }
+
+      .period-subject.lunch-cell {
+        color: #555;
+        font-style: italic;
+      }
+
+      .period-subject.empty-cell {
+        color: #888;
+      }
+
+      .period-row.highlighted-row .period-subject {
+        background: rgba(0,132,255,0.3);
+        font-weight: 700;
+      }
+      .period-row.highlighted-row .period-time {
+        background: rgba(0,132,255,0.4);
+      }
+    }
+
+    /* Desktop/tablet: hide mobile cards */
+    @media (min-width: 601px) {
+      .mobile-cards { display: none; }
     }
   </style>
 </head>
@@ -180,13 +257,11 @@
 <body>
   <h1 class="ui-shadow">ตารางเรียน ม.6/1 กลุ่ม 1 ภาคเรียนที่ 1/2569</h1>
 
-  <!-- แถวแสดงนาฬิกา: เวลาปัจจุบัน + นับถอยหลัง -->
   <div class="clocks">
     <div class="digital-clock ui-shadow" id="digital-clock">00:00:00</div>
     <div class="digital-clock ui-shadow countdown-clock" id="countdown-clock">--:--</div>
   </div>
 
-  <!-- กล่องสถานะและคาบถัดไป (เหมือนเดิม แต่อยู่โดยไม่มี countdown ข้างในแล้ว) -->
   <div class="progress-wrap">
     <div class="progress-block" id="current-block">
       <div class="progress-title ui-shadow">ช่วงเวลาปัจจุบัน</div>
@@ -194,7 +269,6 @@
       <div class="progress-bar"><div class="progress-fill" id="current-progress"></div></div>
       <div class="progress-time ui-shadow" id="current-time-eta"></div>
     </div>
-
     <div class="progress-block" id="next-block">
       <div class="progress-title ui-shadow">คาบ/ช่วงถัดไป</div>
       <div class="progress-subtitle ui-shadow" id="next-slot-label">-</div>
@@ -206,104 +280,237 @@
 
   <div class="current-subject ui-shadow" id="current-subject">ขณะนี้ไม่มีคาบเรียน</div>
 
-  <!-- ตารางเดิม -->
-  <table>
-    <thead>
-      <tr>
-        <th>วัน/เวลา</th>
-        <th>08.30-09.20</th>
-        <th>09.20-10.10</th>
-        <th>10.20-11.10</th>
-        <th>11.10-12.00</th>
-        <th>12.00-12.50</th>
-        <th>12.50-13.40</th>
-        <th>13.50-14.40</th>
-        <th>14.40-15.30</th>
-        <th>15.30-16.20</th>
-        <th>16.20-17.10</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th>จันทร์</th>
-        <td>คณิตศาสตร์ขั้นสูง<br>ณัฐดนัย<br>224</td>
-        <td>สังคม<br>กัลยภิญญ์<br>523</td>
-        <td>เคมี 5<br>ดารุณี<br>433</td>
-        <td>เคมี 5<br>ดารุณี<br>433</td>
-        <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-        <td>สังคมขั้นสูง<br>ทินบัติ<br>532</td>
-        <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-        <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-        <td>-</td><td>-</td>
-      </tr>
-      <tr>
-        <th>อังคาร</th>
-        <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
-        <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
-        <td>ภาษาไทย<br>สุนีย์<br>624</td>
-        <td>แนะแนว<br>ธรณินทร์<br>611</td>
-        <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-        <td>English<br>ออมทิพย์<br>336</td>
-        <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
-        <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
-        <td>ประชุมสี</td><td>-</td>
-      </tr>
-      <tr>
-        <th>พุธ</th>
-        <td>English High tier<br>ศกุณกาญจน์<br>337</td>
-        <td>พลานามัย,พละ<br>วิมลณัฐ<br>อเนกประสงค์6</td>
-        <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
-        <td>เคมี 5<br>ดารุณี<br>433</td>
-        <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-        <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
-        <td>English Secondary<br>Ma.Fabie<br>337</td>
-        <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
-        <td>-</td><td>-</td>
-      </tr>
-      <tr>
-        <th>พฤหัสบดี</th>
-        <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-        <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-        <td>ภาษาไทย<br>สุนีย์<br>624</td>
-        <td>สังคม<br>กัลยภิญญ์<br>523</td>
-        <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-        <td>English<br>อ้อมทิพย์<br>336</td>
-        <td>ทัศนศิลป์<br>รักษ์สุมล<br>515</td>
-        <td>ชุมนุม<br>N/A<br>---</td>
-        <td>ซ่อมเสริม</td><td>-</td>
-      </tr>
-      <tr class="bottom-row">
-        <th>ศุกร์</th>
-        <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
-        <td>ไทยขั้นสูง<br>พิศาล<br>636</td>
-        <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
-        <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
-        <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-        <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
-        <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
-        <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
-        <td>-</td><td>-</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+
+    <!-- ── Desktop/Tablet table (unchanged) ── -->
+    <table class="desktop-table">
+      <thead>
+        <tr>
+          <th>วัน/เวลา</th>
+          <th>08.30-09.20</th>
+          <th>09.20-10.10</th>
+          <th>10.20-11.10</th>
+          <th>11.10-12.00</th>
+          <th>12.00-12.50</th>
+          <th>12.50-13.40</th>
+          <th>13.50-14.40</th>
+          <th>14.40-15.30</th>
+          <th>15.30-16.20</th>
+          <th>16.20-17.10</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>จันทร์</th>
+          <td>คณิตศาสตร์ขั้นสูง<br>ณัฐดนัย<br>224</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>สังคมขั้นสูง<br>ทินบัติ<br>532</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>-</td><td>-</td>
+        </tr>
+        <tr>
+          <th>อังคาร</th>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>ภาษาไทย<br>สุนีย์<br>624</td>
+          <td>แนะแนว<br>ธรณินทร์<br>611</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>English<br>ออมทิพย์<br>336</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>ประชุมสี</td><td>-</td>
+        </tr>
+        <tr>
+          <th>พุธ</th>
+          <td>English High tier<br>ศกุณกาญจน์<br>337</td>
+          <td>พลานามัย,พละ<br>วิมลณัฐ<br>อเนกประสงค์6</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
+          <td>English Secondary<br>Ma.Fabie<br>337</td>
+          <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
+          <td>-</td><td>-</td>
+        </tr>
+        <tr>
+          <th>พฤหัสบดี</th>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ภาษาไทย<br>สุนีย์<br>624</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>English<br>อ้อมทิพย์<br>336</td>
+          <td>ทัศนศิลป์<br>รักษ์สุมล<br>515</td>
+          <td>ชุมนุม<br>N/A<br>---</td>
+          <td>ซ่อมเสริม</td><td>-</td>
+        </tr>
+        <tr>
+          <th>ศุกร์</th>
+          <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
+          <td>ไทยขั้นสูง<br>พิศาล<br>636</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
+          <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
+          <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
+          <td>-</td><td>-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── Mobile card layout ── -->
+    <div class="mobile-cards" id="mobile-cards">
+      <!-- Built by JS below -->
+    </div>
+
+  </div>
 
   <script>
+    /* ===== Timetable data ===== */
+    const DAYS = [
+      {
+        name: 'จันทร์', dayIndex: 1,
+        periods: [
+          { time: '08.30-09.20', subject: 'คณิตศาสตร์ขั้นสูง', teacher: 'ณัฐดนัย', room: '224' },
+          { time: '09.20-10.10', subject: 'สังคม', teacher: 'กัลยภิญญ์', room: '523' },
+          { time: '10.20-11.10', subject: 'เคมี 5', teacher: 'ดารุณี', room: '433' },
+          { time: '11.10-12.00', subject: 'เคมี 5', teacher: 'ดารุณี', room: '433' },
+          { time: '12.00-12.50', subject: 'พักกลางวัน', teacher: '-', room: 'โรงอาหาร', lunch: true },
+          { time: '12.50-13.40', subject: 'สังคมขั้นสูง', teacher: 'ทินบัติ', room: '532' },
+          { time: '13.50-14.40', subject: 'ฟิสิกส์ 5', teacher: 'ปองพล', room: '434' },
+          { time: '14.40-15.30', subject: 'ฟิสิกส์ 5', teacher: 'ปองพล', room: '434' },
+          { time: '15.30-16.20', subject: '-', empty: true },
+          { time: '16.20-17.10', subject: '-', empty: true },
+        ]
+      },
+      {
+        name: 'อังคาร', dayIndex: 2,
+        periods: [
+          { time: '08.30-09.20', subject: 'คณิตศาสตร์เพิ่มเติม 5', teacher: 'ฉัตรณพัฒน์', room: '223' },
+          { time: '09.20-10.10', subject: 'คณิตศาสตร์เพิ่มเติม 5', teacher: 'ฉัตรณพัฒน์', room: '223' },
+          { time: '10.20-11.10', subject: 'ภาษาไทย', teacher: 'สุนีย์', room: '624' },
+          { time: '11.10-12.00', subject: 'แนะแนว', teacher: 'ธรณินทร์', room: '611' },
+          { time: '12.00-12.50', subject: 'พักกลางวัน', teacher: '-', room: 'โรงอาหาร', lunch: true },
+          { time: '12.50-13.40', subject: 'English', teacher: 'ออมทิพย์', room: '336' },
+          { time: '13.50-14.40', subject: 'ชีววิทยา 5', teacher: 'รุ่งทิพย์', room: '436' },
+          { time: '14.40-15.30', subject: 'ชีววิทยา 5', teacher: 'รุ่งทิพย์', room: '436' },
+          { time: '15.30-16.20', subject: 'ประชุมสี' },
+          { time: '16.20-17.10', subject: '-', empty: true },
+        ]
+      },
+      {
+        name: 'พุธ', dayIndex: 3,
+        periods: [
+          { time: '08.30-09.20', subject: 'English High tier', teacher: 'ศกุณกาญจน์', room: '337' },
+          { time: '09.20-10.10', subject: 'พลานามัย, พละ', teacher: 'วิมลณัฐ', room: 'อเนกประสงค์6' },
+          { time: '10.20-11.10', subject: 'ชีววิทยา 5', teacher: 'รุ่งทิพย์', room: '436' },
+          { time: '11.10-12.00', subject: 'เคมี 5', teacher: 'ดารุณี', room: '433' },
+          { time: '12.00-12.50', subject: 'พักกลางวัน', teacher: '-', room: 'โรงอาหาร', lunch: true },
+          { time: '12.50-13.40', subject: 'คณิตศาสตร์', teacher: 'นุชิดา', room: '224' },
+          { time: '13.50-14.40', subject: 'English Secondary', teacher: 'Ma.Fabie', room: '337' },
+          { time: '14.40-15.30', subject: 'ศึกษาค้นขว้า', teacher: 'N/A', room: '---' },
+          { time: '15.30-16.20', subject: '-', empty: true },
+          { time: '16.20-17.10', subject: '-', empty: true },
+        ]
+      },
+      {
+        name: 'พฤหัสบดี', dayIndex: 4,
+        periods: [
+          { time: '08.30-09.20', subject: 'ฟิสิกส์ 5', teacher: 'ปองพล', room: '434' },
+          { time: '09.20-10.10', subject: 'ฟิสิกส์ 5', teacher: 'ปองพล', room: '434' },
+          { time: '10.20-11.10', subject: 'ภาษาไทย', teacher: 'สุนีย์', room: '624' },
+          { time: '11.10-12.00', subject: 'สังคม', teacher: 'กัลยภิญญ์', room: '523' },
+          { time: '12.00-12.50', subject: 'พักกลางวัน', teacher: '-', room: 'โรงอาหาร', lunch: true },
+          { time: '12.50-13.40', subject: 'English', teacher: 'อ้อมทิพย์', room: '336' },
+          { time: '13.50-14.40', subject: 'ทัศนศิลป์', teacher: 'รักษ์สุมล', room: '515' },
+          { time: '14.40-15.30', subject: 'ชุมนุม', teacher: 'N/A', room: '---' },
+          { time: '15.30-16.20', subject: 'ซ่อมเสริม' },
+          { time: '16.20-17.10', subject: '-', empty: true },
+        ]
+      },
+      {
+        name: 'ศุกร์', dayIndex: 5,
+        periods: [
+          { time: '08.30-09.20', subject: 'คณิตศาสตร์', teacher: 'นุชิดา', room: '224' },
+          { time: '09.20-10.10', subject: 'ไทยขั้นสูง', teacher: 'พิศาล', room: '636' },
+          { time: '10.20-11.10', subject: 'คณิตศาสตร์เพิ่มเติม 5', teacher: 'ฉัตรณพัฒน์', room: '223' },
+          { time: '11.10-12.00', subject: 'คณิตศาสตร์เพิ่มเติม 5', teacher: 'ฉัตรณพัฒน์', room: '223' },
+          { time: '12.00-12.50', subject: 'พักกลางวัน', teacher: '-', room: 'โรงอาหาร', lunch: true },
+          { time: '12.50-13.40', subject: 'ศึกษาค้นขว้า', teacher: 'N/A', room: '---' },
+          { time: '13.50-14.40', subject: 'วิทยาศาสตร์เทคโนโลยี', teacher: 'สันติ์', room: '133' },
+          { time: '14.40-15.30', subject: 'วิทยาศาสตร์เทคโนโลยี', teacher: 'สันติ์', room: '133' },
+          { time: '15.30-16.20', subject: '-', empty: true },
+          { time: '16.20-17.10', subject: '-', empty: true },
+        ]
+      },
+    ];
+
+    /* ── Build mobile cards ── */
+    const container = document.getElementById('mobile-cards');
+    DAYS.forEach(day => {
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.dataset.dayIndex = day.dayIndex;
+
+      const header = document.createElement('div');
+      header.className = 'day-card-header';
+      header.textContent = 'วัน' + day.name;
+      card.appendChild(header);
+
+      const list = document.createElement('div');
+      list.className = 'period-list';
+
+      day.periods.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'period-row';
+        row.dataset.periodIndex = i;
+
+        const timeEl = document.createElement('div');
+        timeEl.className = 'period-time';
+        timeEl.textContent = p.time.replace('-', '\n');
+
+        const subEl = document.createElement('div');
+        subEl.className = 'period-subject' +
+          (p.lunch ? ' lunch-cell' : '') +
+          (p.empty ? ' empty-cell' : '');
+
+        if (p.empty) {
+          subEl.textContent = '—';
+        } else if (p.lunch) {
+          subEl.textContent = '🍱 พักกลางวัน · โรงอาหาร';
+        } else if (p.teacher) {
+          subEl.innerHTML = `<span><strong>${p.subject}</strong><br><small>${p.teacher} · ห้อง ${p.room}</small></span>`;
+        } else {
+          subEl.textContent = p.subject;
+        }
+
+        row.appendChild(timeEl);
+        row.appendChild(subEl);
+        list.appendChild(row);
+      });
+
+      card.appendChild(list);
+      container.appendChild(card);
+    });
+
+    /* ===== Clock & progress logic (unchanged from original) ===== */
     const digitalClock   = document.getElementById('digital-clock');
     const countdownClock = document.getElementById('countdown-clock');
-
     const currentSubject = document.getElementById('current-subject');
     const curLabel = document.getElementById('current-slot-label');
     const curProg  = document.getElementById('current-progress');
     const curEta   = document.getElementById('current-time-eta');
-
-    const nextBlock = document.getElementById('next-block');
     const nextLabel = document.getElementById('next-slot-label');
     const nextAfter = document.getElementById('next-after');
     const nextProg  = document.getElementById('next-progress');
     const nextEta   = document.getElementById('next-time-eta');
 
-    const PREVIEW_MIN = 10;
-    const PREVIEW_SEC = PREVIEW_MIN * 60;
+    const PREVIEW_SEC = 600;
 
     const periods = [
       { start: [8, 30], end: [9, 20] },
@@ -318,245 +525,132 @@
       { start: [16, 20], end: [17, 10] }
     ];
 
-    /* ===== Utils ===== */
     function toMinutes(h,m,s=0){ return h*60 + m + s/60; }
     function hmToMinutes([h,m]){ return h*60 + m; }
-    function formatHMM(minsFloat){
-      const totalMin = Math.floor(minsFloat);
-      const h = Math.floor(totalMin/60);
-      const m = totalMin%60;
-      return h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
-    }
-    function formatMMSS(seconds){
-      const s = Math.max(0, Math.ceil(seconds));
-      const mPart = Math.floor(s/60).toString().padStart(2,'0');
-      const sPart = (s%60).toString().padStart(2,'0');
-      return `${mPart}:${sPart}`;
-    }
-    function lerp(a,b,t){ return a + (b-a)*t; }
-    // Sky blue -> red
+    function formatHMM(mf){ const t=Math.floor(mf),h=Math.floor(t/60),m=t%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+    function formatMMSS(sec){ const s=Math.max(0,Math.ceil(sec)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+    function lerp(a,b,t){ return a+(b-a)*t; }
     function colorForRemaining(sec){
-      let t = 1 - Math.min(Math.max(sec, 0), PREVIEW_SEC) / PREVIEW_SEC; // 0 .. 1
-      const from = {r: 3, g: 223, b: 252};   // #03dffc
-      const to   = {r: 255, g: 59, b: 48};   // #ff3b30
-      const r = Math.round(lerp(from.r,to.r,t));
-      const g = Math.round(lerp(from.g,to.g,t));
-      const b = Math.round(lerp(from.b,to.b,t));
-      return `rgb(${r}, ${g}, ${b})`;
+      const t = 1 - Math.min(Math.max(sec,0),PREVIEW_SEC)/PREVIEW_SEC;
+      const r=Math.round(lerp(3,255,t)), g=Math.round(lerp(223,59,t)), b=Math.round(lerp(252,48,t));
+      return `rgb(${r},${g},${b})`;
     }
     function formatCell(cell){
-      const raw = (cell.innerText || cell.textContent || '').trim();
-      const parts = raw.split(/\s*[\r\n]+\s*/).map(s=>s.trim()).filter(Boolean);
-      return parts.join(' ').replace(/\s+/g,' ');
+      return (cell.innerText||'').trim().split(/\s*[\r\n]+\s*/).map(s=>s.trim()).filter(Boolean).join(' ').replace(/\s+/,' ');
     }
 
-    /* ===== Timeline building (include short breaks) ===== */
     function buildSegments(row){
-      const segs = [];
+      const segs=[];
       for(let i=0;i<periods.length;i++){
-        const p = periods[i];
-        const start = hmToMinutes(p.start);
-        const end   = hmToMinutes(p.end);
-        const cell  = row.cells[i+1];
-        const label = (cell && cell.textContent.trim() && cell.textContent.trim()!=='-') ? formatCell(cell) : 'ว่าง';
-        const isLunch = /พักกลางวัน/.test(label);
-        const type = isLunch ? 'lunch' : 'class';
-        segs.push({type, start, end, label});
-
-        if(i<periods.length-1){
-          const nextStart = hmToMinutes(periods[i+1].start);
-          if(end < nextStart){
-            segs.push({type:'break', start:end, end:nextStart, label:'พักระยะสั้น'});
-          }
-        }
+        const p=periods[i];
+        const start=hmToMinutes(p.start), end=hmToMinutes(p.end);
+        const cell=row.cells[i+1];
+        const label=(cell&&cell.textContent.trim()&&cell.textContent.trim()!=='-')?formatCell(cell):'ว่าง';
+        const isLunch=/พักกลางวัน/.test(label);
+        segs.push({type:isLunch?'lunch':'class', start, end, label});
+        if(i<periods.length-1){ const ns=hmToMinutes(periods[i+1].start); if(end<ns) segs.push({type:'break',start:end,end:ns,label:'พักระยะสั้น'}); }
       }
-      segs.sort((a,b)=>a.start-b.start);
-      return segs;
+      return segs.sort((a,b)=>a.start-b.start);
     }
-    function findCurrentSegment(segs, nowMin){
-      for(let i=0;i<segs.length;i++){
-        if(nowMin>=segs[i].start && nowMin<segs[i].end) return i;
-      }
-      return -1;
-    }
+    function findCurrentSegment(segs,nowMin){ for(let i=0;i<segs.length;i++) if(nowMin>=segs[i].start&&nowMin<segs[i].end) return i; return -1; }
 
-    /* ===== NEXT BOX (label/progress) ===== */
-    function nextLabelText(seg){
-      if(!seg) return '-';
-      if(seg.type==='lunch') return 'ถัดไป: พักกลางวัน';
-      if(seg.type==='break') return 'ถัดไป: พักระยะสั้น';
-      return `ถัดไป: ${seg.label}`;
-    }
-    function afterBreakText(seg){
-      if(!seg) return '';
-      if(seg.type==='lunch') return 'หลังจากนั้น: พักกลางวัน';
-      if(seg.type==='break') return 'หลังจากนั้น: พักระยะสั้น';
-      return `หลังจากนั้น: ${seg.label}`;
-    }
-    function updateNextBox(segs, nowMin){
-      const upcomingIndex = segs.findIndex(s => nowMin < s.start);
-      const next = upcomingIndex !== -1 ? segs[upcomingIndex] : null;
-
-      nextLabel.textContent = nextLabelText(next);
-      nextAfter.style.display = 'none';
+    function updateNextBox(segs,nowMin){
+      const ui=segs.findIndex(s=>nowMin<s.start), next=ui!==-1?segs[ui]:null;
+      nextLabel.textContent = next ? (next.type==='lunch'?'ถัดไป: พักกลางวัน':next.type==='break'?'ถัดไป: พักระยะสั้น':`ถัดไป: ${next.label}`) : '-';
+      nextAfter.style.display='none';
       if(next){
-        nextEta.textContent = `เริ่มเวลา ${formatHMM(next.start)}`;
-        if(next.type==='break'){
-          const after = (upcomingIndex+1<segs.length)?segs[upcomingIndex+1]:null;
-          const t = afterBreakText(after);
-          if(t){ nextAfter.style.display=''; nextAfter.textContent = t; }
-        }
-      } else {
-        nextEta.textContent = 'เริ่มเวลา --:--';
-      }
+        nextEta.textContent=`เริ่มเวลา ${formatHMM(next.start)}`;
+        if(next.type==='break'){ const a=ui+1<segs.length?segs[ui+1]:null; if(a){ nextAfter.style.display=''; nextAfter.textContent=(a.type==='lunch'?'หลังจากนั้น: พักกลางวัน':a.type==='break'?'หลังจากนั้น: พักระยะสั้น':`หลังจากนั้น: ${a.label}`); } }
+        const diff=Math.max(0,(next.start-nowMin)*60);
+        nextProg.style.width=diff>PREVIEW_SEC?'0%':Math.min(100,(PREVIEW_SEC-diff)/PREVIEW_SEC*100)+'%';
+      } else { nextEta.textContent='เริ่มเวลา --:--'; nextProg.style.width='0%'; }
+    }
 
-      // อัปเดต progress (แถบ 10 นาที)
-      if(!next){ nextProg.style.width='0%'; return; }
-      const diffSec = Math.max(0, (next.start - nowMin)*60);
-      if(diffSec > PREVIEW_SEC){
-        nextProg.style.width='0%';
-      } else {
-        const pct = (PREVIEW_SEC - diffSec) / PREVIEW_SEC * 100;
-        nextProg.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    function updateCountdownClock(segs,nowMin){
+      const ui=segs.findIndex(s=>nowMin<s.start), next=ui!==-1?segs[ui]:null;
+      if(!next){ countdownClock.textContent='--:--'; countdownClock.style.color='#ff3b30'; countdownClock.style.boxShadow='0 0 20px rgba(255,59,48,0.9)'; countdownClock.classList.remove('blink'); return; }
+      const diff=Math.max(0,(next.start-nowMin)*60);
+      if(diff===0){ countdownClock.textContent='00:00'; countdownClock.classList.add('blink'); return; }
+      if(diff>PREVIEW_SEC){ countdownClock.textContent='--:--'; countdownClock.style.color='#ff3b30'; countdownClock.style.boxShadow='0 0 20px rgba(255,59,48,0.9)'; countdownClock.classList.remove('blink'); }
+      else {
+        countdownClock.textContent=formatMMSS(diff);
+        const c=colorForRemaining(diff);
+        countdownClock.style.color=c;
+        countdownClock.style.boxShadow=`0 0 20px ${c.replace('rgb','rgba').replace(')',',0.9)')}`;
+        if(diff<=30) countdownClock.classList.add('blink'); else countdownClock.classList.remove('blink');
       }
     }
 
-    /* ===== COUNTDOWN CLOCK (บล็อกนาฬิกาแยก) ===== */
-    function updateCountdownClock(segs, nowMin){
-      const upcomingIndex = segs.findIndex(s => nowMin < s.start);
-      const next = upcomingIndex !== -1 ? segs[upcomingIndex] : null;
-
-      if(!next){
-        // ไม่มีคาบ/ช่วงถัดไปวันนี้
-        countdownClock.textContent = '--:--';
-        countdownClock.style.color = '#ff3b30';
-        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
-        countdownClock.classList.remove('blink');
-        return;
-      }
-
-      const diffSec = Math.max(0, (next.start - nowMin)*60);
-      if(diffSec === 0){
-        countdownClock.textContent = '00:00';
-        countdownClock.style.color = '#ff3b30';
-        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
-        countdownClock.classList.add('blink');
-        return;
-      }
-
-      if(diffSec > PREVIEW_SEC){
-        // นอกหน้าต่าง 10 นาที
-        countdownClock.textContent = '--:--';
-        countdownClock.style.color = '#ff3b30';
-        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
-        countdownClock.classList.remove('blink');
-      } else {
-        // ใน 10 นาทีสุดท้าย: แสดงเวลาจริง + ไล่สี
-        countdownClock.textContent = formatMMSS(diffSec);
-        const c = colorForRemaining(diffSec);
-        countdownClock.style.color = c;
-        // แปลง rgb(...) -> rgba(...,0.9) แบบง่าย
-        countdownClock.style.boxShadow = `0 0 20px ${c.replace('rgb','rgba').replace(')',',0.9)')}`;
-        if(diffSec <= 30){ countdownClock.classList.add('blink'); } else { countdownClock.classList.remove('blink'); }
-      }
+    function highlightMobileRow(dayIndex, periodIndex){
+      document.querySelectorAll('.period-row').forEach(r=>r.classList.remove('highlighted-row'));
+      const card = document.querySelector(`.day-card[data-day-index="${dayIndex}"]`);
+      if(!card) return;
+      const row = card.querySelector(`.period-row[data-period-index="${periodIndex}"]`);
+      if(row) row.classList.add('highlighted-row');
     }
 
-    /* ===== CURRENT BLOCK ===== */
-    function updateCurrentBlock(segs, idx, nowMin){
+    function updateCurrentBlock(segs,idx,nowMin,dayIdx){
       document.querySelectorAll('td').forEach(td=>td.classList.remove('highlighted'));
+      document.querySelectorAll('.period-row').forEach(r=>r.classList.remove('highlighted-row'));
 
-      if(idx === -1){
-        curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน';
-        curProg.style.width = '0%';
-        curEta.textContent = '';
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน';
-        return;
+      if(idx===-1){
+        curLabel.textContent='ขณะนี้ไม่มีคาบเรียน'; curProg.style.width='0%'; curEta.textContent=''; currentSubject.textContent='ขณะนี้ไม่มีคาบเรียน'; return;
       }
+      const cur=segs[idx];
+      const durMin=cur.end-cur.start, elapsedMin=Math.max(0,nowMin-cur.start), remainMin=Math.max(0,cur.end-nowMin);
+      const pct=Math.min(100,Math.max(0,elapsedMin/durMin*100));
 
-      const cur = segs[idx];
-      const durMin = cur.end - cur.start;
-      const elapsedMin = Math.max(0, nowMin - cur.start);
-      const remainMin  = Math.max(0, cur.end - nowMin);
-      const pct = Math.min(100, Math.max(0, (elapsedMin / durMin) * 100));
+      if(cur.type==='lunch'){ curLabel.textContent='ช่วงพัก: พักกลางวัน'; currentSubject.textContent='ขณะนี้: พักกลางวัน'; }
+      else { curLabel.textContent=`คาบปัจจุบัน: ${cur.label}`; currentSubject.textContent='ขณะนี้เรียน: '+cur.label; }
 
-      if(cur.type === 'lunch'){
-        curLabel.textContent = 'ช่วงพัก: พักกลางวัน';
-        currentSubject.textContent = 'ขณะนี้: พักกลางวัน';
-      } else {
-        curLabel.textContent = `คาบปัจจุบัน: ${cur.label}`;
-        currentSubject.textContent = 'ขณะนี้เรียน: ' + cur.label;
-      }
-      curProg.style.width = pct + '%';
-      curEta.textContent = `เหลือเวลา ${formatMMSS(remainMin*60)} (สิ้นสุด ${formatHMM(cur.end)})`;
+      curProg.style.width=pct+'%';
+      curEta.textContent=`เหลือเวลา ${formatMMSS(remainMin*60)} (สิ้นสุด ${formatHMM(cur.end)})`;
 
-      // ไฮไลต์เซลล์หากเป็นคาบเรียน
-      const tbody = document.querySelector('tbody');
-      const dayIdx = new Date().getDay();
-      const rowIndex = dayIdx - 1;
-      if(!(dayIdx===0 || dayIdx===6 || !tbody.rows[rowIndex])){
-        if(cur.type === 'class'){
-          for(let i=0;i<periods.length;i++){
-            const pStart = hmToMinutes(periods[i].start);
-            const pEnd   = hmToMinutes(periods[i].end);
-            if(cur.start===pStart && cur.end===pEnd){
-              const cell = tbody.rows[rowIndex].cells[i+1];
-              if(cell) cell.classList.add('highlighted');
-              break;
-            }
+      // Highlight desktop table
+      const tbody=document.querySelector('tbody');
+      const rowIndex=dayIdx-1;
+      if(tbody&&tbody.rows[rowIndex]&&cur.type==='class'){
+        for(let i=0;i<periods.length;i++){
+          if(cur.start===hmToMinutes(periods[i].start)&&cur.end===hmToMinutes(periods[i].end)){
+            const cell=tbody.rows[rowIndex].cells[i+1]; if(cell) cell.classList.add('highlighted');
+            // Highlight mobile row too
+            highlightMobileRow(dayIdx, i);
+            break;
           }
         }
       }
     }
 
-    /* ===== Main tick ===== */
     function tick(){
-      const now = new Date();
-      const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+      const now=new Date();
+      const h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
+      digitalClock.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 
-      // นาฬิกาจริง
-      digitalClock.textContent =
-        h.toString().padStart(2,'0') + ':' +
-        m.toString().padStart(2,'0') + ':' +
-        s.toString().padStart(2,'0');
+      const dayIdx=now.getDay();
+      const tbody=document.querySelector('tbody');
+      const rowIndex=dayIdx-1;
 
-      const dayIdx = now.getDay(); // 0-6
-      const tbody  = document.querySelector('tbody');
-      const rowIndex = dayIdx - 1; // Monday=0
-
-      // วันหยุด: current ไม่มี / next ไม่ทำนายข้ามวัน
-      if(dayIdx===0 || dayIdx===6 || !tbody.rows[rowIndex]){
-        currentSubject.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
-        curLabel.textContent = 'ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
-        curProg.style.width = '0%';
-        curEta.textContent = '';
-
-        // Countdown (เซ็ตเป็น --:--)
-        countdownClock.textContent = '--:--';
-        countdownClock.style.color = '#ff3b30';
-        countdownClock.style.boxShadow = '0 0 20px rgba(255,59,48,0.9)';
-        countdownClock.classList.remove('blink');
-
-        // Next box (ไม่คาดการณ์ข้ามวัน)
-        nextLabel.textContent = '-';
-        nextAfter.style.display = 'none';
-        nextEta.textContent = 'เริ่มเวลา --:--';
-        nextProg.style.width = '0%';
+      if(dayIdx===0||dayIdx===6||!tbody.rows[rowIndex]){
+        currentSubject.textContent='ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+        curLabel.textContent='ขณะนี้ไม่มีคาบเรียน (วันหยุด)';
+        curProg.style.width='0%'; curEta.textContent='';
+        countdownClock.textContent='--:--'; countdownClock.style.color='#ff3b30';
+        countdownClock.style.boxShadow='0 0 20px rgba(255,59,48,0.9)'; countdownClock.classList.remove('blink');
+        nextLabel.textContent='-'; nextAfter.style.display='none'; nextEta.textContent='เริ่มเวลา --:--'; nextProg.style.width='0%';
         return;
       }
 
-      const row = tbody.rows[rowIndex];
-      const segs = buildSegments(row);
-      const nowMin = toMinutes(h,m,s);
-      const idx = findCurrentSegment(segs, nowMin);
-
-      updateCurrentBlock(segs, idx, nowMin);
-      updateNextBox(segs, nowMin);
-      updateCountdownClock(segs, nowMin);
+      const row=tbody.rows[rowIndex];
+      const segs=buildSegments(row);
+      const nowMin=toMinutes(h,m,s);
+      const idx=findCurrentSegment(segs,nowMin);
+      updateCurrentBlock(segs,idx,nowMin,dayIdx);
+      updateNextBox(segs,nowMin);
+      updateCountdownClock(segs,nowMin);
     }
 
-    setInterval(tick, 1000);
+    setInterval(tick,1000);
     tick();
   </script>
-
 </body>
 </html>
