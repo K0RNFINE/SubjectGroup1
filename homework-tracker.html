@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task Tracker · ม.5/1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:        #080c14;
+      --surface:   rgba(12, 20, 38, 0.82);
+      --glass:     rgba(255,255,255,0.06);
+      --border:    rgba(100,160,255,0.18);
+      --accent:    #5b9fff;
+      --accent2:   #a78bfa;
+      --green:     #34d399;
+      --gold:      #fbbf24;
+      --red:       #f87171;
+      --text:      #e2eeff;
+      --muted:     #7a9cc4;
+      --panel-w:   280px;
+      --radius:    14px;
+      --font-hud:  'Orbitron', monospace;
+      --font-body: 'Sarabun', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        url('jpcity.jfif'),
+        radial-gradient(ellipse at 20% 10%, rgba(91,159,255,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(167,139,250,0.10) 0%, transparent 55%);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-blend-mode: overlay, normal, normal;
+      color: var(--text);
+      min-height: 100vh;
+      transition: padding-left 0.38s ease;
+    }
+
+    /* grain overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.35;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      transition: padding-left 0.38s ease;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .site-header h1 {
+      font-family: var(--font-hud);
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+      margin-bottom: 10px;
+    }
+    .clock-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .clock-box {
+      font-family: var(--font-hud);
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      color: var(--accent);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 24px;
+      box-shadow: 0 0 22px rgba(91,159,255,0.25), inset 0 0 12px rgba(91,159,255,0.06);
+      letter-spacing: 0.08em;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    /* ── GLASS CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(91,159,255,0.4), transparent);
+    }
+
+    .card-title {
+      font-family: var(--font-hud);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── FORM ── */
+    .form-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+
+    textarea, input[type="date"], input[type="time"] {
+      font-family: var(--font-body);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(91,159,255,0.15);
+    }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    textarea::placeholder { color: var(--muted); }
+
+    .form-row-inline {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input[type="date"], input[type="time"] {
+      flex: 1 1 130px;
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      color-scheme: dark;
+    }
+
+    /* ── BUTTONS ── */
+    button {
+      font-family: var(--font-body);
+      font-weight: 700;
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+    }
+    button:active { transform: scale(0.96); }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(91,159,255,0.4);
+      flex-shrink: 0;
+    }
+    .btn-main:hover { opacity: 0.88; }
+
+    .btn-complete {
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(52,211,153,0.35);
+    }
+    .btn-delete {
+      background: linear-gradient(135deg, var(--red), #dc2626);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(248,113,113,0.35);
+    }
+    .btn-priority {
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      color: #1a0e00;
+      box-shadow: 0 3px 10px rgba(251,191,36,0.4);
+    }
+    .btn-edit {
+      background: linear-gradient(135deg, var(--accent2), #7c3aed);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(167,139,250,0.35);
+    }
+
+    /* ── LISTS GRID ── */
+    .lists-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 14px;
+    }
+
+    /* ── TASK ITEM ── */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .task-list::-webkit-scrollbar { width: 4px; }
+    .task-list::-webkit-scrollbar-track { background: transparent; }
+    .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .task-item {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 10px 12px;
+      animation: fadeUp 0.25s ease both;
+      transition: box-shadow 0.2s;
+    }
+    .task-item:hover { box-shadow: 0 4px 18px rgba(91,159,255,0.15); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-priority { border-left-color: var(--gold); box-shadow: 0 0 14px rgba(251,191,36,0.2); }
+    .task-completed { border-left-color: rgba(120,120,140,0.5); opacity: 0.6; }
+
+    .task-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .task-text { font-size: 0.92rem; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .task-meta { font-size: 0.72rem; color: var(--muted); text-align: right; line-height: 1.5; white-space: nowrap; }
+    .task-remaining { font-size: 0.75rem; font-family: var(--font-hud); margin-top: 2px; }
+    .task-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .task-buttons button { font-size: 0.75rem; padding: 5px 12px; }
+
+    .task-empty { font-size: 0.85rem; color: var(--muted); text-align: center; padding: 20px 0; }
+
+    /* progress bar inside task */
+    .task-progress-track {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .task-progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+    }
+
+    /* ── APP LAYOUT ── */
+    .app-stack { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ══════════════════════════════════
+       SIDEBAR HUD
+    ══════════════════════════════════ */
+    .ln-toggle {
+      position: fixed;
+      left: 0; top: 45%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      padding: 9px 13px;
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 1rem;
+      z-index: 9999;
+      box-shadow: 0 0 18px rgba(91,159,255,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: left 0.38s ease, border-radius 0.38s ease;
+      user-select: none;
+    }
+    .ln-toggle.open {
+      left: var(--panel-w);
+      border-radius: 12px 0 0 12px;
+    }
+
+    .ln-panel {
+      position: fixed;
+      left: calc(-1 * var(--panel-w));
+      top: 0;
+      width: var(--panel-w);
+      height: 100vh;
+      padding: 22px 18px;
+      background: rgba(8, 14, 30, 0.75);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.5), inset -1px 0 0 rgba(91,159,255,0.12);
+      transition: left 0.38s cubic-bezier(0.4,0,0.2,1);
+      z-index: 9998;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .ln-panel.open { left: 0; }
+
+    /* deco */
+    .ln-deco {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .ln-deco-1 {
+      width: 180px; height: 180px;
+      top: -60px; right: -60px;
+      background: radial-gradient(circle, rgba(91,159,255,0.18), transparent 70%);
+      animation: lnFloat 6s ease-in-out infinite;
+    }
+    .ln-deco-2 {
+      width: 120px; height: 120px;
+      bottom: 40px; left: -40px;
+      background: radial-gradient(circle, rgba(167,139,250,0.15), transparent 70%);
+      animation: lnFloat 8s ease-in-out infinite reverse;
+    }
+    .ln-scanline {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: rgba(91,159,255,0.3);
+      animation: lnScan 4s linear infinite;
+    }
+    @keyframes lnFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes lnScan  { 0%{top:0%} 100%{top:100%} }
+
+    .ln-title {
+      font-family: var(--font-hud);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      position: relative; z-index: 1;
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    .ln-block {
+      margin-bottom: 22px;
+      position: relative; z-index: 1;
+    }
+    .ln-label {
+      font-family: var(--font-hud);
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ln-value {
+      font-family: var(--font-hud);
+      font-size: 1.35rem;
+      color: var(--text);
+      text-shadow: 0 0 12px rgba(91,159,255,0.7);
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .ln-value.sm { font-size: 0.95rem; }
+    .ln-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 14px 0;
+      position: relative; z-index: 1;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .page { padding: 16px 12px 80px; }
+
+      .site-header h1 { font-size: 0.85rem; }
+      .clock-box { font-size: 1.3rem; padding: 8px 16px; min-width: 140px; }
+
+      .lists-grid { grid-template-columns: 1fr; }
+
+      .form-row-inline { flex-direction: column; }
+      input[type="date"], input[type="time"] { width: 100%; }
+
+      .task-top { flex-direction: column; gap: 4px; }
+      .task-meta { text-align: left; }
+      .task-buttons button { font-size: 0.72rem; padding: 5px 10px; }
+
+      /* HUD panel narrows on small screens */
+      :root { --panel-w: 240px; }
+      .ln-value { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 380px) {
+      .clock-box { font-size: 1.1rem; }
+      .task-text { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR HUD ══ -->
+<div class="ln-toggle" id="ln-toggle">▶</div>
+<div class="ln-panel" id="ln-panel">
+  <div class="ln-deco ln-deco-1"></div>
+  <div class="ln-deco ln-deco-2"></div>
+  <div class="ln-scanline"></div>
+
+  <div class="ln-title">Leo/need · HUD</div>
+
+  <div class="ln-block">
+    <div class="ln-label">Time</div>
+    <div class="ln-value" id="ln-time">00:00:00</div>
+  </div>
+
+  <div class="ln-divider"></div>
+
+  <div class="ln-block">
+    <div class="ln-label">Next Due</div>
+    <div class="ln-value sm" id="ln-next">—</div>
+  </div>
+
+  <div class="ln-block">
+    <div class="ln-label">Time Left</div>
+    <div class="ln-value sm" id="ln-due-time">—</div>
+  </div>
+
+  <div class="ln-divider"></div>
+
+  <div class="ln-block">
+    <div class="ln-label">Tasks Left</div>
+    <div class="ln-value" id="ln-left">0</div>
+  </div>
+
+  <div class="ln-block">
+    <div class="ln-label">Uptime</div>
+    <div class="ln-value" id="ln-uptime">00:00:00</div>
+  </div>
+</div>
+
+<!-- ══ MAIN PAGE ══ -->
+<div class="page" id="page">
+
+  <header class="site-header">
+    <h1>TASK TRACKER · ม.5/1 กลุ่ม 3</h1>
+    <div class="clock-row">
+      <div class="clock-box" id="digital-clock">00:00:00</div>
+    </div>
+  </header>
+
+  <div class="app-stack">
+
+    <!-- Add / Edit form -->
+    <div class="card">
+      <div class="card-title">บันทึกงานการบ้าน</div>
+      <div class="card-sub">พิมพ์งาน เลือกวันและเวลาส่ง แล้วกด เพิ่มงาน · งานเรียงตามกำหนดส่ง + งานสำคัญอยู่บนสุด</div>
+      <div class="form-stack">
+        <textarea id="task-text" placeholder="เช่น การบ้านคณิต หน้า 52 ข้อ 1-10"></textarea>
+        <div class="form-row-inline">
+          <input type="date" id="task-date" />
+          <input type="time" id="task-time" />
+          <button class="btn-main" id="add-task">＋ เพิ่มงาน</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lists -->
+    <div class="lists-grid">
+      <div class="card">
+        <div class="card-title">งานที่ต้องทำ</div>
+        <div class="card-sub">⭐ สำคัญ + ใกล้กำหนดอยู่บนสุด</div>
+        <div id="pending-list" class="task-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">เสร็จแล้ว ✅</div>
+        <div class="card-sub">ลบอัตโนมัติหลัง 7 วัน</div>
+        <div id="completed-list" class="task-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ══ UTILS ══ */
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = 'homework-tasks-v2';
+
+  /* ══ CLOCK ══ */
+  function tickClock() {
+    const n = new Date();
+    const t = [n.getHours(), n.getMinutes(), n.getSeconds()]
+      .map(v => String(v).padStart(2,'0')).join(':');
+    $('digital-clock').textContent = t;
+    $('ln-time').textContent = t;
+  }
+  setInterval(tickClock, 500); tickClock();
+
+  /* ══ UPTIME ══ */
+  const startTime = Date.now();
+  function tickUptime() {
+    let s = Math.floor((Date.now() - startTime) / 1000);
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60);  s %= 60;
+    $('ln-uptime').textContent = [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
+  }
+  setInterval(tickUptime, 1000); tickUptime();
+
+  /* ══ TASKS ══ */
+  let tasks = [];
+  let editingId = null;
+
+  function load() {
+    try { const r = localStorage.getItem(STORAGE_KEY); tasks = r ? JSON.parse(r) : []; }
+    catch { tasks = []; }
+    cleanup();
+  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+  function cleanup() {
+    const cutoff = Date.now() - 7*24*60*60*1000;
+    const before = tasks.length;
+    tasks = tasks.filter(t => !t.completed || (t.completedAt && t.completedAt > cutoff));
+    if (tasks.length !== before) save();
+  }
+
+  function makeDue(d, t) {
+    if (!d || !t) return null;
+    const dt = new Date(`${d}T${t}:00`);
+    return isNaN(dt) ? null : dt;
+  }
+
+  function fmtDue(d) {
+    const pad = v => String(v).padStart(2,'0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} น.`;
+  }
+
+  function fmtRemaining(ms) {
+    const sign = ms >= 0;
+    const abs = Math.abs(ms);
+    const totalMin = Math.floor(abs / 60000);
+    const d = Math.floor(totalMin / 1440);
+    const h = Math.floor((totalMin % 1440) / 60);
+    const m = totalMin % 60;
+    let s = '';
+    if (d) s += `${d}ว `;
+    if (h) s += `${h}ชม `;
+    s += `${m}น`;
+    return sign ? `⏱ เหลือ ${s.trim()}` : `🔴 เลย ${s.trim()}`;
+  }
+
+  function remainColor(ms) {
+    if (ms <= 0) return 'var(--red)';
+    if (ms < 86400000) return 'var(--red)';
+    if (ms < 3*86400000) return 'var(--gold)';
+    return 'var(--accent)';
+  }
+
+  /* ══ RENDER ══ */
+  function render() {
+    cleanup();
+
+    const pending   = tasks.filter(t => !t.completed).sort((a,b) => {
+      if (a.priority && !b.priority) return -1;
+      if (!a.priority && b.priority) return 1;
+      return new Date(a.due) - new Date(b.due);
+    });
+    const completed = tasks.filter(t => t.completed).sort((a,b) => b.completedAt - a.completedAt);
+
+    const pl = $('pending-list');
+    const cl = $('completed-list');
+    pl.innerHTML = ''; cl.innerHTML = '';
+
+    if (!pending.length)   pl.innerHTML = '<div class="task-empty">ยังไม่มีงานที่ต้องทำ 🎉</div>';
+    if (!completed.length) cl.innerHTML = '<div class="task-empty">ยังไม่มีงานที่เสร็จ</div>';
+
+    pending.forEach(t   => pl.appendChild(makeEl(t, false)));
+    completed.forEach(t => cl.appendChild(makeEl(t, true)));
+
+    updateHUD(pending);
+  }
+
+  function makeEl(task, done) {
+    const due = new Date(task.due);
+    const ms  = due - Date.now();
+
+    const el = document.createElement('div');
+    el.className = 'task-item' +
+      (done              ? ' task-completed' : '') +
+      (task.priority && !done ? ' task-priority' : '');
+    el.dataset.id = task.id;
+
+    /* top row */
+    const top = document.createElement('div');
+    top.className = 'task-top';
+
+    const txt = document.createElement('div');
+    txt.className = 'task-text';
+    txt.id = `tt-${task.id}`;
+    if (task.priority && !done) txt.textContent = '⭐ ' + task.text;
+    else txt.textContent = task.text;
+    if (done) txt.style.textDecoration = 'line-through';
+
+    const meta = document.createElement('div');
+    meta.className = 'task-meta';
+    meta.innerHTML = `กำหนด:<br>${fmtDue(due)}`;
+
+    top.appendChild(txt); top.appendChild(meta);
+
+    /* remaining */
+    const rem = document.createElement('div');
+    rem.className = 'task-remaining';
+    rem.id = `tr-${task.id}`;
+    if (!done) {
+      rem.textContent = fmtRemaining(ms);
+      rem.style.color = remainColor(ms);
+    } else {
+      rem.textContent = '✅ เสร็จแล้ว';
+      rem.style.color = 'var(--green)';
+    }
+
+    /* mini progress bar (% of 7-day window) */
+    const track = document.createElement('div');
+    track.className = 'task-progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'task-progress-fill';
+    if (!done) {
+      const total = due - new Date(task.createdAt);
+      const elapsed = Date.now() - new Date(task.createdAt);
+      const pct = total > 0 ? Math.min(100, Math.max(0, elapsed/total*100)) : 0;
+      fill.style.width = pct + '%';
+      if (ms < 0) fill.style.background = 'var(--red)';
+      else if (ms < 86400000) fill.style.background = `linear-gradient(90deg, var(--gold), var(--red))`;
+    } else {
+      fill.style.width = '100%';
+      fill.style.background = 'var(--green)';
+    }
+    track.appendChild(fill);
+
+    /* buttons */
+    const btns = document.createElement('div');
+    btns.className = 'task-buttons';
+
+    if (!done) {
+      btns.innerHTML = `
+        <button class="btn-priority" data-id="${task.id}" data-action="priority">${task.priority ? '★ ยกเลิกสำคัญ' : '⭐ สำคัญ'}</button>
+        <button class="btn-edit"     data-id="${task.id}" data-action="edit">✏️ แก้ไข</button>
+        <button class="btn-complete" data-id="${task.id}" data-action="complete">✅ เสร็จ</button>
+      `;
+    }
+    btns.innerHTML += `<button class="btn-delete" data-id="${task.id}" data-action="delete">🗑 ลบ</button>`;
+
+    el.appendChild(top);
+    el.appendChild(rem);
+    el.appendChild(track);
+    el.appendChild(btns);
+    return el;
+  }
+
+  /* live remaining update */
+  function liveUpdate() {
+    tasks.filter(t => !t.completed).forEach(t => {
+      const due = new Date(t.due);
+      const ms  = due - Date.now();
+      const rem = $(`tr-${t.id}`);
+      if (rem) { rem.textContent = fmtRemaining(ms); rem.style.color = remainColor(ms); }
+    });
+  }
+  setInterval(liveUpdate, 30000);
+
+  /* ══ HUD UPDATE ══ */
+  function updateHUD(pending) {
+    $('ln-left').textContent = pending.length;
+    if (!pending.length) {
+      $('ln-next').textContent = '—';
+      $('ln-due-time').textContent = '—';
+      return;
+    }
+    const next = pending[0];
+    const ms   = new Date(next.due) - Date.now();
+    $('ln-next').textContent     = next.text.length > 28 ? next.text.slice(0,28)+'…' : next.text;
+    $('ln-due-time').textContent = fmtRemaining(ms);
+  }
+  setInterval(() => {
+    const pending = tasks.filter(t=>!t.completed).sort((a,b)=>{
+      if (a.priority&&!b.priority) return -1;
+      if (!a.priority&&b.priority) return 1;
+      return new Date(a.due)-new Date(b.due);
+    });
+    updateHUD(pending);
+  }, 5000);
+
+  /* ══ ADD / EDIT ══ */
+  $('add-task').addEventListener('click', () => {
+    const text = ($('task-text').value || '').trim();
+    const due  = makeDue($('task-date').value, $('task-time').value);
+    if (!text) { alert('กรุณาพิมพ์รายละเอียดงาน'); return; }
+    if (!due)  { alert('กรุณาเลือกวันและเวลาส่งให้ครบ'); return; }
+
+    if (editingId) {
+      const t = tasks.find(t => t.id === editingId);
+      if (t) { t.text = text; t.due = due.toISOString(); }
+      editingId = null;
+      $('add-task').textContent = '＋ เพิ่มงาน';
+      $('add-task').className = 'btn-main';
+    } else {
+      tasks.push({ id: uid(), text, due: due.toISOString(), completed: false,
+        createdAt: Date.now(), completedAt: null, priority: false });
+    }
+    save(); render();
+    $('task-text').value = '';
+  });
+
+  /* ══ LIST ACTIONS ══ */
+  function handleClick(e) {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const { id, action } = btn.dataset;
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+
+    if (action === 'delete')   { tasks = tasks.filter(t => t.id !== id); save(); render(); }
+    if (action === 'complete') { t.completed = true; t.completedAt = Date.now(); save(); render(); }
+    if (action === 'priority') { t.priority = !t.priority; save(); render(); }
+    if (action === 'edit') {
+      const d = new Date(t.due);
+      const pad = v => String(v).padStart(2,'0');
+      $('task-text').value  = t.text;
+      $('task-date').value  = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      $('task-time').value  = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      editingId = id;
+      $('add-task').textContent = '💾 บันทึกการแก้ไข';
+      $('add-task').className   = 'btn-edit';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  $('pending-list').addEventListener('click',   handleClick);
+  $('completed-list').addEventListener('click', handleClick);
+
+  /* ══ HUD TOGGLE ══ */
+  const panel  = $('ln-panel');
+  const toggle = $('ln-toggle');
+  toggle.onclick = () => {
+    const open = panel.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.textContent = open ? '◀' : '▶';
+  };
+
+  /* ══ INIT ══ */
+  load(); render();
+</script>
+</body>
+</html>
