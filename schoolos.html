@@ -126,9 +126,7 @@
     .card-title{font-family:var(--fhud);font-size:.72rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:5px;}
     .card-sub{font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
 
-    /* ══════════════════════════════
-       SECTION 1: TIMETABLE
-    ══════════════════════════════ */
+    /* ══ TIMETABLE ══ */
     .tt-header{text-align:center;margin-bottom:18px;}
     .tt-header h1{
       font-family:var(--fhud);
@@ -174,7 +172,7 @@
       border-collapse:collapse; width:100%; table-layout:fixed;
       background:rgba(255,255,255,.07); border-radius:10px;
       overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,.3);
-      min-width:700px;
+      min-width:900px;
     }
     th,td{
       border:1px solid rgba(255,255,255,.1);
@@ -186,13 +184,13 @@
     tbody th{background:rgba(79,158,255,.15);color:var(--cyan);font-size:.72rem;}
     td.highlighted{background:rgba(79,158,255,.35)!important;box-shadow:inset 0 0 12px rgba(79,158,255,.4);color:#fff;font-weight:700;}
 
-    /* task-dot on table cell */
-    .cell-wrap{position:relative;display:inline-block;width:100%;}
+    /* ── Per-cell task dot ── */
+    td { position: relative; }
     .task-dot{
       display:inline-block; width:7px;height:7px;
       border-radius:50%; background:var(--gold);
       box-shadow:0 0 6px var(--gold);
-      position:absolute; top:2px; right:2px;
+      position:absolute; top:3px; right:3px;
       cursor:pointer; z-index:2;
       animation:tdpulse 2s infinite;
     }
@@ -223,26 +221,21 @@
     }
     .task-popup-close:hover{color:var(--red);}
 
-    /* desktop table always visible on desktop */
-    table.desktop-table{display:table;}
-
     /* mobile cards */
     .mobile-cards{display:none;flex-direction:column;gap:12px;width:100%;}
     .day-card{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
     .day-card-header{background:rgba(79,158,255,.22);color:var(--cyan);font-family:var(--fhud);font-size:.7rem;letter-spacing:.1em;font-weight:700;padding:8px 14px;text-transform:uppercase;}
     .period-list{display:flex;flex-direction:column;}
-    .period-row{display:flex;align-items:stretch;border-top:1px solid rgba(255,255,255,.06);}
+    .period-row{display:flex;align-items:stretch;border-top:1px solid rgba(255,255,255,.06);position:relative;}
     .period-time{background:rgba(79,158,255,.1);color:var(--muted);font-size:.65rem;font-weight:600;padding:8px 6px;min-width:68px;display:flex;align-items:center;justify-content:center;text-align:center;border-right:1px solid rgba(255,255,255,.07);line-height:1.3;font-family:var(--fhud);}
     .period-subject{flex:1;padding:7px 10px;font-size:.78rem;color:var(--text);line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:6px;}
     .period-subject.lunch-cell{color:var(--muted);font-style:italic;}
     .period-subject.empty-cell{color:rgba(255,255,255,.2);}
     .period-row.highlighted-row .period-time{background:rgba(79,158,255,.3);color:var(--cyan);}
     .period-row.highlighted-row .period-subject{background:rgba(79,158,255,.15);font-weight:700;}
-    .mob-task-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);flex-shrink:0;animation:tdpulse 2s infinite;}
+    .mob-task-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);flex-shrink:0;cursor:pointer;animation:tdpulse 2s infinite;}
 
-    /* ══════════════════════════════
-       SECTION 2: TASK TRACKER
-    ══════════════════════════════ */
+    /* ══ TASK TRACKER ══ */
     .form-stack{display:flex;flex-direction:column;gap:9px;}
     textarea,input[type="date"],input[type="time"]{
       font-family:var(--fbody);
@@ -322,13 +315,11 @@
 </head>
 <body>
 
-<!-- Sync badge -->
 <div class="sync-badge" id="sync-badge">
   <div class="sync-dot"></div>
   <span id="sync-text">เชื่อมต่อ...</span>
 </div>
 
-<!-- HUD Sidebar -->
 <div class="hud-toggle" id="hud-toggle">▶</div>
 <div class="hud-panel" id="hud-panel">
   <div class="hud-deco hud-d1"></div>
@@ -346,10 +337,8 @@
   <div class="hud-block"><div class="hud-label">Uptime</div><div class="hud-val" id="hv-uptime">00:00:00</div></div>
 </div>
 
-<!-- ══ PAGE ══ -->
 <div class="page">
 
-  <!-- ── SECTION 1: TIMETABLE ── -->
   <div class="tt-header">
     <h1>SCHOOLOS · ม.6/1 กลุ่ม 1 · ภาคเรียน 1/2569</h1>
     <div class="clocks">
@@ -376,18 +365,34 @@
 
   <div class="current-subject-bar" id="cur-subject">ขณะนี้ไม่มีคาบเรียน</div>
 
-  <!-- Desktop table -->
   <div class="table-wrapper">
+    <!--
+      FIXED TABLE: exactly 12 period columns per row (no duplicates).
+      Periods:
+        [0] 08.30-09.20  [1] 09.20-10.10  [2] 10.20-11.10  [3] 11.10-12.00
+        [4] 12.00-12.50  [5] 12.50-13.40  [6] 13.50-14.40  [7] 14.40-15.30
+        [8] 15.30-16.20  [9] 16.20-17.10  [10] 17.20-18.20 [11] 18.20-20.10
+    -->
     <table class="desktop-table">
       <thead>
         <tr>
           <th>วัน/เวลา</th>
-          <th>08.30-09.20</th><th>09.20-10.10</th><th>10.20-11.10</th><th>11.10-12.00</th>
-          <th>12.00-12.50</th><th>12.50-13.40</th><th>13.50-14.40</th><th>14.40-15.30</th>
-          <th>15.30-16.20</th><th>16.20-17.10</th><th>17.20-18.20</th><th>18.20-20:10</th>
+          <th>08.30<br>09.20</th>
+          <th>09.20<br>10.10</th>
+          <th>10.20<br>11.10</th>
+          <th>11.10<br>12.00</th>
+          <th>12.00<br>12.50</th>
+          <th>12.50<br>13.40</th>
+          <th>13.50<br>14.40</th>
+          <th>14.40<br>15.30</th>
+          <th>15.30<br>16.20</th>
+          <th>16.20<br>17.10</th>
+          <th>17.20<br>18.20</th>
+          <th>18.20<br>20.10</th>
         </tr>
       </thead>
       <tbody id="tt-tbody">
+        <!-- จันทร์ -->
         <tr>
           <th>จันทร์</th>
           <td>คณิตศาสตร์ขั้นสูง<br>ณัฐดนัย<br>224</td>
@@ -398,9 +403,12 @@
           <td>สังคมขั้นสูง<br>ทินบัติ<br>532</td>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-          <td>-</td><td>-</td>
-          <td>-</td><td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
+        <!-- อังคาร -->
         <tr>
           <th>อังคาร</th>
           <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
@@ -411,10 +419,12 @@
           <td>English<br>ออมทิพย์<br>336</td>
           <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
           <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
-          <td>ประชุมสี</td><td>-</td>
-          <td>-</td><td>-</td>
-
+          <td>ประชุมสี</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
+        <!-- พุธ -->
         <tr>
           <th>พุธ</th>
           <td>English High tier<br>ศกุณกาญจน์<br>337</td>
@@ -425,10 +435,12 @@
           <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
           <td>English Secondary<br>Ma.Fabie<br>337</td>
           <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
-          <td>-</td><td>-</td>
-          <td>-</td><td>-</td>
-
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
+        <!-- พฤหัสบดี -->
         <tr>
           <th>พฤหัสบดี</th>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
@@ -439,10 +451,12 @@
           <td>English<br>อ้อมทิพย์<br>336</td>
           <td>ทัศนศิลป์<br>รักษ์สุมล<br>515</td>
           <td>ชุมนุม<br>N/A<br>---</td>
-          <td>ซ่อมเสริม</td><td>-</td>
-          <td>-</td><td>-</td>
-
+          <td>ซ่อมเสริม</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
+        <!-- ศุกร์ -->
         <tr>
           <th>ศุกร์</th>
           <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
@@ -453,18 +467,18 @@
           <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
           <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
           <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
-          <td>-</td><td>-</td>
-          <td>-</td><td>-</td>
-
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Mobile cards -->
     <div class="mobile-cards" id="mobile-cards"></div>
   </div>
 
-  <!-- ── SECTION 2: TASK TRACKER ── -->
+  <!-- TASK TRACKER -->
   <div class="section-divider">
     <div class="sd-line"></div>
     <div class="sd-label">📋 Task Tracker · Firebase</div>
@@ -499,16 +513,14 @@
     </div>
   </div>
 
-</div><!-- /page -->
+</div>
 
-<!-- Task popup (shared) -->
 <div class="task-popup" id="task-popup" style="display:none;">
   <button class="task-popup-close" id="popup-close">✕</button>
   <div class="task-popup-title">📋 งานในช่วงนี้</div>
   <div id="popup-body"></div>
 </div>
 
-<!-- Firebase compat CDN -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
@@ -532,7 +544,6 @@ const syncText = document.getElementById('sync-text');
 function setSync(state, msg){ badge.className='sync-badge '+state; syncText.textContent=msg; }
 setSync('syncing','เชื่อมต่อ...');
 
-/* ══ UTILS ══ */
 const $ = id => document.getElementById(id);
 let tasks = {}, editingId = null;
 
@@ -549,7 +560,26 @@ function fmtRemaining(ms){
 function remColor(ms){ if(ms<=0||ms<86400000)return'var(--red)';if(ms<3*86400000)return'var(--gold)';return'var(--accent)'; }
 function makeDue(d,t){ if(!d||!t)return null;const dt=new Date(`${d}T${t}:00`);return isNaN(dt)?null:dt; }
 
-/* ══ TIMETABLE DATA for mobile cards ══ */
+/* ══ TIMETABLE DATA ══
+   Periods array index must match table column order (0-based, after the day-name th).
+   PERIODS[i] corresponds to cells[i+1] in each tbody row.
+*/
+const PERIODS=[
+  {start:[8,30],  end:[9,20]},   // 0
+  {start:[9,20],  end:[10,10]},  // 1
+  {start:[10,20], end:[11,10]},  // 2
+  {start:[11,10], end:[12,0]},   // 3
+  {start:[12,0],  end:[12,50]},  // 4  lunch
+  {start:[12,50], end:[13,40]},  // 5
+  {start:[13,50], end:[14,40]},  // 6
+  {start:[14,40], end:[15,30]},  // 7
+  {start:[15,30], end:[16,20]},  // 8
+  {start:[16,20], end:[17,10]},  // 9
+  {start:[17,20], end:[18,20]},  // 10
+  {start:[18,20], end:[20,10]},  // 11
+];
+
+/* ══ MOBILE CARD DATA (mirrors table) ══ */
 const DAYS=[
   {name:'จันทร์',dayIndex:1,periods:[
     {time:'08.30-09.20',subject:'คณิตศาสตร์ขั้นสูง',teacher:'ณัฐดนัย',room:'224'},
@@ -639,14 +669,18 @@ DAYS.forEach(day => {
     timeEl.className='period-time'; timeEl.textContent=p.time.replace('-','\n');
     const subEl=document.createElement('div');
     subEl.className='period-subject'+(p.lunch?' lunch-cell':'')+(p.empty?' empty-cell':'');
-    if(p.empty) subEl.textContent='—';
-    else if(p.lunch) subEl.innerHTML='🍱 พักกลางวัน · โรงอาหาร';
-    else if(p.teacher) subEl.innerHTML=`<span><strong>${p.subject}</strong><br><small>${p.teacher} · ห้อง ${p.room}</small></span>`;
-    else subEl.textContent=p.subject;
-    // task dot placeholder (populated by updateTaskDots)
-    const dotPlaceholder=document.createElement('div');
-    dotPlaceholder.className='mob-dot-wrap'; dotPlaceholder.dataset.dayIndex=day.dayIndex; dotPlaceholder.dataset.periodIndex=i;
-    subEl.appendChild(dotPlaceholder);
+    const subText=document.createElement('span');
+    if(p.empty) subText.textContent='—';
+    else if(p.lunch) subText.innerHTML='🍱 พักกลางวัน · โรงอาหาร';
+    else if(p.teacher) subText.innerHTML=`<strong>${p.subject}</strong><br><small>${p.teacher} · ห้อง ${p.room}</small>`;
+    else subText.textContent=p.subject;
+    subEl.appendChild(subText);
+    // dot placeholder — populated by updateTaskDots()
+    const dotWrap=document.createElement('span');
+    dotWrap.className='mob-dot-wrap';
+    dotWrap.dataset.dayIndex=day.dayIndex;
+    dotWrap.dataset.periodIndex=i;
+    subEl.appendChild(dotWrap);
     row.appendChild(timeEl); row.appendChild(subEl); list.appendChild(row);
   });
   card.appendChild(list); mobContainer.appendChild(card);
@@ -655,26 +689,26 @@ DAYS.forEach(day => {
 /* ══ TASK POPUP ══ */
 const popup=$('task-popup');
 $('popup-close').onclick=()=>popup.style.display='none';
-document.addEventListener('click',e=>{if(!popup.contains(e.target)&&!e.target.classList.contains('task-dot')&&!e.target.classList.contains('mob-task-dot')) popup.style.display='none';});
+document.addEventListener('click',e=>{
+  if(!popup.contains(e.target)&&!e.target.classList.contains('task-dot')&&!e.target.classList.contains('mob-task-dot'))
+    popup.style.display='none';
+});
 
-function showPopup(anchorEl, dueDateStr){
+function showPopup(anchorEl, subjectName){
   const arr=Object.values(tasks).filter(t=>!t.completed);
-  // filter tasks due on the same date as anchorEl's context (or all pending if no filter)
-  let relevant=arr;
-  if(dueDateStr){
-    relevant=arr.filter(t=>{
-      const d=new Date(t.due);
-      return d.toDateString()===new Date(dueDateStr).toDateString();
-    });
-    if(!relevant.length) relevant=arr; // fallback: show all
-  }
+  // Filter tasks whose text mentions the subject name (loose match), fallback to all pending
+  let relevant = subjectName
+    ? arr.filter(t => t.text.toLowerCase().includes(subjectName.toLowerCase()))
+    : arr;
+  if(!relevant.length) relevant = arr;
   relevant.sort((a,b)=>new Date(a.due)-new Date(b.due));
 
   const body=$('popup-body'); body.innerHTML='';
-  if(!relevant.length){ body.innerHTML='<div class="task-popup-empty">ไม่มีงานค้างอยู่</div>'; }
-  else {
+  if(!relevant.length){
+    body.innerHTML='<div class="task-popup-empty">ไม่มีงานค้างอยู่</div>';
+  } else {
     relevant.slice(0,6).forEach(t=>{
-      const d=new Date(t.due), ms=d-Date.now();
+      const d=new Date(t.due),ms=d-Date.now();
       const item=document.createElement('div'); item.className='task-popup-item';
       item.innerHTML=`<div>${t.priority?'⭐ ':''}${t.text}</div><div class="tpi-due" style="color:${remColor(ms)}">${fmtRemaining(ms)} · กำหนด ${fmtDue(d)}</div>`;
       body.appendChild(item);
@@ -684,55 +718,69 @@ function showPopup(anchorEl, dueDateStr){
   const rect=anchorEl.getBoundingClientRect();
   let top=rect.bottom+6+window.scrollY;
   let left=rect.left+window.scrollX;
-  // keep in viewport
   if(left+290>window.innerWidth) left=window.innerWidth-295;
   if(left<4) left=4;
   popup.style.top=top+'px'; popup.style.left=left+'px';
 }
 
-/* ══ UPDATE TASK DOTS ON TABLE ══ */
+/* ══ UPDATE TASK DOTS — per subject cell ══ */
+function getSubjectLabel(cellText){
+  // First line of the cell is the subject name
+  return (cellText||'').trim().split(/[\r\n]+/)[0].trim();
+}
+
 function updateTaskDots(){
-  // clear old dots
+  // Clear existing dots
   document.querySelectorAll('.task-dot').forEach(d=>d.remove());
   document.querySelectorAll('.mob-task-dot').forEach(d=>d.remove());
 
   const pending=Object.values(tasks).filter(t=>!t.completed);
   if(!pending.length) return;
 
-  // For each table cell, check if any pending task's due date falls on that day
   const tbody=document.getElementById('tt-tbody');
-  const dayMap={1:0,2:1,3:2,4:3,5:4}; // dayIndex->row
+  const dayMap={1:0,2:1,3:2,4:3,5:4};
+
+  // For each pending task, find matching subject cells across the whole table
   pending.forEach(t=>{
-    const due=new Date(t.due);
-    const dayIdx=due.getDay();
-    if(dayIdx===0||dayIdx===6) return;
-    const rowIdx=dayMap[dayIdx];
-    if(rowIdx===undefined) return;
-    const row=tbody.rows[rowIdx];
-    if(!row) return;
-    // add dot to first non-empty cell of that day (or all cells — we put it on the day header th)
-    const th=row.cells[0];
-    if(th&&!th.querySelector('.task-dot')){
-      const dot=document.createElement('div');
-      dot.className='task-dot';
-      dot.title='มีงานวันนี้ — คลิกเพื่อดู';
-      dot.style.position='absolute'; dot.style.top='4px'; dot.style.right='4px';
-      if(getComputedStyle(th).position==='static') th.style.position='relative';
-      th.appendChild(dot);
-      dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot, due.toISOString());});
-    }
-    // mobile: add dot to that day card header
-    const mCard=document.querySelector(`.day-card[data-day-index="${dayIdx}"]`);
-    if(mCard){
-      const mHdr=mCard.querySelector('.day-card-header');
-      if(mHdr&&!mHdr.querySelector('.mob-task-dot')){
-        const mdot=document.createElement('div');
-        mdot.className='mob-task-dot';
-        mdot.style.cssText='display:inline-block;margin-left:8px;cursor:pointer;vertical-align:middle;';
-        mHdr.appendChild(mdot);
-        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,due.toISOString());});
-      }
-    }
+    const tText=t.text.toLowerCase();
+    // Check every data cell in the table
+    Array.from(tbody.rows).forEach((row,rowIdx)=>{
+      const dayIndex=rowIdx+1; // Mon=1 … Fri=5
+      Array.from(row.cells).forEach((cell,colIdx)=>{
+        if(colIdx===0) return; // skip day-name th
+        const subjectLabel=getSubjectLabel(cell.textContent);
+        if(!subjectLabel||subjectLabel==='-') return;
+        // Match: task text contains subject name OR subject name contains key words from task
+        const subLower=subjectLabel.toLowerCase();
+        const matches=tText.includes(subLower) || subLower.split(/\s+/).some(w=>w.length>2&&tText.includes(w));
+        if(!matches) return;
+
+        // Add dot to desktop cell (once per cell)
+        if(!cell.querySelector('.task-dot')){
+          const dot=document.createElement('div');
+          dot.className='task-dot';
+          dot.title=`มีงาน: ${t.text}`;
+          cell.appendChild(dot);
+          dot.addEventListener('click',e=>{
+            e.stopPropagation();
+            showPopup(dot, subjectLabel);
+          });
+        }
+
+        // Add dot to mobile card row (same dayIndex, periodIndex = colIdx-1)
+        const periodIdx=colIdx-1;
+        const wrap=document.querySelector(`.mob-dot-wrap[data-day-index="${dayIndex}"][data-period-index="${periodIdx}"]`);
+        if(wrap&&!wrap.querySelector('.mob-task-dot')){
+          const mdot=document.createElement('span');
+          mdot.className='mob-task-dot';
+          wrap.appendChild(mdot);
+          mdot.addEventListener('click',e=>{
+            e.stopPropagation();
+            showPopup(mdot, subjectLabel);
+          });
+        }
+      });
+    });
   });
 }
 
@@ -752,10 +800,9 @@ function render(){
   pending.forEach(t=>pl.appendChild(makeTaskEl(t,false)));
   completed.forEach(t=>cl.appendChild(makeTaskEl(t,true)));
 
-  // HUD
   $('hv-left').textContent=pending.length;
   if(pending.length){
-    const nx=pending[0], ms=new Date(nx.due)-Date.now();
+    const nx=pending[0],ms=new Date(nx.due)-Date.now();
     $('hv-nexttask').textContent=nx.text.length>24?nx.text.slice(0,24)+'…':nx.text;
     $('hv-tasktime').textContent=fmtRemaining(ms);
   } else {
@@ -803,7 +850,6 @@ function makeTaskEl(task,done){
   return el;
 }
 
-/* live remaining refresh */
 setInterval(()=>{
   Object.entries(tasks).forEach(([key,t])=>{
     if(t.completed)return;
@@ -815,7 +861,6 @@ setInterval(()=>{
 /* ══ FIREBASE LISTENER ══ */
 tasksRef.on('value',snap=>{
   tasks=snap.val()||{};
-  // cleanup >7 days
   const cut=Date.now()-7*24*60*60*1000;
   snap.forEach(c=>{const t=c.val();if(t.completed&&t.completedAt&&t.completedAt<cut)c.ref.remove();});
   render();
@@ -858,14 +903,8 @@ function handleClick(e){
 $('pending-list').addEventListener('click',handleClick);
 $('completed-list').addEventListener('click',handleClick);
 
-/* ══ TIMETABLE LOGIC ══ */
+/* ══ TIMETABLE CLOCK ══ */
 const PSEC=600;
-const PERIODS=[
-  {start:[8,30],end:[9,20]},{start:[9,20],end:[10,10]},{start:[10,20],end:[11,10]},
-  {start:[11,10],end:[12,0]},{start:[12,0],end:[12,50]},{start:[12,50],end:[13,40]},
-  {start:[13,50],end:[14,40]},{start:[14,40],end:[15,30]},{start:[15,30],end:[16,20]},
-  {start:[16,20],end:[17,10]},{start:[17,20],end:[18,20]},{start:[18,20],end:[20,10]}
-];
 const toMin=(h,m,s=0)=>h*60+m+s/60;
 const hmMin=([h,m])=>h*60+m;
 const fmtHM=mf=>{const t=Math.floor(mf),h=Math.floor(t/60),m=t%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');};
@@ -910,7 +949,6 @@ function ttTick(){
   const row=tbody.rows[rowIdx],segs=buildSegs(row),nowMin=toMin(h,m,s);
   const idx=findSeg(segs,nowMin);
 
-  // clear highlights
   document.querySelectorAll('td').forEach(td=>td.classList.remove('highlighted'));
   document.querySelectorAll('.period-row').forEach(r=>r.classList.remove('highlighted-row'));
 
@@ -928,11 +966,9 @@ function ttTick(){
       $('cur-label').textContent=`คาบปัจจุบัน: ${cur.label}`;
       $('cur-subject').textContent='ขณะนี้เรียน: '+cur.label;
       $('hv-period').textContent=cur.label.length>22?cur.label.slice(0,22)+'…':cur.label;
-      // highlight desktop
       for(let i=0;i<PERIODS.length;i++){
         if(cur.start===hmMin(PERIODS[i].start)&&cur.end===hmMin(PERIODS[i].end)){
           const cell=tbody.rows[rowIdx].cells[i+1];if(cell)cell.classList.add('highlighted');
-          // mobile
           const mCard=document.querySelector(`.day-card[data-day-index="${dayIdx}"]`);
           if(mCard){const mRow=mCard.querySelector(`.period-row[data-period-index="${i}"]`);if(mRow)mRow.classList.add('highlighted-row');}
           break;
@@ -941,7 +977,6 @@ function ttTick(){
     }
   }
 
-  // next
   const ui=segs.findIndex(s=>nowMin<s.start),next=ui!==-1?segs[ui]:null;
   $('nxt-label').textContent=next?(next.type==='lunch'?'ถัดไป: พักกลางวัน':next.type==='break'?'ถัดไป: พักระยะสั้น':`ถัดไป: ${next.label}`):'-';
   $('nxt-after').style.display='none';
@@ -950,7 +985,6 @@ function ttTick(){
     if(next.type==='break'&&ui+1<segs.length){const a=segs[ui+1];$('nxt-after').style.display='';$('nxt-after').textContent=`หลังจากนั้น: ${a.label}`;}
     const diff=Math.max(0,(next.start-nowMin)*60);
     $('nxt-prog').style.width=diff>PSEC?'0%':Math.min(100,(PSEC-diff)/PSEC*100)+'%';
-    // countdown clock
     if(diff===0){cdr.textContent='00:00';cdr.classList.add('blink');}
     else if(diff>PSEC){cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');}
     else{
