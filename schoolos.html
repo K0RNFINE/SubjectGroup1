@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>SchoolOS · ม.6/1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #070b12;
+      --surface:  rgba(10,18,36,0.85);
+      --glass:    rgba(255,255,255,0.05);
+      --border:   rgba(80,140,255,0.18);
+      --accent:   #4f9eff;
+      --accent2:  #a78bfa;
+      --green:    #34d399;
+      --gold:     #fbbf24;
+      --red:      #f87171;
+      --cyan:     #22d3ee;
+      --text:     #ddeeff;
+      --muted:    #6a8fb0;
+      --panel-w:  270px;
+      --r:        13px;
+      --fhud:     'Orbitron', monospace;
+      --fbody:    'Sarabun', sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+
+    body {
+      font-family: var(--fbody);
+      background: var(--bg);
+      background-image:
+        url('jpcity.jfif'),
+        radial-gradient(ellipse at 15% 10%, rgba(79,158,255,.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 90%, rgba(167,139,250,.09) 0%, transparent 50%);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-blend-mode: overlay,normal,normal;
+      color: var(--text);
+      min-height: 100vh;
+    }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity:.4;
+    }
+
+    /* ── SYNC BADGE ── */
+    .sync-badge {
+      position:fixed; top:10px; right:12px; z-index:9999;
+      font-family:var(--fhud); font-size:.58rem; letter-spacing:.1em;
+      padding:4px 12px; border-radius:999px;
+      border:1px solid var(--border); backdrop-filter:blur(10px);
+      background:rgba(7,11,18,.8);
+      display:flex; align-items:center; gap:6px; transition:all .3s;
+    }
+    .sync-dot { width:6px;height:6px;border-radius:50%;background:var(--muted);transition:all .3s; }
+    .sync-badge.synced  .sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+    .sync-badge.syncing .sync-dot{background:var(--gold); box-shadow:0 0 6px var(--gold); animation:sdot 1s infinite;}
+    .sync-badge.error   .sync-dot{background:var(--red);  box-shadow:0 0 6px var(--red);}
+    @keyframes sdot{0%,100%{opacity:1}50%{opacity:.25}}
+
+    /* ── HUD SIDEBAR ── */
+    .hud-toggle {
+      position:fixed; left:0; top:45%; transform:translateY(-50%);
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; padding:8px 12px; border-radius:0 11px 11px 0;
+      cursor:pointer; font-weight:900; font-size:.95rem; z-index:9999;
+      box-shadow:0 0 16px rgba(79,158,255,.5);
+      border:1px solid rgba(255,255,255,.15);
+      transition:left .35s ease, border-radius .35s ease;
+      user-select:none;
+    }
+    .hud-toggle.open{left:var(--panel-w);border-radius:11px 0 0 11px;}
+    .hud-panel {
+      position:fixed; left:calc(-1 * var(--panel-w)); top:0;
+      width:var(--panel-w); height:100vh; padding:20px 16px;
+      background:rgba(7,11,20,.8); backdrop-filter:blur(18px);
+      border-right:1px solid var(--border);
+      box-shadow:4px 0 28px rgba(0,0,0,.6);
+      transition:left .35s cubic-bezier(.4,0,.2,1);
+      z-index:9998; overflow:hidden; display:flex; flex-direction:column;
+    }
+    .hud-panel.open{left:0;}
+    .hud-deco{position:absolute;border-radius:50%;pointer-events:none;}
+    .hud-d1{width:160px;height:160px;top:-50px;right:-50px;background:radial-gradient(circle,rgba(79,158,255,.16),transparent 70%);animation:hdf 6s ease-in-out infinite;}
+    .hud-d2{width:110px;height:110px;bottom:40px;left:-35px;background:radial-gradient(circle,rgba(167,139,250,.13),transparent 70%);animation:hdf 8s ease-in-out infinite reverse;}
+    .hud-scan{position:absolute;left:0;right:0;height:1px;background:rgba(79,158,255,.28);animation:hscan 4s linear infinite;}
+    @keyframes hdf{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    @keyframes hscan{0%{top:0%}100%{top:100%}}
+    .hud-title{font-family:var(--fhud);font-size:.65rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;margin-bottom:22px;position:relative;z-index:1;text-shadow:0 0 10px var(--accent);}
+    .hud-block{margin-bottom:18px;position:relative;z-index:1;}
+    .hud-label{font-family:var(--fhud);font-size:.55rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+    .hud-val{font-family:var(--fhud);font-size:1.25rem;color:var(--text);text-shadow:0 0 10px rgba(79,158,255,.7);line-height:1.3;word-break:break-word;}
+    .hud-val.sm{font-size:.88rem;}
+    .hud-div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:12px 0;position:relative;z-index:1;}
+
+    /* ── PAGE ── */
+    .page{position:relative;z-index:1;max-width:1020px;margin:0 auto;padding:24px 18px 60px;}
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      display:flex; align-items:center; gap:12px;
+      margin:28px 0 18px;
+    }
+    .section-divider .sd-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    .section-divider .sd-label{
+      font-family:var(--fhud); font-size:.65rem; letter-spacing:.14em;
+      color:var(--accent); text-transform:uppercase;
+      padding:4px 14px; border:1px solid var(--border);
+      border-radius:999px; background:rgba(7,11,18,.7);
+      backdrop-filter:blur(8px);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r); padding:16px 18px;
+      backdrop-filter:blur(12px);
+      box-shadow:0 8px 28px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+      position:relative; overflow:hidden;
+    }
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(79,158,255,.35),transparent);}
+    .card-title{font-family:var(--fhud);font-size:.72rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:5px;}
+    .card-sub{font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+
+    /* ══════════════════════════════
+       SECTION 1: TIMETABLE
+    ══════════════════════════════ */
+    .tt-header{text-align:center;margin-bottom:18px;}
+    .tt-header h1{
+      font-family:var(--fhud);
+      font-size:clamp(.9rem,3.5vw,1.4rem);
+      font-weight:700; letter-spacing:.06em;
+      background:linear-gradient(135deg,var(--cyan),var(--accent));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      margin-bottom:10px;
+    }
+    .clocks{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+    .clock-box{
+      font-family:var(--fhud); color:var(--cyan);
+      font-size:clamp(1.3rem,5vw,2rem);
+      background:rgba(0,0,0,.6); border:1px solid var(--border);
+      border-radius:var(--r); padding:9px 22px;
+      box-shadow:0 0 20px rgba(34,211,238,.2), inset 0 0 10px rgba(34,211,238,.05);
+      letter-spacing:.08em; min-width:170px; text-align:center;
+    }
+    .countdown-box{color:var(--red);box-shadow:0 0 20px rgba(248,113,113,.25);}
+    @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.2}}
+    .blink{animation:blink 1s steps(2,start) infinite;}
+
+    .tt-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+    .prog-block{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:10px 12px;backdrop-filter:blur(4px);}
+    .prog-title{font-family:var(--fhud);font-size:.6rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;}
+    .prog-sub{font-size:.82rem;color:var(--text);margin-bottom:6px;line-height:1.4;}
+    .prog-note{font-size:.75rem;color:var(--muted);margin-bottom:6px;}
+    .prog-bar{width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+    .prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:999px;transition:width .3s ease;}
+    .prog-eta{margin-top:5px;font-size:.75rem;color:var(--cyan);font-family:var(--fhud);}
+
+    .current-subject-bar{
+      text-align:center; font-size:1rem; font-weight:600;
+      color:#fff; background:rgba(0,0,0,.55);
+      border:1px solid var(--border); border-radius:10px;
+      padding:9px 14px; margin:10px 0;
+      box-shadow:0 0 12px rgba(79,158,255,.15);
+    }
+
+    /* desktop table */
+    .table-wrapper{width:100%;overflow-x:auto;}
+    table.desktop-table{
+      border-collapse:collapse; width:100%; table-layout:fixed;
+      background:rgba(255,255,255,.07); border-radius:10px;
+      overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,.3);
+      min-width:700px;
+    }
+    th,td{
+      border:1px solid rgba(255,255,255,.1);
+      padding:8px 6px; text-align:center;
+      background:rgba(255,255,255,.04);
+      font-size:.75rem; line-height:1.35; color:var(--text);
+    }
+    thead th{background:rgba(79,158,255,.25);color:#fff;font-family:var(--fhud);font-size:.62rem;letter-spacing:.05em;}
+    tbody th{background:rgba(79,158,255,.15);color:var(--cyan);font-size:.72rem;}
+    td.highlighted{background:rgba(79,158,255,.35)!important;box-shadow:inset 0 0 12px rgba(79,158,255,.4);color:#fff;font-weight:700;}
+
+    /* task-dot on table cell */
+    .cell-wrap{position:relative;display:inline-block;width:100%;}
+    .task-dot{
+      display:inline-block; width:7px;height:7px;
+      border-radius:50%; background:var(--gold);
+      box-shadow:0 0 6px var(--gold);
+      position:absolute; top:2px; right:2px;
+      cursor:pointer; z-index:2;
+      animation:tdpulse 2s infinite;
+    }
+    @keyframes tdpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+
+    /* task popup */
+    .task-popup{
+      position:fixed; z-index:8000;
+      background:rgba(7,11,20,.95); border:1px solid var(--border);
+      border-radius:var(--r); padding:14px 16px;
+      box-shadow:0 12px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(79,158,255,.1);
+      backdrop-filter:blur(16px);
+      min-width:200px; max-width:280px;
+      animation:popIn .18s ease;
+      pointer-events:auto;
+    }
+    @keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+    .task-popup-title{font-family:var(--fhud);font-size:.6rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+    .task-popup-item{font-size:.8rem;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.4;}
+    .task-popup-item:last-child{border-bottom:none;}
+    .task-popup-item .tpi-due{font-size:.7rem;color:var(--muted);}
+    .task-popup-empty{font-size:.8rem;color:var(--muted);text-align:center;padding:8px 0;}
+    .task-popup-close{
+      position:absolute;top:8px;right:10px;
+      font-size:.9rem;cursor:pointer;color:var(--muted);
+      background:none;border:none;padding:2px 6px;
+      transition:color .2s;
+    }
+    .task-popup-close:hover{color:var(--red);}
+
+    /* desktop table always visible on desktop */
+    table.desktop-table{display:table;}
+
+    /* mobile cards */
+    .mobile-cards{display:none;flex-direction:column;gap:12px;width:100%;}
+    .day-card{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
+    .day-card-header{background:rgba(79,158,255,.22);color:var(--cyan);font-family:var(--fhud);font-size:.7rem;letter-spacing:.1em;font-weight:700;padding:8px 14px;text-transform:uppercase;}
+    .period-list{display:flex;flex-direction:column;}
+    .period-row{display:flex;align-items:stretch;border-top:1px solid rgba(255,255,255,.06);}
+    .period-time{background:rgba(79,158,255,.1);color:var(--muted);font-size:.65rem;font-weight:600;padding:8px 6px;min-width:68px;display:flex;align-items:center;justify-content:center;text-align:center;border-right:1px solid rgba(255,255,255,.07);line-height:1.3;font-family:var(--fhud);}
+    .period-subject{flex:1;padding:7px 10px;font-size:.78rem;color:var(--text);line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+    .period-subject.lunch-cell{color:var(--muted);font-style:italic;}
+    .period-subject.empty-cell{color:rgba(255,255,255,.2);}
+    .period-row.highlighted-row .period-time{background:rgba(79,158,255,.3);color:var(--cyan);}
+    .period-row.highlighted-row .period-subject{background:rgba(79,158,255,.15);font-weight:700;}
+    .mob-task-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);flex-shrink:0;animation:tdpulse 2s infinite;}
+
+    /* ══════════════════════════════
+       SECTION 2: TASK TRACKER
+    ══════════════════════════════ */
+    .form-stack{display:flex;flex-direction:column;gap:9px;}
+    textarea,input[type="date"],input[type="time"]{
+      font-family:var(--fbody);
+      background:rgba(0,0,0,.35); border:1px solid var(--border);
+      border-radius:9px; color:var(--text); outline:none;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    textarea:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,.12);}
+    textarea{width:100%;min-height:80px;padding:10px 13px;font-size:.92rem;resize:vertical;line-height:1.5;}
+    textarea::placeholder{color:var(--muted);}
+    .form-row-inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    input[type="date"],input[type="time"]{flex:1 1 128px;padding:8px 11px;font-size:.86rem;color-scheme:dark;}
+
+    button{
+      font-family:var(--fbody);font-weight:700;border:none;border-radius:999px;
+      padding:7px 16px;cursor:pointer;font-size:.82rem;
+      display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+      transition:opacity .15s,transform .1s;
+    }
+    button:active{transform:scale(.96);}
+    button:hover{opacity:.88;}
+    .btn-main    {background:linear-gradient(135deg,var(--accent),#3b82f6);color:#fff;box-shadow:0 4px 14px rgba(79,158,255,.35);flex-shrink:0;}
+    .btn-complete{background:linear-gradient(135deg,var(--green),#059669);color:#fff;box-shadow:0 3px 10px rgba(52,211,153,.3);}
+    .btn-delete  {background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;box-shadow:0 3px 10px rgba(248,113,113,.3);}
+    .btn-priority{background:linear-gradient(135deg,var(--gold),#d97706);color:#1a0e00;box-shadow:0 3px 10px rgba(251,191,36,.35);}
+    .btn-edit    {background:linear-gradient(135deg,var(--accent2),#7c3aed);color:#fff;box-shadow:0 3px 10px rgba(167,139,250,.3);}
+
+    .lists-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;}
+    .task-list{display:flex;flex-direction:column;gap:7px;max-height:400px;overflow-y:auto;padding-right:2px;}
+    .task-list::-webkit-scrollbar{width:3px;}
+    .task-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+    .task-item{
+      background:var(--glass);border:1px solid var(--border);
+      border-left:3px solid var(--accent);border-radius:9px;
+      padding:9px 11px;animation:fadeUp .22s ease both;transition:box-shadow .2s;
+    }
+    .task-item:hover{box-shadow:0 4px 16px rgba(79,158,255,.12);}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    .task-priority{border-left-color:var(--gold);box-shadow:0 0 12px rgba(251,191,36,.18);}
+    .task-completed{border-left-color:rgba(120,120,140,.4);opacity:.55;}
+    .task-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;}
+    .task-text{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.4;}
+    .task-meta{font-size:.7rem;color:var(--muted);text-align:right;line-height:1.5;white-space:nowrap;}
+    .task-remaining{font-size:.72rem;font-family:var(--fhud);margin-top:2px;}
+    .task-buttons{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+    .task-buttons button{font-size:.72rem;padding:4px 11px;}
+    .task-empty{font-size:.82rem;color:var(--muted);text-align:center;padding:18px 0;}
+    .prog-track{height:3px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:5px;overflow:hidden;}
+    .prog-track-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:640px){
+      .page{padding:14px 10px 70px;}
+      .tt-header h1{font-size:.85rem;}
+      .clock-box{font-size:1.2rem;padding:7px 14px;min-width:130px;}
+      .clocks{gap:7px;}
+      .tt-status-grid{grid-template-columns:1fr;}
+      table.desktop-table{display:none!important;}
+      .mobile-cards{display:flex!important;}
+      .lists-grid{grid-template-columns:1fr;}
+      .form-row-inline{flex-direction:column;}
+      input[type="date"],input[type="time"]{width:100%;}
+      .task-top{flex-direction:column;gap:3px;}
+      .task-meta{text-align:left;}
+      .task-buttons button{font-size:.7rem;padding:4px 9px;}
+      :root{--panel-w:240px;}
+      .hud-val{font-size:1.05rem;}
+      .sync-badge{font-size:.52rem;top:7px;right:7px;}
+      .task-popup{min-width:180px;max-width:240px;}
+    }
+    @media(min-width:641px){
+      table.desktop-table{display:table!important;}
+      .mobile-cards{display:none!important;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sync badge -->
+<div class="sync-badge" id="sync-badge">
+  <div class="sync-dot"></div>
+  <span id="sync-text">เชื่อมต่อ...</span>
+</div>
+
+<!-- HUD Sidebar -->
+<div class="hud-toggle" id="hud-toggle">▶</div>
+<div class="hud-panel" id="hud-panel">
+  <div class="hud-deco hud-d1"></div>
+  <div class="hud-deco hud-d2"></div>
+  <div class="hud-scan"></div>
+  <div class="hud-title">SchoolOS · HUD</div>
+  <div class="hud-block"><div class="hud-label">Time</div><div class="hud-val" id="hv-time">00:00:00</div></div>
+  <div class="hud-div"></div>
+  <div class="hud-block"><div class="hud-label">Now / Next</div><div class="hud-val sm" id="hv-period">—</div></div>
+  <div class="hud-div"></div>
+  <div class="hud-block"><div class="hud-label">Next Task Due</div><div class="hud-val sm" id="hv-nexttask">—</div></div>
+  <div class="hud-block"><div class="hud-label">Time Left</div><div class="hud-val sm" id="hv-tasktime">—</div></div>
+  <div class="hud-div"></div>
+  <div class="hud-block"><div class="hud-label">Tasks Left</div><div class="hud-val" id="hv-left">0</div></div>
+  <div class="hud-block"><div class="hud-label">Uptime</div><div class="hud-val" id="hv-uptime">00:00:00</div></div>
+</div>
+
+<!-- ══ PAGE ══ -->
+<div class="page">
+
+  <!-- ── SECTION 1: TIMETABLE ── -->
+  <div class="tt-header">
+    <h1>SCHOOLOS · ม.6/1 กลุ่ม 1 · ภาคเรียน 1/2569</h1>
+    <div class="clocks">
+      <div class="clock-box" id="digital-clock">00:00:00</div>
+      <div class="clock-box countdown-box" id="countdown-clock">--:--</div>
+    </div>
+  </div>
+
+  <div class="tt-status-grid">
+    <div class="prog-block">
+      <div class="prog-title">ช่วงเวลาปัจจุบัน</div>
+      <div class="prog-sub" id="cur-label">ขณะนี้ไม่มีคาบเรียน</div>
+      <div class="prog-bar"><div class="prog-fill" id="cur-prog"></div></div>
+      <div class="prog-eta" id="cur-eta"></div>
+    </div>
+    <div class="prog-block">
+      <div class="prog-title">ถัดไป</div>
+      <div class="prog-sub" id="nxt-label">-</div>
+      <div class="prog-note" id="nxt-after" style="display:none">-</div>
+      <div class="prog-bar"><div class="prog-fill" id="nxt-prog"></div></div>
+      <div class="prog-eta" id="nxt-eta">เริ่มเวลา --:--</div>
+    </div>
+  </div>
+
+  <div class="current-subject-bar" id="cur-subject">ขณะนี้ไม่มีคาบเรียน</div>
+
+  <!-- Desktop table -->
+  <div class="table-wrapper">
+    <table class="desktop-table">
+      <thead>
+        <tr>
+          <th>วัน/เวลา</th>
+          <th>08.30-09.20</th><th>09.20-10.10</th><th>10.20-11.10</th><th>11.10-12.00</th>
+          <th>12.00-12.50</th><th>12.50-13.40</th><th>13.50-14.40</th><th>14.40-15.30</th>
+          <th>15.30-16.20</th><th>16.20-17.10</th>
+        </tr>
+      </thead>
+      <tbody id="tt-tbody">
+        <tr>
+          <th>จันทร์</th>
+          <td>คณิตศาสตร์ขั้นสูง<br>ณัฐดนัย<br>224</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>สังคมขั้นสูง<br>ทินบัติ<br>532</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>-</td><td>-</td>
+        </tr>
+        <tr>
+          <th>อังคาร</th>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>ภาษาไทย<br>สุนีย์<br>624</td>
+          <td>แนะแนว<br>ธรณินทร์<br>611</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>English<br>ออมทิพย์<br>336</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>ประชุมสี</td><td>-</td>
+        </tr>
+        <tr>
+          <th>พุธ</th>
+          <td>English High tier<br>ศกุณกาญจน์<br>337</td>
+          <td>พลานามัย,พละ<br>วิมลณัฐ<br>อเนกประสงค์6</td>
+          <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
+          <td>เคมี 5<br>ดารุณี<br>433</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
+          <td>English Secondary<br>Ma.Fabie<br>337</td>
+          <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
+          <td>-</td><td>-</td>
+        </tr>
+        <tr>
+          <th>พฤหัสบดี</th>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
+          <td>ภาษาไทย<br>สุนีย์<br>624</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>English<br>อ้อมทิพย์<br>336</td>
+          <td>ทัศนศิลป์<br>รักษ์สุมล<br>515</td>
+          <td>ชุมนุม<br>N/A<br>---</td>
+          <td>ซ่อมเสริม</td><td>-</td>
+        </tr>
+        <tr>
+          <th>ศุกร์</th>
+          <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
+          <td>ไทยขั้นสูง<br>พิศาล<br>636</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>223</td>
+          <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
+          <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
+          <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
+          <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
+          <td>-</td><td>-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mobile cards -->
+    <div class="mobile-cards" id="mobile-cards"></div>
+  </div>
+
+  <!-- ── SECTION 2: TASK TRACKER ── -->
+  <div class="section-divider">
+    <div class="sd-line"></div>
+    <div class="sd-label">📋 Task Tracker · Firebase</div>
+    <div class="sd-line"></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-title">บันทึกงานการบ้าน</div>
+      <div class="card-sub">งานที่มีกำหนดส่งจะแสดงเป็น 🟡 บนตารางเรียน · ซิงค์ Firebase แบบ real-time ☁️</div>
+      <div class="form-stack">
+        <textarea id="task-text" placeholder="เช่น การบ้านคณิต หน้า 52 ข้อ 1-10"></textarea>
+        <div class="form-row-inline">
+          <input type="date" id="task-date"/>
+          <input type="time" id="task-time"/>
+          <button class="btn-main" id="add-task">＋ เพิ่มงาน</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lists-grid">
+      <div class="card">
+        <div class="card-title">งานที่ต้องทำ</div>
+        <div class="card-sub">⭐ สำคัญ + ใกล้กำหนดอยู่บนสุด</div>
+        <div id="pending-list" class="task-list"><div class="task-empty">กำลังโหลด...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">เสร็จแล้ว ✅</div>
+        <div class="card-sub">ลบอัตโนมัติหลัง 7 วัน</div>
+        <div id="completed-list" class="task-list"><div class="task-empty">กำลังโหลด...</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Task popup (shared) -->
+<div class="task-popup" id="task-popup" style="display:none;">
+  <button class="task-popup-close" id="popup-close">✕</button>
+  <div class="task-popup-title">📋 งานในช่วงนี้</div>
+  <div id="popup-body"></div>
+</div>
+
+<!-- Firebase compat CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* ══ FIREBASE ══ */
+firebase.initializeApp({
+  apiKey:            "AIzaSyCewMoKe7elxb0wi2iIPBGkCVEHKzyp6Sk",
+  authDomain:        "tasktracker-8c87d.firebaseapp.com",
+  databaseURL:       "https://tasktracker-8c87d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "tasktracker-8c87d",
+  storageBucket:     "tasktracker-8c87d.firebasestorage.app",
+  messagingSenderId: "642579600347",
+  appId:             "1:642579600347:web:fc1910589f557bd7f8cdfe"
+});
+const db = firebase.database();
+const tasksRef = db.ref('tasks');
+
+/* ══ SYNC BADGE ══ */
+const badge = document.getElementById('sync-badge');
+const syncText = document.getElementById('sync-text');
+function setSync(state, msg){ badge.className='sync-badge '+state; syncText.textContent=msg; }
+setSync('syncing','เชื่อมต่อ...');
+
+/* ══ UTILS ══ */
+const $ = id => document.getElementById(id);
+let tasks = {}, editingId = null;
+
+function fmtDue(d){
+  const p=v=>String(v).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}น.`;
+}
+function fmtRemaining(ms){
+  const sign=ms>=0, abs=Math.abs(ms), tm=Math.floor(abs/60000);
+  const d=Math.floor(tm/1440),h=Math.floor((tm%1440)/60),m=tm%60;
+  let s=''; if(d)s+=`${d}ว `;if(h)s+=`${h}ชม `;s+=`${m}น`;
+  return sign?`⏱ เหลือ ${s.trim()}`:`🔴 เลย ${s.trim()}`;
+}
+function remColor(ms){ if(ms<=0||ms<86400000)return'var(--red)';if(ms<3*86400000)return'var(--gold)';return'var(--accent)'; }
+function makeDue(d,t){ if(!d||!t)return null;const dt=new Date(`${d}T${t}:00`);return isNaN(dt)?null:dt; }
+
+/* ══ TIMETABLE DATA for mobile cards ══ */
+const DAYS=[
+  {name:'จันทร์',dayIndex:1,periods:[
+    {time:'08.30-09.20',subject:'คณิตศาสตร์ขั้นสูง',teacher:'ณัฐดนัย',room:'224'},
+    {time:'09.20-10.10',subject:'สังคม',teacher:'กัลยภิญญ์',room:'523'},
+    {time:'10.20-11.10',subject:'เคมี 5',teacher:'ดารุณี',room:'433'},
+    {time:'11.10-12.00',subject:'เคมี 5',teacher:'ดารุณี',room:'433'},
+    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
+    {time:'12.50-13.40',subject:'สังคมขั้นสูง',teacher:'ทินบัติ',room:'532'},
+    {time:'13.50-14.40',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
+    {time:'14.40-15.30',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
+    {time:'15.30-16.20',subject:'-',empty:true},
+    {time:'16.20-17.10',subject:'-',empty:true},
+  ]},
+  {name:'อังคาร',dayIndex:2,periods:[
+    {time:'08.30-09.20',subject:'คณิตศาสตร์เพิ่มเติม 5',teacher:'ฉัตรณพัฒน์',room:'223'},
+    {time:'09.20-10.10',subject:'คณิตศาสตร์เพิ่มเติม 5',teacher:'ฉัตรณพัฒน์',room:'223'},
+    {time:'10.20-11.10',subject:'ภาษาไทย',teacher:'สุนีย์',room:'624'},
+    {time:'11.10-12.00',subject:'แนะแนว',teacher:'ธรณินทร์',room:'611'},
+    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
+    {time:'12.50-13.40',subject:'English',teacher:'ออมทิพย์',room:'336'},
+    {time:'13.50-14.40',subject:'ชีววิทยา 5',teacher:'รุ่งทิพย์',room:'436'},
+    {time:'14.40-15.30',subject:'ชีววิทยา 5',teacher:'รุ่งทิพย์',room:'436'},
+    {time:'15.30-16.20',subject:'ประชุมสี'},
+    {time:'16.20-17.10',subject:'-',empty:true},
+  ]},
+  {name:'พุธ',dayIndex:3,periods:[
+    {time:'08.30-09.20',subject:'English High tier',teacher:'ศกุณกาญจน์',room:'337'},
+    {time:'09.20-10.10',subject:'พลานามัย, พละ',teacher:'วิมลณัฐ',room:'อเนกประสงค์6'},
+    {time:'10.20-11.10',subject:'ชีววิทยา 5',teacher:'รุ่งทิพย์',room:'436'},
+    {time:'11.10-12.00',subject:'เคมี 5',teacher:'ดารุณี',room:'433'},
+    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
+    {time:'12.50-13.40',subject:'คณิตศาสตร์',teacher:'นุชิดา',room:'224'},
+    {time:'13.50-14.40',subject:'English Secondary',teacher:'Ma.Fabie',room:'337'},
+    {time:'14.40-15.30',subject:'ศึกษาค้นขว้า',teacher:'N/A',room:'---'},
+    {time:'15.30-16.20',subject:'-',empty:true},
+    {time:'16.20-17.10',subject:'-',empty:true},
+  ]},
+  {name:'พฤหัสบดี',dayIndex:4,periods:[
+    {time:'08.30-09.20',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
+    {time:'09.20-10.10',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
+    {time:'10.20-11.10',subject:'ภาษาไทย',teacher:'สุนีย์',room:'624'},
+    {time:'11.10-12.00',subject:'สังคม',teacher:'กัลยภิญญ์',room:'523'},
+    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
+    {time:'12.50-13.40',subject:'English',teacher:'อ้อมทิพย์',room:'336'},
+    {time:'13.50-14.40',subject:'ทัศนศิลป์',teacher:'รักษ์สุมล',room:'515'},
+    {time:'14.40-15.30',subject:'ชุมนุม',teacher:'N/A',room:'---'},
+    {time:'15.30-16.20',subject:'ซ่อมเสริม'},
+    {time:'16.20-17.10',subject:'-',empty:true},
+  ]},
+  {name:'ศุกร์',dayIndex:5,periods:[
+    {time:'08.30-09.20',subject:'คณิตศาสตร์',teacher:'นุชิดา',room:'224'},
+    {time:'09.20-10.10',subject:'ไทยขั้นสูง',teacher:'พิศาล',room:'636'},
+    {time:'10.20-11.10',subject:'คณิตศาสตร์เพิ่มเติม 5',teacher:'ฉัตรณพัฒน์',room:'223'},
+    {time:'11.10-12.00',subject:'คณิตศาสตร์เพิ่มเติม 5',teacher:'ฉัตรณพัฒน์',room:'223'},
+    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
+    {time:'12.50-13.40',subject:'ศึกษาค้นขว้า',teacher:'N/A',room:'---'},
+    {time:'13.50-14.40',subject:'วิทยาศาสตร์เทคโนโลยี',teacher:'สันติ์',room:'133'},
+    {time:'14.40-15.30',subject:'วิทยาศาสตร์เทคโนโลยี',teacher:'สันติ์',room:'133'},
+    {time:'15.30-16.20',subject:'-',empty:true},
+    {time:'16.20-17.10',subject:'-',empty:true},
+  ]},
+];
+
+/* ══ BUILD MOBILE CARDS ══ */
+const mobContainer = $('mobile-cards');
+DAYS.forEach(day => {
+  const card = document.createElement('div');
+  card.className='day-card'; card.dataset.dayIndex=day.dayIndex;
+  const hdr=document.createElement('div');
+  hdr.className='day-card-header'; hdr.textContent='วัน'+day.name;
+  card.appendChild(hdr);
+  const list=document.createElement('div'); list.className='period-list';
+  day.periods.forEach((p,i)=>{
+    const row=document.createElement('div');
+    row.className='period-row'; row.dataset.periodIndex=i;
+    const timeEl=document.createElement('div');
+    timeEl.className='period-time'; timeEl.textContent=p.time.replace('-','\n');
+    const subEl=document.createElement('div');
+    subEl.className='period-subject'+(p.lunch?' lunch-cell':'')+(p.empty?' empty-cell':'');
+    if(p.empty) subEl.textContent='—';
+    else if(p.lunch) subEl.innerHTML='🍱 พักกลางวัน · โรงอาหาร';
+    else if(p.teacher) subEl.innerHTML=`<span><strong>${p.subject}</strong><br><small>${p.teacher} · ห้อง ${p.room}</small></span>`;
+    else subEl.textContent=p.subject;
+    // task dot placeholder (populated by updateTaskDots)
+    const dotPlaceholder=document.createElement('div');
+    dotPlaceholder.className='mob-dot-wrap'; dotPlaceholder.dataset.dayIndex=day.dayIndex; dotPlaceholder.dataset.periodIndex=i;
+    subEl.appendChild(dotPlaceholder);
+    row.appendChild(timeEl); row.appendChild(subEl); list.appendChild(row);
+  });
+  card.appendChild(list); mobContainer.appendChild(card);
+});
+
+/* ══ TASK POPUP ══ */
+const popup=$('task-popup');
+$('popup-close').onclick=()=>popup.style.display='none';
+document.addEventListener('click',e=>{if(!popup.contains(e.target)&&!e.target.classList.contains('task-dot')&&!e.target.classList.contains('mob-task-dot')) popup.style.display='none';});
+
+function showPopup(anchorEl, dueDateStr){
+  const arr=Object.values(tasks).filter(t=>!t.completed);
+  // filter tasks due on the same date as anchorEl's context (or all pending if no filter)
+  let relevant=arr;
+  if(dueDateStr){
+    relevant=arr.filter(t=>{
+      const d=new Date(t.due);
+      return d.toDateString()===new Date(dueDateStr).toDateString();
+    });
+    if(!relevant.length) relevant=arr; // fallback: show all
+  }
+  relevant.sort((a,b)=>new Date(a.due)-new Date(b.due));
+
+  const body=$('popup-body'); body.innerHTML='';
+  if(!relevant.length){ body.innerHTML='<div class="task-popup-empty">ไม่มีงานค้างอยู่</div>'; }
+  else {
+    relevant.slice(0,6).forEach(t=>{
+      const d=new Date(t.due), ms=d-Date.now();
+      const item=document.createElement('div'); item.className='task-popup-item';
+      item.innerHTML=`<div>${t.priority?'⭐ ':''}${t.text}</div><div class="tpi-due" style="color:${remColor(ms)}">${fmtRemaining(ms)} · กำหนด ${fmtDue(d)}</div>`;
+      body.appendChild(item);
+    });
+  }
+  popup.style.display='block';
+  const rect=anchorEl.getBoundingClientRect();
+  let top=rect.bottom+6+window.scrollY;
+  let left=rect.left+window.scrollX;
+  // keep in viewport
+  if(left+290>window.innerWidth) left=window.innerWidth-295;
+  if(left<4) left=4;
+  popup.style.top=top+'px'; popup.style.left=left+'px';
+}
+
+/* ══ UPDATE TASK DOTS ON TABLE ══ */
+function updateTaskDots(){
+  // clear old dots
+  document.querySelectorAll('.task-dot').forEach(d=>d.remove());
+  document.querySelectorAll('.mob-task-dot').forEach(d=>d.remove());
+
+  const pending=Object.values(tasks).filter(t=>!t.completed);
+  if(!pending.length) return;
+
+  // For each table cell, check if any pending task's due date falls on that day
+  const tbody=document.getElementById('tt-tbody');
+  const dayMap={1:0,2:1,3:2,4:3,5:4}; // dayIndex->row
+  pending.forEach(t=>{
+    const due=new Date(t.due);
+    const dayIdx=due.getDay();
+    if(dayIdx===0||dayIdx===6) return;
+    const rowIdx=dayMap[dayIdx];
+    if(rowIdx===undefined) return;
+    const row=tbody.rows[rowIdx];
+    if(!row) return;
+    // add dot to first non-empty cell of that day (or all cells — we put it on the day header th)
+    const th=row.cells[0];
+    if(th&&!th.querySelector('.task-dot')){
+      const dot=document.createElement('div');
+      dot.className='task-dot';
+      dot.title='มีงานวันนี้ — คลิกเพื่อดู';
+      dot.style.position='absolute'; dot.style.top='4px'; dot.style.right='4px';
+      if(getComputedStyle(th).position==='static') th.style.position='relative';
+      th.appendChild(dot);
+      dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot, due.toISOString());});
+    }
+    // mobile: add dot to that day card header
+    const mCard=document.querySelector(`.day-card[data-day-index="${dayIdx}"]`);
+    if(mCard){
+      const mHdr=mCard.querySelector('.day-card-header');
+      if(mHdr&&!mHdr.querySelector('.mob-task-dot')){
+        const mdot=document.createElement('div');
+        mdot.className='mob-task-dot';
+        mdot.style.cssText='display:inline-block;margin-left:8px;cursor:pointer;vertical-align:middle;';
+        mHdr.appendChild(mdot);
+        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,due.toISOString());});
+      }
+    }
+  });
+}
+
+/* ══ RENDER TASKS ══ */
+function render(){
+  const arr=Object.entries(tasks).map(([key,val])=>({...val,key}));
+  const pending=arr.filter(t=>!t.completed).sort((a,b)=>{
+    if(a.priority&&!b.priority)return-1;if(!a.priority&&b.priority)return 1;
+    return new Date(a.due)-new Date(b.due);
+  });
+  const completed=arr.filter(t=>t.completed).sort((a,b)=>b.completedAt-a.completedAt);
+
+  const pl=$('pending-list'),cl=$('completed-list');
+  pl.innerHTML='';cl.innerHTML='';
+  if(!pending.length)   pl.innerHTML='<div class="task-empty">ยังไม่มีงานที่ต้องทำ 🎉</div>';
+  if(!completed.length) cl.innerHTML='<div class="task-empty">ยังไม่มีงานที่เสร็จ</div>';
+  pending.forEach(t=>pl.appendChild(makeTaskEl(t,false)));
+  completed.forEach(t=>cl.appendChild(makeTaskEl(t,true)));
+
+  // HUD
+  $('hv-left').textContent=pending.length;
+  if(pending.length){
+    const nx=pending[0], ms=new Date(nx.due)-Date.now();
+    $('hv-nexttask').textContent=nx.text.length>24?nx.text.slice(0,24)+'…':nx.text;
+    $('hv-tasktime').textContent=fmtRemaining(ms);
+  } else {
+    $('hv-nexttask').textContent='—'; $('hv-tasktime').textContent='—';
+  }
+  updateTaskDots();
+}
+
+function makeTaskEl(task,done){
+  const due=new Date(task.due),ms=due-Date.now();
+  const el=document.createElement('div');
+  el.className='task-item'+(done?' task-completed':'')+(task.priority&&!done?' task-priority':'');
+  el.dataset.key=task.key;
+
+  const top=document.createElement('div'); top.className='task-top';
+  const txt=document.createElement('div'); txt.className='task-text'; txt.id=`tt-${task.key}`;
+  txt.textContent=(task.priority&&!done?'⭐ ':'')+task.text;
+  if(done) txt.style.textDecoration='line-through';
+  const meta=document.createElement('div'); meta.className='task-meta';
+  meta.innerHTML=`กำหนด:<br>${fmtDue(due)}`;
+  top.appendChild(txt); top.appendChild(meta);
+
+  const rem=document.createElement('div'); rem.className='task-remaining'; rem.id=`tr-${task.key}`;
+  if(!done){rem.textContent=fmtRemaining(ms);rem.style.color=remColor(ms);}
+  else{rem.textContent='✅ เสร็จแล้ว';rem.style.color='var(--green)';}
+
+  const track=document.createElement('div'); track.className='prog-track';
+  const fill=document.createElement('div'); fill.className='prog-track-fill';
+  if(!done){
+    const total=due-new Date(task.createdAt),elapsed=Date.now()-new Date(task.createdAt);
+    fill.style.width=total>0?Math.min(100,Math.max(0,elapsed/total*100))+'%':'0%';
+    if(ms<0)fill.style.background='var(--red)';
+    else if(ms<86400000)fill.style.background='linear-gradient(90deg,var(--gold),var(--red))';
+  } else{fill.style.width='100%';fill.style.background='var(--green)';}
+  track.appendChild(fill);
+
+  const btns=document.createElement('div'); btns.className='task-buttons';
+  if(!done) btns.innerHTML=`
+    <button class="btn-priority" data-key="${task.key}" data-action="priority">${task.priority?'★ ยกเลิก':'⭐ สำคัญ'}</button>
+    <button class="btn-edit"     data-key="${task.key}" data-action="edit">✏️ แก้ไข</button>
+    <button class="btn-complete" data-key="${task.key}" data-action="complete">✅ เสร็จ</button>`;
+  btns.innerHTML+=`<button class="btn-delete" data-key="${task.key}" data-action="delete">🗑 ลบ</button>`;
+
+  el.appendChild(top);el.appendChild(rem);el.appendChild(track);el.appendChild(btns);
+  return el;
+}
+
+/* live remaining refresh */
+setInterval(()=>{
+  Object.entries(tasks).forEach(([key,t])=>{
+    if(t.completed)return;
+    const ms=new Date(t.due)-Date.now(),rem=$(`tr-${key}`);
+    if(rem){rem.textContent=fmtRemaining(ms);rem.style.color=remColor(ms);}
+  });
+},30000);
+
+/* ══ FIREBASE LISTENER ══ */
+tasksRef.on('value',snap=>{
+  tasks=snap.val()||{};
+  // cleanup >7 days
+  const cut=Date.now()-7*24*60*60*1000;
+  snap.forEach(c=>{const t=c.val();if(t.completed&&t.completedAt&&t.completedAt<cut)c.ref.remove();});
+  render();
+  setSync('synced','ซิงค์แล้ว ☁️');
+},err=>{setSync('error','เชื่อมไม่ได้ ⚠️');});
+
+/* ══ ADD/EDIT ══ */
+$('add-task').addEventListener('click',()=>{
+  const text=($('task-text').value||'').trim();
+  const due=makeDue($('task-date').value,$('task-time').value);
+  if(!text){alert('กรุณาพิมพ์รายละเอียดงาน');return;}
+  if(!due){alert('กรุณาเลือกวันและเวลาส่งให้ครบ');return;}
+  setSync('syncing','กำลังบันทึก...');
+  if(editingId){
+    tasksRef.child(editingId).update({text,due:due.toISOString()});
+    editingId=null; $('add-task').textContent='＋ เพิ่มงาน'; $('add-task').className='btn-main';
+  } else {
+    tasksRef.push({text,due:due.toISOString(),completed:false,createdAt:Date.now(),completedAt:null,priority:false});
+  }
+  $('task-text').value='';
+});
+
+function handleClick(e){
+  const btn=e.target.closest('button[data-action]');if(!btn)return;
+  const{key,action}=btn.dataset,t=tasks[key];if(!t)return;
+  setSync('syncing','กำลังบันทึก...');
+  if(action==='delete')   tasksRef.child(key).remove();
+  if(action==='complete') tasksRef.child(key).update({completed:true,completedAt:Date.now()});
+  if(action==='priority') tasksRef.child(key).update({priority:!t.priority});
+  if(action==='edit'){
+    const d=new Date(t.due),pad=v=>String(v).padStart(2,'0');
+    $('task-text').value=t.text;
+    $('task-date').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    $('task-time').value=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    editingId=key; $('add-task').textContent='💾 บันทึกการแก้ไข'; $('add-task').className='btn-edit';
+    window.scrollTo({top:0,behavior:'smooth'});
+    setSync('synced','ซิงค์แล้ว ☁️');
+  }
+}
+$('pending-list').addEventListener('click',handleClick);
+$('completed-list').addEventListener('click',handleClick);
+
+/* ══ TIMETABLE LOGIC ══ */
+const PSEC=600;
+const PERIODS=[
+  {start:[8,30],end:[9,20]},{start:[9,20],end:[10,10]},{start:[10,20],end:[11,10]},
+  {start:[11,10],end:[12,0]},{start:[12,0],end:[12,50]},{start:[12,50],end:[13,40]},
+  {start:[13,50],end:[14,40]},{start:[14,40],end:[15,30]},{start:[15,30],end:[16,20]},
+  {start:[16,20],end:[17,10]}
+];
+const toMin=(h,m,s=0)=>h*60+m+s/60;
+const hmMin=([h,m])=>h*60+m;
+const fmtHM=mf=>{const t=Math.floor(mf),h=Math.floor(t/60),m=t%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');};
+const fmtMS=sec=>{const s=Math.max(0,Math.ceil(sec));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+function lerp(a,b,t){return a+(b-a)*t;}
+function cdrColor(sec){
+  const t=1-Math.min(Math.max(sec,0),PSEC)/PSEC;
+  return`rgb(${Math.round(lerp(34,248,t))},${Math.round(lerp(211,113,t))},${Math.round(lerp(238,113,t))})`;
+}
+function fmtCell(cell){return(cell.innerText||'').trim().split(/\s*[\r\n]+\s*/).map(s=>s.trim()).filter(Boolean).join(' ');}
+
+function buildSegs(row){
+  const segs=[];
+  for(let i=0;i<PERIODS.length;i++){
+    const p=PERIODS[i],start=hmMin(p.start),end=hmMin(p.end);
+    const cell=row.cells[i+1];
+    const label=(cell&&cell.textContent.trim()&&cell.textContent.trim()!=='-')?fmtCell(cell):'ว่าง';
+    segs.push({type:/พักกลางวัน/.test(label)?'lunch':'class',start,end,label});
+    if(i<PERIODS.length-1){const ns=hmMin(PERIODS[i+1].start);if(end<ns)segs.push({type:'break',start:end,end:ns,label:'พักระยะสั้น'});}
+  }
+  return segs.sort((a,b)=>a.start-b.start);
+}
+function findSeg(segs,nowMin){for(let i=0;i<segs.length;i++)if(nowMin>=segs[i].start&&nowMin<segs[i].end)return i;return -1;}
+
+function ttTick(){
+  const now=new Date(),h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  const tstr=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
+  $('digital-clock').textContent=tstr; $('hv-time').textContent=tstr;
+
+  const dayIdx=now.getDay(),tbody=document.getElementById('tt-tbody'),rowIdx=dayIdx-1;
+  const cdr=$('countdown-clock');
+
+  if(dayIdx===0||dayIdx===6||!tbody.rows[rowIdx]){
+    $('cur-subject').textContent='วันหยุด 🎉';
+    $('cur-label').textContent='วันหยุด';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
+    cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');
+    $('nxt-label').textContent='-';$('nxt-after').style.display='none';$('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';
+    $('hv-period').textContent='วันหยุด';
+    return;
+  }
+
+  const row=tbody.rows[rowIdx],segs=buildSegs(row),nowMin=toMin(h,m,s);
+  const idx=findSeg(segs,nowMin);
+
+  // clear highlights
+  document.querySelectorAll('td').forEach(td=>td.classList.remove('highlighted'));
+  document.querySelectorAll('.period-row').forEach(r=>r.classList.remove('highlighted-row'));
+
+  if(idx===-1){
+    $('cur-label').textContent='ขณะนี้ไม่มีคาบเรียน';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
+    $('cur-subject').textContent='ขณะนี้ไม่มีคาบเรียน';$('hv-period').textContent='ว่าง';
+  } else {
+    const cur=segs[idx],dur=cur.end-cur.start,elapsed=Math.max(0,nowMin-cur.start),remain=Math.max(0,cur.end-nowMin);
+    const pct=Math.min(100,elapsed/dur*100);
+    $('cur-prog').style.width=pct+'%';
+    $('cur-eta').textContent=`เหลือ ${fmtMS(remain*60)} (สิ้นสุด ${fmtHM(cur.end)})`;
+    if(cur.type==='lunch'){
+      $('cur-label').textContent='พักกลางวัน 🍱';$('cur-subject').textContent='🍱 พักกลางวัน';$('hv-period').textContent='พักกลางวัน';
+    } else {
+      $('cur-label').textContent=`คาบปัจจุบัน: ${cur.label}`;
+      $('cur-subject').textContent='ขณะนี้เรียน: '+cur.label;
+      $('hv-period').textContent=cur.label.length>22?cur.label.slice(0,22)+'…':cur.label;
+      // highlight desktop
+      for(let i=0;i<PERIODS.length;i++){
+        if(cur.start===hmMin(PERIODS[i].start)&&cur.end===hmMin(PERIODS[i].end)){
+          const cell=tbody.rows[rowIdx].cells[i+1];if(cell)cell.classList.add('highlighted');
+          // mobile
+          const mCard=document.querySelector(`.day-card[data-day-index="${dayIdx}"]`);
+          if(mCard){const mRow=mCard.querySelector(`.period-row[data-period-index="${i}"]`);if(mRow)mRow.classList.add('highlighted-row');}
+          break;
+        }
+      }
+    }
+  }
+
+  // next
+  const ui=segs.findIndex(s=>nowMin<s.start),next=ui!==-1?segs[ui]:null;
+  $('nxt-label').textContent=next?(next.type==='lunch'?'ถัดไป: พักกลางวัน':next.type==='break'?'ถัดไป: พักระยะสั้น':`ถัดไป: ${next.label}`):'-';
+  $('nxt-after').style.display='none';
+  if(next){
+    $('nxt-eta').textContent=`เริ่มเวลา ${fmtHM(next.start)}`;
+    if(next.type==='break'&&ui+1<segs.length){const a=segs[ui+1];$('nxt-after').style.display='';$('nxt-after').textContent=`หลังจากนั้น: ${a.label}`;}
+    const diff=Math.max(0,(next.start-nowMin)*60);
+    $('nxt-prog').style.width=diff>PSEC?'0%':Math.min(100,(PSEC-diff)/PSEC*100)+'%';
+    // countdown clock
+    if(diff===0){cdr.textContent='00:00';cdr.classList.add('blink');}
+    else if(diff>PSEC){cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');}
+    else{
+      cdr.textContent=fmtMS(diff);const c=cdrColor(diff);
+      cdr.style.color=c;cdr.style.boxShadow=`0 0 18px ${c.replace('rgb','rgba').replace(')',',0.7)')}`;
+      if(diff<=30)cdr.classList.add('blink');else cdr.classList.remove('blink');
+    }
+  } else {
+    $('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';
+    cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');
+  }
+}
+setInterval(ttTick,1000);ttTick();
+
+/* ══ HUD TOGGLE ══ */
+const hudPanel=$('hud-panel'),hudToggle=$('hud-toggle');
+hudToggle.onclick=()=>{
+  const open=hudPanel.classList.toggle('open');
+  hudToggle.classList.toggle('open',open);
+  hudToggle.textContent=open?'◀':'▶';
+};
+
+/* ══ UPTIME ══ */
+const startT=Date.now();
+setInterval(()=>{
+  let s=Math.floor((Date.now()-startT)/1000);
+  const h=Math.floor(s/3600);s%=3600;const mn=Math.floor(s/60);s%=60;
+  $('hv-uptime').textContent=[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':');
+},1000);
+</script>
+</body>
+</html>
