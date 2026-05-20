@@ -7,75 +7,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:       #070b12;
-      --surface:  rgba(10,18,36,0.85);
-      --glass:    rgba(255,255,255,0.05);
-      --border:   rgba(80,140,255,0.18);
-      --accent:   #4f9eff;
-      --accent2:  #a78bfa;
-      --green:    #34d399;
-      --gold:     #fbbf24;
-      --red:      #f87171;
-      --cyan:     #22d3ee;
-      --text:     #ddeeff;
-      --muted:    #6a8fb0;
-      --panel-w:  270px;
-      --r:        13px;
-      --fhud:     'Orbitron', monospace;
-      --fbody:    'Sarabun', sans-serif;
+      --bg:#070b12; --surface:rgba(10,18,36,.85); --glass:rgba(255,255,255,.05);
+      --border:rgba(80,140,255,.18); --accent:#4f9eff; --accent2:#a78bfa;
+      --green:#34d399; --gold:#fbbf24; --red:#f87171; --cyan:#22d3ee;
+      --indigo:#818cf8; --text:#ddeeff; --muted:#6a8fb0;
+      --panel-w:270px; --r:13px; --fhud:'Orbitron',monospace; --fbody:'Sarabun',sans-serif;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
-    body {
-      font-family: var(--fbody);
-      background: var(--bg);
-      background-image:
-        url('jpcity.jfif'),
-        radial-gradient(ellipse at 15% 10%, rgba(79,158,255,.1) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 90%, rgba(167,139,250,.09) 0%, transparent 50%);
-      background-size: cover; background-position: center;
-      background-attachment: fixed; background-blend-mode: overlay,normal,normal;
-      color: var(--text); min-height: 100vh;
-    }
-    body::before {
-      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      opacity:.4;
-    }
+    body{font-family:var(--fbody);background:var(--bg);
+      background-image:url('jpcity.jfif'),
+        radial-gradient(ellipse at 15% 10%,rgba(79,158,255,.1) 0%,transparent 50%),
+        radial-gradient(ellipse at 85% 90%,rgba(167,139,250,.09) 0%,transparent 50%);
+      background-size:cover;background-position:center;background-attachment:fixed;
+      background-blend-mode:overlay,normal,normal;color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");opacity:.4;}
 
-    /* ── SYNC BADGE ── */
-    .sync-badge {
-      position:fixed; top:10px; right:12px; z-index:9999;
-      font-family:var(--fhud); font-size:.58rem; letter-spacing:.1em;
-      padding:4px 12px; border-radius:999px;
-      border:1px solid var(--border); backdrop-filter:blur(10px);
-      background:rgba(7,11,18,.8);
-      display:flex; align-items:center; gap:6px; transition:all .3s;
-    }
+    /* SYNC */
+    .sync-badge{position:fixed;top:10px;right:12px;z-index:9999;font-family:var(--fhud);font-size:.58rem;letter-spacing:.1em;padding:4px 12px;border-radius:999px;border:1px solid var(--border);backdrop-filter:blur(10px);background:rgba(7,11,18,.8);display:flex;align-items:center;gap:6px;transition:all .3s;}
     .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:all .3s;}
-    .sync-badge.synced  .sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+    .sync-badge.synced .sync-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
     .sync-badge.syncing .sync-dot{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:sdot 1s infinite;}
-    .sync-badge.error   .sync-dot{background:var(--red);box-shadow:0 0 6px var(--red);}
+    .sync-badge.error .sync-dot{background:var(--red);box-shadow:0 0 6px var(--red);}
     @keyframes sdot{0%,100%{opacity:1}50%{opacity:.25}}
 
-    /* ── HUD SIDEBAR ── */
-    .hud-toggle {
-      position:fixed; left:0; top:45%; transform:translateY(-50%);
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff; padding:8px 12px; border-radius:0 11px 11px 0;
-      cursor:pointer; font-weight:900; font-size:.95rem; z-index:9999;
-      box-shadow:0 0 16px rgba(79,158,255,.5); border:1px solid rgba(255,255,255,.15);
-      transition:left .35s ease, border-radius .35s ease; user-select:none;
-    }
+    /* HUD */
+    .hud-toggle{position:fixed;left:0;top:45%;transform:translateY(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:8px 12px;border-radius:0 11px 11px 0;cursor:pointer;font-weight:900;font-size:.95rem;z-index:9999;box-shadow:0 0 16px rgba(79,158,255,.5);border:1px solid rgba(255,255,255,.15);transition:left .35s ease,border-radius .35s ease;user-select:none;}
     .hud-toggle.open{left:var(--panel-w);border-radius:11px 0 0 11px;}
-    .hud-panel {
-      position:fixed; left:calc(-1 * var(--panel-w)); top:0;
-      width:var(--panel-w); height:100vh; padding:20px 16px;
-      background:rgba(7,11,20,.8); backdrop-filter:blur(18px);
-      border-right:1px solid var(--border); box-shadow:4px 0 28px rgba(0,0,0,.6);
-      transition:left .35s cubic-bezier(.4,0,.2,1);
-      z-index:9998; overflow:hidden; display:flex; flex-direction:column;
-    }
+    .hud-panel{position:fixed;left:calc(-1 * var(--panel-w));top:0;width:var(--panel-w);height:100vh;padding:16px 14px 10px;background:rgba(7,11,20,.85);backdrop-filter:blur(18px);border-right:1px solid var(--border);box-shadow:4px 0 28px rgba(0,0,0,.6);transition:left .35s cubic-bezier(.4,0,.2,1);z-index:9998;overflow:hidden;display:flex;flex-direction:column;}
     .hud-panel.open{left:0;}
     .hud-deco{position:absolute;border-radius:50%;pointer-events:none;}
     .hud-d1{width:160px;height:160px;top:-50px;right:-50px;background:radial-gradient(circle,rgba(79,158,255,.16),transparent 70%);animation:hdf 6s ease-in-out infinite;}
@@ -83,54 +43,49 @@
     .hud-scan{position:absolute;left:0;right:0;height:1px;background:rgba(79,158,255,.28);animation:hscan 4s linear infinite;}
     @keyframes hdf{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
     @keyframes hscan{0%{top:0%}100%{top:100%}}
-    .hud-title{font-family:var(--fhud);font-size:.65rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;margin-bottom:22px;position:relative;z-index:1;text-shadow:0 0 10px var(--accent);}
-    .hud-block{margin-bottom:18px;position:relative;z-index:1;}
-    .hud-label{font-family:var(--fhud);font-size:.55rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
-    .hud-val{font-family:var(--fhud);font-size:1.25rem;color:var(--text);text-shadow:0 0 10px rgba(79,158,255,.7);line-height:1.3;word-break:break-word;}
-    .hud-val.sm{font-size:.88rem;}
-    .hud-div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:12px 0;position:relative;z-index:1;}
+    .hud-title{font-family:var(--fhud);font-size:.62rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;position:relative;z-index:1;text-shadow:0 0 10px var(--accent);}
+    .hud-block{margin-bottom:12px;position:relative;z-index:1;}
+    .hud-label{font-family:var(--fhud);font-size:.52rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+    .hud-val{font-family:var(--fhud);font-size:1.15rem;color:var(--text);text-shadow:0 0 10px rgba(79,158,255,.7);line-height:1.25;word-break:break-word;}
+    .hud-val.sm{font-size:.82rem;}
+    .hud-div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:8px 0;position:relative;z-index:1;}
 
-    /* ── PAGE ── */
+    /* KERNEL PANEL */
+    .kernel-panel{position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;margin-top:4px;}
+    .kernel-title{font-family:var(--fhud);font-size:.52rem;letter-spacing:.15em;color:var(--green);text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+    .kernel-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:kdot 1.4s ease-in-out infinite;}
+    @keyframes kdot{0%,100%{opacity:1}50%{opacity:.3}}
+    .kernel-log{flex:1;overflow:hidden;font-family:'Courier New',monospace;font-size:.58rem;line-height:1.5;color:var(--green);background:rgba(0,0,0,.45);border:1px solid rgba(52,211,153,.15);border-radius:8px;padding:7px 9px;position:relative;}
+    .kernel-log::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 22px,rgba(52,211,153,.018) 22px,rgba(52,211,153,.018) 23px);pointer-events:none;}
+    .kline{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:kfade .3s ease;}
+    @keyframes kfade{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+    .kline.dim{color:rgba(52,211,153,.45);}
+    .kline.warn{color:var(--gold);}
+    .kline.err{color:var(--red);}
+    .kline.info{color:var(--cyan);}
+    .kcursor{display:inline-block;width:6px;height:10px;background:var(--green);margin-left:2px;animation:kcur .7s steps(1) infinite;vertical-align:middle;}
+    @keyframes kcur{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* PAGE */
     .page{position:relative;z-index:1;max-width:1020px;margin:0 auto;padding:24px 18px 60px;}
-
-    /* ── SECTION DIVIDER ── */
     .section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 18px;}
     .section-divider .sd-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
-    .section-divider .sd-label{
-      font-family:var(--fhud);font-size:.65rem;letter-spacing:.14em;color:var(--accent);
-      text-transform:uppercase;padding:4px 14px;border:1px solid var(--border);
-      border-radius:999px;background:rgba(7,11,18,.7);backdrop-filter:blur(8px);
-    }
-
-    /* ── CARD ── */
-    .card{
-      background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--r);padding:16px 18px;backdrop-filter:blur(12px);
-      box-shadow:0 8px 28px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
-      position:relative;overflow:hidden;
-    }
+    .section-divider .sd-label{font-family:var(--fhud);font-size:.65rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;padding:4px 14px;border:1px solid var(--border);border-radius:999px;background:rgba(7,11,18,.7);backdrop-filter:blur(8px);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;backdrop-filter:blur(12px);box-shadow:0 8px 28px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);position:relative;overflow:hidden;}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(79,158,255,.35),transparent);}
     .card-title{font-family:var(--fhud);font-size:.72rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:5px;}
     .card-sub{font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
 
-    /* ══ TIMETABLE ══ */
+    /* TIMETABLE HEADER */
     .tt-header{text-align:center;margin-bottom:18px;}
-    .tt-header h1{
-      font-family:var(--fhud);font-size:clamp(.9rem,3.5vw,1.4rem);font-weight:700;letter-spacing:.06em;
-      background:linear-gradient(135deg,var(--cyan),var(--accent));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;
-    }
+    .tt-header h1{font-family:var(--fhud);font-size:clamp(.9rem,3.5vw,1.4rem);font-weight:700;letter-spacing:.06em;background:linear-gradient(135deg,var(--cyan),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;}
     .clocks{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-    .clock-box{
-      font-family:var(--fhud);color:var(--cyan);font-size:clamp(1.3rem,5vw,2rem);
-      background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:var(--r);padding:9px 22px;
-      box-shadow:0 0 20px rgba(34,211,238,.2),inset 0 0 10px rgba(34,211,238,.05);
-      letter-spacing:.08em;min-width:170px;text-align:center;
-    }
+    .clock-box{font-family:var(--fhud);color:var(--cyan);font-size:clamp(1.3rem,5vw,2rem);background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:var(--r);padding:9px 22px;box-shadow:0 0 20px rgba(34,211,238,.2),inset 0 0 10px rgba(34,211,238,.05);letter-spacing:.08em;min-width:170px;text-align:center;}
     .countdown-box{color:var(--red);box-shadow:0 0 20px rgba(248,113,113,.25);}
     @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.2}}
     .blink{animation:blink 1s steps(2,start) infinite;}
 
+    /* STATUS */
     .tt-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
     .prog-block{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:10px 12px;backdrop-filter:blur(4px);}
     .prog-title{font-family:var(--fhud);font-size:.6rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;}
@@ -139,50 +94,48 @@
     .prog-bar{width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
     .prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:999px;transition:width .3s ease;}
     .prog-eta{margin-top:5px;font-size:.75rem;color:var(--cyan);font-family:var(--fhud);}
-    .current-subject-bar{
-      text-align:center;font-size:1rem;font-weight:600;color:#fff;
-      background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:10px;
-      padding:9px 14px;margin:10px 0;box-shadow:0 0 12px rgba(79,158,255,.15);
-    }
+    .current-subject-bar{text-align:center;font-size:1rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:10px;padding:9px 14px;margin:10px 0;box-shadow:0 0 12px rgba(79,158,255,.15);}
 
-    /* desktop table */
+    /* TABLE */
     .table-wrapper{width:100%;overflow-x:auto;}
-    table.desktop-table{
-      border-collapse:collapse;width:100%;table-layout:fixed;
-      background:rgba(255,255,255,.07);border-radius:10px;
-      overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.3);min-width:900px;
-    }
+    table.desktop-table{border-collapse:collapse;width:100%;table-layout:fixed;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.3);min-width:900px;}
     th,td{border:1px solid rgba(255,255,255,.1);padding:8px 6px;text-align:center;background:rgba(255,255,255,.04);font-size:.75rem;line-height:1.35;color:var(--text);}
     thead th{background:rgba(79,158,255,.25);color:#fff;font-family:var(--fhud);font-size:.62rem;letter-spacing:.05em;}
     tbody th{background:rgba(79,158,255,.15);color:var(--cyan);font-size:.72rem;}
     td.highlighted{background:rgba(79,158,255,.35)!important;box-shadow:inset 0 0 12px rgba(79,158,255,.4);color:#fff;font-weight:700;}
     td{position:relative;}
 
-    /* task dot */
+    /* TASK DOTS — gold=one-time (bottom-right), indigo=recurring (top-right). Never overlap. */
     .task-dot{
       display:inline-block;width:7px;height:7px;border-radius:50%;
-      background:var(--gold);box-shadow:0 0 6px var(--gold);
-      position:absolute;top:3px;right:3px;cursor:pointer;z-index:2;
-      animation:tdpulse 2s infinite;
+      position:absolute;cursor:pointer;z-index:2;animation:tdpulse 2s infinite;
     }
-    @keyframes tdpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+    .task-dot.dot-task {background:var(--gold);  box-shadow:0 0 6px var(--gold);   bottom:3px;right:3px;top:auto;}
+    .task-dot.dot-recur{background:var(--indigo);box-shadow:0 0 6px var(--indigo); top:3px;   right:3px;bottom:auto;}
+    @keyframes tdpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.45)}}
 
     /* task popup */
-    .task-popup{
-      position:fixed;z-index:8000;background:rgba(7,11,20,.95);
-      border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;
-      box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 0 1px rgba(79,158,255,.1);
-      backdrop-filter:blur(16px);min-width:200px;max-width:280px;
-      animation:popIn .18s ease;pointer-events:auto;
-    }
+    .task-popup{position:fixed;z-index:8000;background:rgba(7,11,20,.95);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 0 1px rgba(79,158,255,.1);backdrop-filter:blur(16px);min-width:200px;max-width:290px;animation:popIn .18s ease;pointer-events:auto;}
     @keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
     .task-popup-title{font-family:var(--fhud);font-size:.6rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
     .task-popup-item{font-size:.8rem;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.4;}
     .task-popup-item:last-child{border-bottom:none;}
-    .task-popup-item .tpi-due{font-size:.7rem;color:var(--muted);}
+    .tpi-due{font-size:.7rem;color:var(--muted);}
     .task-popup-empty{font-size:.8rem;color:var(--muted);text-align:center;padding:8px 0;}
     .task-popup-close{position:absolute;top:8px;right:10px;font-size:.9rem;cursor:pointer;color:var(--muted);background:none;border:none;padding:2px 6px;transition:color .2s;}
     .task-popup-close:hover{color:var(--red);}
+
+    /* subject picker modal */
+    .modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
+    .modal-box{background:rgba(7,11,20,.97);border:1px solid var(--border);border-radius:var(--r);padding:20px;min-width:280px;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,.8);}
+    .modal-title{font-family:var(--fhud);font-size:.65rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;}
+    .subject-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
+    .subject-list::-webkit-scrollbar{width:3px;}
+    .subject-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+    .subject-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-size:.82rem;color:var(--text);transition:all .15s;}
+    .subject-opt:hover{background:rgba(79,158,255,.1);border-color:var(--border);}
+    .subject-opt input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;}
+    .modal-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
 
     /* mobile cards */
     .mobile-cards{display:none;flex-direction:column;gap:12px;width:100%;}
@@ -191,103 +144,86 @@
     .period-list{display:flex;flex-direction:column;}
     .period-row{display:flex;align-items:stretch;border-top:1px solid rgba(255,255,255,.06);position:relative;}
     .period-time{background:rgba(79,158,255,.1);color:var(--muted);font-size:.65rem;font-weight:600;padding:8px 6px;min-width:68px;display:flex;align-items:center;justify-content:center;text-align:center;border-right:1px solid rgba(255,255,255,.07);line-height:1.3;font-family:var(--fhud);}
-    .period-subject{flex:1;padding:7px 10px;font-size:.78rem;color:var(--text);line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+    .period-subject{flex:1;padding:7px 10px;font-size:.78rem;color:var(--text);line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:5px;}
     .period-subject.lunch-cell{color:var(--muted);font-style:italic;}
     .period-subject.empty-cell{color:rgba(255,255,255,.2);}
     .period-row.highlighted-row .period-time{background:rgba(79,158,255,.3);color:var(--cyan);}
     .period-row.highlighted-row .period-subject{background:rgba(79,158,255,.15);font-weight:700;}
-    .mob-task-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);flex-shrink:0;cursor:pointer;animation:tdpulse 2s infinite;}
+    .mob-dot-wrap{display:flex;gap:3px;align-items:center;flex-shrink:0;}
+    .mob-task-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;cursor:pointer;animation:tdpulse 2s infinite;}
+    .mob-task-dot.dot-task{background:var(--gold);box-shadow:0 0 5px var(--gold);}
+    .mob-task-dot.dot-recur{background:var(--indigo);box-shadow:0 0 5px var(--indigo);}
 
-    /* ══ TASK TRACKER ══ */
+    /* TASK TRACKER */
     .form-stack{display:flex;flex-direction:column;gap:9px;}
-    textarea,input[type="date"],input[type="time"],select{
-      font-family:var(--fbody);background:rgba(0,0,0,.35);border:1px solid var(--border);
-      border-radius:9px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;
-    }
+    textarea,input[type="date"],input[type="time"],select{font-family:var(--fbody);background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:9px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
     textarea:focus,input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,.12);}
     textarea{width:100%;min-height:80px;padding:10px 13px;font-size:.92rem;resize:vertical;line-height:1.5;}
     textarea::placeholder{color:var(--muted);}
-    select{padding:8px 11px;font-size:.86rem;flex:1 1 128px;}
+    select{padding:8px 11px;font-size:.86rem;flex:1 1 120px;}
     select option{background:#0a1224;}
     .form-row-inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-    input[type="date"],input[type="time"]{flex:1 1 128px;padding:8px 11px;font-size:.86rem;color-scheme:dark;}
+    input[type="date"],input[type="time"]{flex:1 1 120px;padding:8px 11px;font-size:.86rem;color-scheme:dark;}
 
-    /* repeat toggle row */
+    /* subject link button */
+    .subject-link-btn{font-family:var(--fbody);font-weight:600;border:1px dashed rgba(79,158,255,.4);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;background:rgba(79,158,255,.07);color:var(--muted);display:inline-flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;}
+    .subject-link-btn:hover,.subject-link-btn.has-subs{border-color:var(--accent);color:var(--accent);background:rgba(79,158,255,.12);}
+
+    /* repeat */
     .repeat-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
     .repeat-label{font-size:.82rem;color:var(--muted);}
-    .toggle-btn{
-      font-family:var(--fbody);font-weight:700;border:1px solid var(--border);border-radius:999px;
-      padding:5px 14px;cursor:pointer;font-size:.78rem;background:rgba(0,0,0,.3);color:var(--muted);
-      display:inline-flex;align-items:center;gap:5px;transition:all .2s;
-    }
-    .toggle-btn.active{background:rgba(167,139,250,.2);border-color:var(--accent2);color:var(--accent2);box-shadow:0 0 10px rgba(167,139,250,.25);}
+    .toggle-btn{font-family:var(--fbody);font-weight:700;border:1px solid var(--border);border-radius:999px;padding:5px 14px;cursor:pointer;font-size:.78rem;background:rgba(0,0,0,.3);color:var(--muted);display:inline-flex;align-items:center;gap:5px;transition:all .2s;}
+    .toggle-btn.active{background:rgba(129,140,248,.2);border-color:var(--indigo);color:var(--indigo);box-shadow:0 0 10px rgba(129,140,248,.25);}
     .repeat-options{display:none;gap:8px;flex-wrap:wrap;align-items:center;width:100%;}
     .repeat-options.visible{display:flex;}
+    /* specific dates section */
+    .specific-dates-wrap{display:none;flex-direction:column;gap:6px;width:100%;}
+    .specific-dates-wrap.visible{display:flex;}
+    .date-chip-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+    .date-chip{background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.3);border-radius:999px;padding:3px 10px;font-size:.72rem;color:var(--indigo);display:inline-flex;align-items:center;gap:4px;}
+    .date-chip .rm{cursor:pointer;opacity:.7;font-size:.8rem;}
+    .date-chip .rm:hover{opacity:1;color:var(--red);}
+    .add-date-row{display:flex;gap:6px;align-items:center;}
+    .add-date-row input{flex:1;min-width:0;}
 
-    button{
-      font-family:var(--fbody);font-weight:700;border:none;border-radius:999px;
-      padding:7px 16px;cursor:pointer;font-size:.82rem;
-      display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
-      transition:opacity .15s,transform .1s;
-    }
+    button{font-family:var(--fbody);font-weight:700;border:none;border-radius:999px;padding:7px 16px;cursor:pointer;font-size:.82rem;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s,transform .1s;}
     button:active{transform:scale(.96);}
     button:hover{opacity:.88;}
-    .btn-main    {background:linear-gradient(135deg,var(--accent),#3b82f6);color:#fff;box-shadow:0 4px 14px rgba(79,158,255,.35);flex-shrink:0;}
+    .btn-main{background:linear-gradient(135deg,var(--accent),#3b82f6);color:#fff;box-shadow:0 4px 14px rgba(79,158,255,.35);flex-shrink:0;}
     .btn-complete{background:linear-gradient(135deg,var(--green),#059669);color:#fff;box-shadow:0 3px 10px rgba(52,211,153,.3);}
-    .btn-delete  {background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;box-shadow:0 3px 10px rgba(248,113,113,.3);}
+    .btn-delete{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;box-shadow:0 3px 10px rgba(248,113,113,.3);}
     .btn-priority{background:linear-gradient(135deg,var(--gold),#d97706);color:#1a0e00;box-shadow:0 3px 10px rgba(251,191,36,.35);}
-    .btn-edit    {background:linear-gradient(135deg,var(--accent2),#7c3aed);color:#fff;box-shadow:0 3px 10px rgba(167,139,250,.3);}
-    .btn-repeat  {background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;box-shadow:0 3px 10px rgba(99,102,241,.3);}
+    .btn-edit{background:linear-gradient(135deg,var(--accent2),#7c3aed);color:#fff;box-shadow:0 3px 10px rgba(167,139,250,.3);}
+    .btn-sm{padding:4px 11px;font-size:.72rem;}
+    .btn-ghost{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border);}
 
     .lists-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;}
     .task-list{display:flex;flex-direction:column;gap:7px;max-height:420px;overflow-y:auto;padding-right:2px;}
     .task-list::-webkit-scrollbar{width:3px;}
     .task-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
-
-    .task-item{
-      background:var(--glass);border:1px solid var(--border);
-      border-left:3px solid var(--accent);border-radius:9px;
-      padding:9px 11px;animation:fadeUp .22s ease both;transition:box-shadow .2s;
-    }
+    .task-item{background:var(--glass);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:9px;padding:9px 11px;animation:fadeUp .22s ease both;transition:box-shadow .2s;}
     .task-item:hover{box-shadow:0 4px 16px rgba(79,158,255,.12);}
     @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
     .task-priority{border-left-color:var(--gold);box-shadow:0 0 12px rgba(251,191,36,.18);}
     .task-completed{border-left-color:rgba(120,120,140,.4);opacity:.55;}
-    /* recurring items get indigo left border */
-    .task-recurring{border-left-color:#818cf8;box-shadow:0 0 12px rgba(129,140,248,.15);}
+    .task-recurring{border-left-color:var(--indigo);box-shadow:0 0 12px rgba(129,140,248,.15);}
     .task-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;}
     .task-text{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.4;}
     .task-meta{font-size:.7rem;color:var(--muted);text-align:right;line-height:1.5;white-space:nowrap;}
     .task-remaining{font-size:.72rem;font-family:var(--fhud);margin-top:2px;}
     .task-buttons{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
-    .task-buttons button{font-size:.72rem;padding:4px 11px;}
     .task-empty{font-size:.82rem;color:var(--muted);text-align:center;padding:18px 0;}
     .prog-track{height:3px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:5px;overflow:hidden;}
     .prog-track-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;}
+    .recur-badge{display:inline-flex;align-items:center;gap:4px;font-size:.66rem;color:var(--indigo);font-family:var(--fhud);background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:999px;padding:2px 8px;margin-top:3px;}
+    .subj-tag{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;color:var(--cyan);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:999px;padding:2px 7px;margin-top:3px;margin-right:2px;}
 
-    /* recurring badge */
-    .recur-badge{
-      display:inline-flex;align-items:center;gap:4px;
-      font-size:.68rem;color:#818cf8;font-family:var(--fhud);
-      background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);
-      border-radius:999px;padding:2px 8px;margin-top:3px;
-    }
-
-    /* toast notification */
-    .toast{
-      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-      background:rgba(10,18,36,.95);border:1px solid var(--border);
-      border-radius:var(--r);padding:12px 20px;
-      font-size:.88rem;color:var(--text);
-      box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 1px rgba(79,158,255,.1);
-      backdrop-filter:blur(16px);z-index:9990;
-      transition:transform .3s ease,opacity .3s ease;opacity:0;
-      display:flex;align-items:center;gap:10px;min-width:240px;max-width:360px;
-    }
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(10,18,36,.95);border:1px solid var(--border);border-radius:var(--r);padding:12px 20px;font-size:.88rem;color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 1px rgba(79,158,255,.1);backdrop-filter:blur(16px);z-index:9990;transition:transform .3s ease,opacity .3s ease;opacity:0;display:flex;align-items:center;gap:10px;min-width:240px;max-width:380px;}
     .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
     .toast-icon{font-size:1.2rem;flex-shrink:0;}
 
-    /* ── RESPONSIVE ── */
+    /* RESPONSIVE */
     @media(max-width:640px){
       .page{padding:14px 10px 70px;}
       .tt-header h1{font-size:.85rem;}
@@ -303,22 +239,15 @@
       .task-meta{text-align:left;}
       .task-buttons button{font-size:.7rem;padding:4px 9px;}
       :root{--panel-w:240px;}
-      .hud-val{font-size:1.05rem;}
+      .hud-val{font-size:1rem;}
       .sync-badge{font-size:.52rem;top:7px;right:7px;}
-      .task-popup{min-width:180px;max-width:240px;}
     }
-    @media(min-width:641px){
-      table.desktop-table{display:table!important;}
-      .mobile-cards{display:none!important;}
-    }
+    @media(min-width:641px){table.desktop-table{display:table!important;}.mobile-cards{display:none!important;}}
   </style>
 </head>
 <body>
 
-<div class="sync-badge" id="sync-badge">
-  <div class="sync-dot"></div>
-  <span id="sync-text">เชื่อมต่อ...</span>
-</div>
+<div class="sync-badge" id="sync-badge"><div class="sync-dot"></div><span id="sync-text">เชื่อมต่อ...</span></div>
 
 <div class="hud-toggle" id="hud-toggle">▶</div>
 <div class="hud-panel" id="hud-panel">
@@ -332,17 +261,30 @@
   <div class="hud-block"><div class="hud-label">Time Left</div><div class="hud-val sm" id="hv-tasktime">—</div></div>
   <div class="hud-div"></div>
   <div class="hud-block"><div class="hud-label">Tasks Left</div><div class="hud-val" id="hv-left">0</div></div>
-  <div class="hud-block"><div class="hud-label">Uptime</div><div class="hud-val" id="hv-uptime">00:00:00</div></div>
+  <div class="hud-block"><div class="hud-label">Uptime</div><div class="hud-val sm" id="hv-uptime">00:00:00</div></div>
+  <div class="hud-div"></div>
+  <!-- KERNEL PANEL -->
+  <div class="kernel-panel">
+    <div class="kernel-title"><span class="kernel-dot"></span>KERNEL · schoolos v2.4</div>
+    <div class="kernel-log" id="kernel-log"></div>
+  </div>
 </div>
 
-<!-- toast -->
-<div class="toast" id="toast">
-  <span class="toast-icon">🔔</span>
-  <span id="toast-msg">การแจ้งเตือน</span>
+<div class="toast" id="toast"><span class="toast-icon">🔔</span><span id="toast-msg"></span></div>
+
+<!-- Subject picker modal -->
+<div class="modal-overlay" id="subject-modal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">🔗 เชื่อมวิชากับงานนี้</div>
+    <div class="subject-list" id="subject-list-modal"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost btn-sm" id="modal-cancel">ยกเลิก</button>
+      <button class="btn-main btn-sm" id="modal-confirm">ยืนยัน</button>
+    </div>
+  </div>
 </div>
 
 <div class="page">
-
   <div class="tt-header">
     <h1>SCHOOLOS · ม.6/1 กลุ่ม 1 · ภาคเรียน 1/2569</h1>
     <div class="clocks">
@@ -366,25 +308,21 @@
       <div class="prog-eta" id="nxt-eta">เริ่มเวลา --:--</div>
     </div>
   </div>
-
   <div class="current-subject-bar" id="cur-subject">ขณะนี้ไม่มีคาบเรียน</div>
 
   <div class="table-wrapper">
     <table class="desktop-table">
-      <thead>
-        <tr>
-          <th>วัน/เวลา</th>
-          <th>08.30<br>09.20</th><th>09.20<br>10.10</th>
-          <th>10.20<br>11.10</th><th>11.10<br>12.00</th>
-          <th>12.00<br>12.50</th><th>12.50<br>13.40</th>
-          <th>13.50<br>14.40</th><th>14.40<br>15.30</th>
-          <th>15.30<br>16.20</th><th>16.00<br>17.00</th>
-          <th>17.20<br>18.20</th><th>18.20<br>20.10</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>วัน/เวลา</th>
+        <th>08.30<br>09.20</th><th>09.20<br>10.10</th>
+        <th>10.20<br>11.10</th><th>11.10<br>12.00</th>
+        <th>12.00<br>12.50</th><th>12.50<br>13.40</th>
+        <th>13.50<br>14.40</th><th>14.40<br>15.30</th>
+        <th>15.30<br>16.20</th><th>16.00<br>17.00</th>
+        <th>17.20<br>18.20</th><th>18.20<br>20.10</th>
+      </tr></thead>
       <tbody id="tt-tbody">
-        <tr>
-          <th>จันทร์</th>
+        <tr><th>จันทร์</th>
           <td>คณิตศาสตร์ขั้นสูง<br>ณัฐดนัย<br>224</td>
           <td>สังคม<br>กัลยภิญญ์<br>523</td>
           <td>เคมี 5<br>ดารุณี<br>433</td>
@@ -393,10 +331,8 @@
           <td>สังคมขั้นสูง<br>ทินบัติ<br>532</td>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
-          <td>-</td><td>-</td><td>-</td><td>-</td>
-        </tr>
-        <tr>
-          <th>อังคาร</th>
+          <td>-</td><td>-</td><td>-</td><td>-</td></tr>
+        <tr><th>อังคาร</th>
           <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>233</td>
           <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>233</td>
           <td>ภาษาไทย<br>สุนีย์<br>624</td>
@@ -407,10 +343,8 @@
           <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
           <td>ประชุมสี</td>
           <td>ทำเวรห้อง 624 zoning</td>
-          <td>-</td><td>-</td>
-        </tr>
-        <tr>
-          <th>พุธ</th>
+          <td>-</td><td>-</td></tr>
+        <tr><th>พุธ</th>
           <td>English High tier<br>ศกุณกาญจน์<br>337</td>
           <td>พลานามัย,พละ<br>วิมลณัฐ<br>อเนกประสงค์6</td>
           <td>ชีววิทยา 5<br>รุ่งทิพย์<br>436</td>
@@ -419,10 +353,8 @@
           <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
           <td>English Secondary<br>Ma.Fabie<br>337</td>
           <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
-          <td>-</td><td>-</td><td>-</td><td>-</td>
-        </tr>
-        <tr>
-          <th>พฤหัสบดี</th>
+          <td>-</td><td>-</td><td>-</td><td>-</td></tr>
+        <tr><th>พฤหัสบดี</th>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
           <td>ฟิสิกส์ 5<br>ปองพล<br>434</td>
           <td>ภาษาไทย<br>สุนีย์<br>624</td>
@@ -432,10 +364,8 @@
           <td>ทัศนศิลป์<br>รักษ์สุมล<br>515</td>
           <td>ชุมนุม<br>N/A<br>---</td>
           <td>ซ่อมเสริม</td>
-          <td>-</td><td>-</td><td>-</td>
-        </tr>
-        <tr>
-          <th>ศุกร์</th>
+          <td>-</td><td>-</td><td>-</td></tr>
+        <tr><th>ศุกร์</th>
           <td>คณิตศาสตร์<br>นุชิดา<br>224</td>
           <td>ไทยขั้นสูง<br>พิศาล<br>636</td>
           <td>คณิตศาสตร์เพิ่มเติม 5<br>ฉัตรณพัฒน์<br>233</td>
@@ -444,32 +374,31 @@
           <td>ศึกษาค้นขว้า<br>N/A<br>---</td>
           <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
           <td>วิทยาศาสตร์เทคโนโลยี<br>สันติ์<br>133</td>
-          <td>-</td><td>-</td><td>-</td><td>-</td>
-        </tr>
+          <td>-</td><td>-</td><td>-</td><td>-</td></tr>
       </tbody>
     </table>
     <div class="mobile-cards" id="mobile-cards"></div>
   </div>
 
-  <!-- TASK TRACKER -->
-  <div class="section-divider">
-    <div class="sd-line"></div>
-    <div class="sd-label">📋 Task Tracker · Firebase</div>
-    <div class="sd-line"></div>
-  </div>
+  <div class="section-divider"><div class="sd-line"></div><div class="sd-label">📋 Task Tracker · Firebase</div><div class="sd-line"></div></div>
 
   <div style="display:flex;flex-direction:column;gap:14px;">
     <div class="card">
       <div class="card-title">บันทึกงานการบ้าน</div>
-      <div class="card-sub">งานที่มีกำหนดส่งจะแสดงเป็น 🟡 บนตาราง · ซิงค์ Firebase ☁️ · 🔁 = แจ้งเตือนซ้ำ ไม่ถูกลบเมื่อเสร็จ</div>
+      <div class="card-sub">🟡 = งานปกติ · 🟣 = แจ้งเตือนซ้ำ · เชื่อมวิชาเพื่อแสดงดอทตรงตำแหน่ง ☁️ Firebase</div>
       <div class="form-stack">
-        <textarea id="task-text" placeholder="เช่น การบ้านคณิต หน้า 52 หรือ เตือนส่งรายงาน (ซ้ำทุกสัปดาห์)"></textarea>
+        <textarea id="task-text" placeholder="เช่น การบ้านเคมี หน้า 52 หรือ เตือนส่งรายงาน"></textarea>
         <div class="form-row-inline">
           <input type="date" id="task-date"/>
           <input type="time" id="task-time"/>
           <button class="btn-main" id="add-task">＋ เพิ่มงาน</button>
         </div>
-        <!-- Repeat toggle -->
+        <!-- Subject link -->
+        <div>
+          <button type="button" class="subject-link-btn" id="link-subject-btn">🔗 เชื่อมวิชา (ไม่บังคับ)</button>
+          <div id="linked-subjects-preview" style="display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:6px;vertical-align:middle;"></div>
+        </div>
+        <!-- Repeat -->
         <div class="repeat-row">
           <span class="repeat-label">🔁 ซ้ำ:</span>
           <button type="button" class="toggle-btn" id="repeat-toggle">ไม่ซ้ำ</button>
@@ -478,17 +407,25 @@
               <option value="daily">ทุกวัน</option>
               <option value="weekly" selected>ทุกสัปดาห์</option>
               <option value="monthly">ทุกเดือน</option>
+              <option value="specific">วันที่ระบุ</option>
             </select>
-            <span style="font-size:.78rem;color:var(--muted)">จะแจ้งเตือนทุกรอบโดยอัตโนมัติ</span>
+          </div>
+        </div>
+        <!-- Specific dates -->
+        <div class="specific-dates-wrap" id="specific-dates-wrap">
+          <div style="font-size:.78rem;color:var(--muted);">📅 เพิ่มวันที่ที่ต้องการแจ้งเตือน:</div>
+          <div class="date-chip-row" id="date-chips"></div>
+          <div class="add-date-row">
+            <input type="date" id="specific-date-input" style="flex:1"/>
+            <button type="button" class="btn-ghost btn-sm" id="add-specific-date">+ เพิ่ม</button>
           </div>
         </div>
       </div>
     </div>
-
     <div class="lists-grid">
       <div class="card">
         <div class="card-title">งานที่ต้องทำ</div>
-        <div class="card-sub">⭐ สำคัญ + ใกล้กำหนดอยู่บนสุด · 🔁 = แจ้งเตือนซ้ำ</div>
+        <div class="card-sub">⭐ สำคัญ + ใกล้กำหนดอยู่บนสุด</div>
         <div id="pending-list" class="task-list"><div class="task-empty">กำลังโหลด...</div></div>
       </div>
       <div class="card">
@@ -498,12 +435,11 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <div class="task-popup" id="task-popup" style="display:none;">
   <button class="task-popup-close" id="popup-close">✕</button>
-  <div class="task-popup-title">📋 งานในช่วงนี้</div>
+  <div class="task-popup-title" id="popup-title">📋 งาน</div>
   <div id="popup-body"></div>
 </div>
 
@@ -512,82 +448,150 @@
 <script>
 /* ══ FIREBASE ══ */
 firebase.initializeApp({
-  apiKey:            "AIzaSyCewMoKe7elxb0wi2iIPBGkCVEHKzyp6Sk",
-  authDomain:        "tasktracker-8c87d.firebaseapp.com",
-  databaseURL:       "https://tasktracker-8c87d-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "tasktracker-8c87d",
-  storageBucket:     "tasktracker-8c87d.firebasestorage.app",
-  messagingSenderId: "642579600347",
-  appId:             "1:642579600347:web:fc1910589f557bd7f8cdfe"
+  apiKey:"AIzaSyCewMoKe7elxb0wi2iIPBGkCVEHKzyp6Sk",
+  authDomain:"tasktracker-8c87d.firebaseapp.com",
+  databaseURL:"https://tasktracker-8c87d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"tasktracker-8c87d",
+  storageBucket:"tasktracker-8c87d.firebasestorage.app",
+  messagingSenderId:"642579600347",
+  appId:"1:642579600347:web:fc1910589f557bd7f8cdfe"
 });
-const db = firebase.database();
-const tasksRef = db.ref('tasks');
-
-const badge = document.getElementById('sync-badge');
-const syncText = document.getElementById('sync-text');
-function setSync(state,msg){badge.className='sync-badge '+state;syncText.textContent=msg;}
+const db=firebase.database(), tasksRef=db.ref('tasks');
+const badge=document.getElementById('sync-badge'), syncText=document.getElementById('sync-text');
+function setSync(s,m){badge.className='sync-badge '+s;syncText.textContent=m;}
 setSync('syncing','เชื่อมต่อ...');
-
-const $ = id => document.getElementById(id);
-let tasks={}, editingId=null;
+const $=id=>document.getElementById(id);
+let tasks={}, editingId=null, repeatOn=false, specificDates=[], linkedSubjects=[];
 
 /* ══ TOAST ══ */
-let toastTimer=null;
+let toastT=null;
 function showToast(msg,icon='🔔'){
   $('toast-msg').textContent=msg;
   $('toast').querySelector('.toast-icon').textContent=icon;
   $('toast').classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4000);
+  clearTimeout(toastT); toastT=setTimeout(()=>$('toast').classList.remove('show'),4500);
 }
 
-/* ══ REPEAT TOGGLE ══ */
-let repeatOn=false;
+/* ══ ALL UNIQUE SUBJECT NAMES from table ══ */
+function getAllSubjects(){
+  const tbody=document.getElementById('tt-tbody');
+  const set=new Set();
+  Array.from(tbody.rows).forEach(row=>{
+    Array.from(row.cells).forEach((cell,ci)=>{
+      if(ci===0) return;
+      const name=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
+      if(name&&name!=='-') set.add(name);
+    });
+  });
+  return [...set].sort();
+}
+
+/* ══ SUBJECT MODAL ══ */
+let modalTmpSubs=[];
+$('link-subject-btn').addEventListener('click',()=>{
+  modalTmpSubs=[...linkedSubjects];
+  const list=$('subject-list-modal'); list.innerHTML='';
+  getAllSubjects().forEach(s=>{
+    const d=document.createElement('label');
+    d.className='subject-opt';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=s;
+    if(modalTmpSubs.includes(s)) cb.checked=true;
+    cb.addEventListener('change',()=>{
+      if(cb.checked){ if(!modalTmpSubs.includes(s)) modalTmpSubs.push(s); }
+      else modalTmpSubs=modalTmpSubs.filter(x=>x!==s);
+    });
+    d.appendChild(cb); d.appendChild(document.createTextNode(s));
+    list.appendChild(d);
+  });
+  $('subject-modal').style.display='flex';
+});
+$('modal-cancel').addEventListener('click',()=>$('subject-modal').style.display='none');
+$('modal-confirm').addEventListener('click',()=>{
+  linkedSubjects=modalTmpSubs;
+  renderSubjectPreview();
+  $('subject-modal').style.display='none';
+});
+function renderSubjectPreview(){
+  const p=$('linked-subjects-preview'); p.innerHTML='';
+  linkedSubjects.forEach(s=>{
+    const tag=document.createElement('span'); tag.className='subj-tag';
+    tag.textContent=s; p.appendChild(tag);
+  });
+  $('link-subject-btn').classList.toggle('has-subs',linkedSubjects.length>0);
+  $('link-subject-btn').textContent=linkedSubjects.length?`🔗 ${linkedSubjects.length} วิชา`:'🔗 เชื่อมวิชา (ไม่บังคับ)';
+}
+
+/* ══ REPEAT ══ */
 $('repeat-toggle').addEventListener('click',()=>{
   repeatOn=!repeatOn;
   $('repeat-toggle').textContent=repeatOn?'🔁 ซ้ำ':'ไม่ซ้ำ';
   $('repeat-toggle').classList.toggle('active',repeatOn);
   $('repeat-options').classList.toggle('visible',repeatOn);
+  if(!repeatOn){ $('specific-dates-wrap').classList.remove('visible'); specificDates=[]; renderDateChips(); }
 });
+$('repeat-freq').addEventListener('change',()=>{
+  const isSpecific=$('repeat-freq').value==='specific';
+  $('specific-dates-wrap').classList.toggle('visible',isSpecific);
+  if(!isSpecific){ specificDates=[]; renderDateChips(); }
+});
+$('add-specific-date').addEventListener('click',()=>{
+  const v=$('specific-date-input').value;
+  if(!v||specificDates.includes(v)) return;
+  specificDates.push(v); specificDates.sort(); renderDateChips();
+  $('specific-date-input').value='';
+});
+function renderDateChips(){
+  const row=$('date-chips'); row.innerHTML='';
+  specificDates.forEach(d=>{
+    const chip=document.createElement('span'); chip.className='date-chip';
+    chip.innerHTML=`${d}<span class="rm" data-d="${d}">✕</span>`;
+    chip.querySelector('.rm').addEventListener('click',e=>{
+      specificDates=specificDates.filter(x=>x!==e.target.dataset.d); renderDateChips();
+    });
+    row.appendChild(chip);
+  });
+}
+
+function resetForm(){
+  $('task-text').value=''; repeatOn=false; specificDates=[]; linkedSubjects=[];
+  $('repeat-toggle').textContent='ไม่ซ้ำ'; $('repeat-toggle').classList.remove('active');
+  $('repeat-options').classList.remove('visible'); $('specific-dates-wrap').classList.remove('visible');
+  renderDateChips(); renderSubjectPreview();
+  $('add-task').textContent='＋ เพิ่มงาน'; $('add-task').className='btn-main'; editingId=null;
+}
 
 /* ══ UTILS ══ */
 function fmtDue(d){const p=v=>String(v).padStart(2,'0');return`${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}น.`;}
 function fmtRemaining(ms){
   const sign=ms>=0,abs=Math.abs(ms),tm=Math.floor(abs/60000);
   const d=Math.floor(tm/1440),h=Math.floor((tm%1440)/60),m=tm%60;
-  let s='';if(d)s+=`${d}ว `;if(h)s+=`${h}ชม `;s+=`${m}น`;
+  let s=''; if(d)s+=`${d}ว `;if(h)s+=`${h}ชม `;s+=`${m}น`;
   return sign?`⏱ เหลือ ${s.trim()}`:`🔴 เลย ${s.trim()}`;
 }
 function remColor(ms){if(ms<=0||ms<86400000)return'var(--red)';if(ms<3*86400000)return'var(--gold)';return'var(--accent)';}
 function makeDue(d,t){if(!d||!t)return null;const dt=new Date(`${d}T${t}:00`);return isNaN(dt)?null:dt;}
-
-/* ══ RECURRING: advance due date by frequency ══ */
-function advanceDue(dueISO, freq){
+function advanceDue(dueISO,freq){
   const d=new Date(dueISO);
-  if(freq==='daily')   d.setDate(d.getDate()+1);
-  if(freq==='weekly')  d.setDate(d.getDate()+7);
+  if(freq==='daily') d.setDate(d.getDate()+1);
+  if(freq==='weekly') d.setDate(d.getDate()+7);
   if(freq==='monthly') d.setMonth(d.getMonth()+1);
   return d.toISOString();
 }
-
-const FREQ_LABEL={daily:'ทุกวัน',weekly:'ทุกสัปดาห์',monthly:'ทุกเดือน'};
+function nextSpecificDate(dates){
+  const now=new Date(); const today=now.toISOString().slice(0,10);
+  return dates.find(d=>d>=today)||dates[0];
+}
+const FREQ_LABEL={daily:'ทุกวัน',weekly:'ทุกสัปดาห์',monthly:'ทุกเดือน',specific:'วันที่ระบุ'};
 
 /* ══ TIMETABLE DATA ══ */
 const PERIODS=[
-  {start:[8,30], end:[9,20]},
-  {start:[9,20], end:[10,10]},
-  {start:[10,20],end:[11,10]},
-  {start:[11,10],end:[12,0]},
-  {start:[12,0], end:[12,50]},
-  {start:[12,50],end:[13,40]},
-  {start:[13,50],end:[14,40]},
-  {start:[14,40],end:[15,30]},
-  {start:[15,30],end:[16,20]},
-  {start:[16,0], end:[17,0]},   // ← changed to 16:00-17:00
-  {start:[17,20],end:[18,20]},
-  {start:[18,20],end:[20,10]},
+  {start:[8,30],end:[9,20]},{start:[9,20],end:[10,10]},
+  {start:[10,20],end:[11,10]},{start:[11,10],end:[12,0]},
+  {start:[12,0],end:[12,50]},{start:[12,50],end:[13,40]},
+  {start:[13,50],end:[14,40]},{start:[14,40],end:[15,30]},
+  {start:[15,30],end:[16,20]},{start:[16,0],end:[17,0]},
+  {start:[17,20],end:[18,20]},{start:[18,20],end:[20,10]},
 ];
-
 const DAYS=[
   {name:'จันทร์',dayIndex:1,periods:[
     {time:'08.30-09.20',subject:'คณิตศาสตร์ขั้นสูง',teacher:'ณัฐดนัย',room:'224'},
@@ -598,10 +602,8 @@ const DAYS=[
     {time:'12.50-13.40',subject:'สังคมขั้นสูง',teacher:'ทินบัติ',room:'532'},
     {time:'13.50-14.40',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
     {time:'14.40-15.30',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
-    {time:'15.30-16.20',subject:'-',empty:true},
-    {time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},
-    {time:'18.20-20.10',subject:'-',empty:true},
+    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
+    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
   ]},
   {name:'อังคาร',dayIndex:2,periods:[
     {time:'08.30-09.20',subject:'คณิตศาสตร์เพิ่มเติม 5',teacher:'ฉัตรณพัฒน์',room:'233'},
@@ -613,9 +615,8 @@ const DAYS=[
     {time:'13.50-14.40',subject:'ชีววิทยา 5',teacher:'รุ่งทิพย์',room:'436'},
     {time:'14.40-15.30',subject:'ชีววิทยา 5',teacher:'รุ่งทิพย์',room:'436'},
     {time:'15.30-16.20',subject:'ประชุมสี'},
-    {time:'16.00-17.00',subject:'ทำเวร',teacher:'สุนีย์',room:'624'},
-    {time:'17.20-18.20',subject:'-',empty:true},
-    {time:'18.20-20.10',subject:'-',empty:true},
+    {time:'16.00-17.00',subject:'ทำเวรห้อง 624 zoning'},
+    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
   ]},
   {name:'พุธ',dayIndex:3,periods:[
     {time:'08.30-09.20',subject:'English High tier',teacher:'ศกุณกาญจน์',room:'337'},
@@ -626,10 +627,8 @@ const DAYS=[
     {time:'12.50-13.40',subject:'คณิตศาสตร์',teacher:'นุชิดา',room:'224'},
     {time:'13.50-14.40',subject:'English Secondary',teacher:'Ma.Fabie',room:'337'},
     {time:'14.40-15.30',subject:'ศึกษาค้นขว้า',teacher:'N/A',room:'---'},
-    {time:'15.30-16.20',subject:'-',empty:true},
-    {time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},
-    {time:'18.20-20.10',subject:'-',empty:true},
+    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
+    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
   ]},
   {name:'พฤหัสบดี',dayIndex:4,periods:[
     {time:'08.30-09.20',subject:'ฟิสิกส์ 5',teacher:'ปองพล',room:'434'},
@@ -642,8 +641,7 @@ const DAYS=[
     {time:'14.40-15.30',subject:'ชุมนุม',teacher:'N/A',room:'---'},
     {time:'15.30-16.20',subject:'ซ่อมเสริม'},
     {time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},
-    {time:'18.20-20.10',subject:'-',empty:true},
+    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
   ]},
   {name:'ศุกร์',dayIndex:5,periods:[
     {time:'08.30-09.20',subject:'คณิตศาสตร์',teacher:'นุชิดา',room:'224'},
@@ -654,10 +652,8 @@ const DAYS=[
     {time:'12.50-13.40',subject:'ศึกษาค้นขว้า',teacher:'N/A',room:'---'},
     {time:'13.50-14.40',subject:'วิทยาศาสตร์เทคโนโลยี',teacher:'สันติ์',room:'133'},
     {time:'14.40-15.30',subject:'วิทยาศาสตร์เทคโนโลยี',teacher:'สันติ์',room:'133'},
-    {time:'15.30-16.20',subject:'-',empty:true},
-    {time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},
-    {time:'18.20-20.10',subject:'-',empty:true},
+    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
+    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
   ]},
 ];
 
@@ -683,10 +679,8 @@ DAYS.forEach(day=>{
     else if(p.teacher) subText.innerHTML=`<strong>${p.subject}</strong><br><small>${p.teacher} · ห้อง ${p.room}</small>`;
     else subText.textContent=p.subject;
     subEl.appendChild(subText);
-    const dotWrap=document.createElement('span');
-    dotWrap.className='mob-dot-wrap';
-    dotWrap.dataset.dayIndex=day.dayIndex;
-    dotWrap.dataset.periodIndex=i;
+    const dotWrap=document.createElement('div'); dotWrap.className='mob-dot-wrap';
+    dotWrap.dataset.dayIndex=day.dayIndex; dotWrap.dataset.periodIndex=i;
     subEl.appendChild(dotWrap);
     row.appendChild(timeEl); row.appendChild(subEl); list.appendChild(row);
   });
@@ -700,17 +694,13 @@ document.addEventListener('click',e=>{
   if(!popup.contains(e.target)&&!e.target.classList.contains('task-dot')&&!e.target.classList.contains('mob-task-dot'))
     popup.style.display='none';
 });
-
-function showPopup(anchorEl,subjectName){
+function showPopup(anchorEl,subjectName,isRecur){
   const arr=Object.values(tasks).filter(t=>!t.completed);
-  let relevant=subjectName?arr.filter(t=>{
-    const tText=t.text.toLowerCase(),subLower=subjectName.toLowerCase();
-    const taskWords=tText.split(/\s+/).filter(w=>w.length>1);
-    const subWords=subLower.split(/\s+/).filter(w=>w.length>1);
-    return taskWords.some(w=>subLower.includes(w))||subWords.some(w=>tText.includes(w));
-  }):arr;
-  if(!relevant.length) relevant=arr;
+  // EXACT match: only show tasks that explicitly link this subject name
+  let relevant=arr.filter(t=>(t.subjects||[]).includes(subjectName));
+  if(!relevant.length) relevant=arr; // fallback if no exact links
   relevant.sort((a,b)=>new Date(a.due)-new Date(b.due));
+  $('popup-title').textContent=isRecur?'🟣 แจ้งเตือนซ้ำ':'🟡 งาน';
   const body=$('popup-body'); body.innerHTML='';
   if(!relevant.length){body.innerHTML='<div class="task-popup-empty">ไม่มีงานค้างอยู่</div>';}
   else{
@@ -723,47 +713,68 @@ function showPopup(anchorEl,subjectName){
   }
   popup.style.display='block';
   const rect=anchorEl.getBoundingClientRect();
-  let top=rect.bottom+6+window.scrollY,left=rect.left+window.scrollX;
-  if(left+290>window.innerWidth) left=window.innerWidth-295;
+  let top=rect.bottom+6+window.scrollY, left=rect.left+window.scrollX;
+  if(left+300>window.innerWidth) left=window.innerWidth-305;
   if(left<4) left=4;
   popup.style.top=top+'px'; popup.style.left=left+'px';
 }
 
-/* ══ TASK DOTS ══ */
-function getSubjectLabel(cellText){return(cellText||'').trim().split(/[\r\n]+/)[0].trim();}
+/* ══ TASK DOTS — exact subject match ══ */
 function updateTaskDots(){
   document.querySelectorAll('.task-dot').forEach(d=>d.remove());
   document.querySelectorAll('.mob-task-dot').forEach(d=>d.remove());
   const pending=Object.values(tasks).filter(t=>!t.completed);
   if(!pending.length) return;
   const tbody=document.getElementById('tt-tbody');
+
+  // Build a map: subjectName -> {hasTask, hasRecur}
+  const subMap={};
   pending.forEach(t=>{
-    const tText=t.text.toLowerCase();
-    Array.from(tbody.rows).forEach((row,rowIdx)=>{
-      const dayIndex=rowIdx+1;
-      Array.from(row.cells).forEach((cell,colIdx)=>{
-        if(colIdx===0) return;
-        const subjectLabel=getSubjectLabel(cell.textContent);
-        if(!subjectLabel||subjectLabel==='-') return;
-        const subLower=subjectLabel.toLowerCase();
-        const taskWords=tText.split(/\s+/).filter(w=>w.length>1);
-        const subWords=subLower.split(/\s+/).filter(w=>w.length>1);
-        const matches=taskWords.some(w=>subLower.includes(w))||subWords.some(w=>tText.includes(w));
-        if(!matches) return;
-        if(!cell.querySelector('.task-dot')){
-          const dot=document.createElement('div');
-          dot.className='task-dot'; dot.title=`มีงาน: ${t.text}`;
-          cell.appendChild(dot);
-          dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,subjectLabel);});
-        }
-        const periodIdx=colIdx-1;
-        const wrap=document.querySelector(`.mob-dot-wrap[data-day-index="${dayIndex}"][data-period-index="${periodIdx}"]`);
-        if(wrap&&!wrap.querySelector('.mob-task-dot')){
-          const mdot=document.createElement('span');
-          mdot.className='mob-task-dot'; wrap.appendChild(mdot);
-          mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,subjectLabel);});
-        }
-      });
+    (t.subjects||[]).forEach(s=>{
+      if(!subMap[s]) subMap[s]={hasTask:false,hasRecur:false};
+      if(t.recurring) subMap[s].hasRecur=true;
+      else subMap[s].hasTask=true;
+    });
+  });
+
+  Array.from(tbody.rows).forEach((row,rowIdx)=>{
+    const dayIndex=rowIdx+1;
+    Array.from(row.cells).forEach((cell,colIdx)=>{
+      if(colIdx===0) return;
+      const name=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
+      if(!name||name==='-') return;
+      const info=subMap[name]; if(!info) return;
+
+      // Desktop dots
+      if(info.hasTask){
+        const dot=document.createElement('div');
+        dot.className='task-dot dot-task';
+        dot.title='🟡 งานปกติ: คลิกเพื่อดู';
+        cell.appendChild(dot);
+        dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,false);});
+      }
+      if(info.hasRecur){
+        const dot=document.createElement('div');
+        dot.className='task-dot dot-recur';
+        dot.title='แจ้งเตือนซ้ำ: คลิกเพื่อดู';
+        cell.appendChild(dot);
+        dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,true);});
+      }
+
+      // Mobile dots
+      const periodIdx=colIdx-1;
+      const wrap=document.querySelector(`.mob-dot-wrap[data-day-index="${dayIndex}"][data-period-index="${periodIdx}"]`);
+      if(!wrap) return;
+      if(info.hasTask&&!wrap.querySelector('.dot-task')){
+        const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-task';
+        wrap.appendChild(mdot);
+        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,false);});
+      }
+      if(info.hasRecur&&!wrap.querySelector('.dot-recur')){
+        const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-recur';
+        wrap.appendChild(mdot);
+        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,true);});
+      }
     });
   });
 }
@@ -778,19 +789,15 @@ function render(){
   const completed=arr.filter(t=>t.completed).sort((a,b)=>b.completedAt-a.completedAt);
   const pl=$('pending-list'),cl=$('completed-list');
   pl.innerHTML=''; cl.innerHTML='';
-  if(!pending.length)   pl.innerHTML='<div class="task-empty">ยังไม่มีงานที่ต้องทำ 🎉</div>';
+  if(!pending.length) pl.innerHTML='<div class="task-empty">ยังไม่มีงานที่ต้องทำ 🎉</div>';
   if(!completed.length) cl.innerHTML='<div class="task-empty">ยังไม่มีงานที่เสร็จ</div>';
   pending.forEach(t=>pl.appendChild(makeTaskEl(t,false)));
   completed.forEach(t=>cl.appendChild(makeTaskEl(t,true)));
   $('hv-left').textContent=pending.length;
-  if(pending.length){
-    const nx=pending[0],ms=new Date(nx.due)-Date.now();
-    $('hv-nexttask').textContent=nx.text.length>24?nx.text.slice(0,24)+'…':nx.text;
-    $('hv-tasktime').textContent=fmtRemaining(ms);
-  } else { $('hv-nexttask').textContent='—'; $('hv-tasktime').textContent='—'; }
+  if(pending.length){const nx=pending[0],ms=new Date(nx.due)-Date.now();$('hv-nexttask').textContent=nx.text.length>24?nx.text.slice(0,24)+'…':nx.text;$('hv-tasktime').textContent=fmtRemaining(ms);}
+  else{$('hv-nexttask').textContent='—';$('hv-tasktime').textContent='—';}
   updateTaskDots();
 }
-
 function makeTaskEl(task,done){
   const due=new Date(task.due),ms=due-Date.now();
   const el=document.createElement('div');
@@ -799,25 +806,16 @@ function makeTaskEl(task,done){
   else if(task.recurring) cls+=' task-recurring';
   else if(task.priority) cls+=' task-priority';
   el.className=cls; el.dataset.key=task.key;
-
   const top=document.createElement('div'); top.className='task-top';
-  const txt=document.createElement('div'); txt.className='task-text'; txt.id=`tt-${task.key}`;
+  const txt=document.createElement('div'); txt.className='task-text';
   txt.textContent=(task.priority&&!done?'⭐ ':'')+(task.recurring?'🔁 ':'')+task.text;
   if(done&&!task.recurring) txt.style.textDecoration='line-through';
   const meta=document.createElement('div'); meta.className='task-meta';
   meta.innerHTML=`กำหนด:<br>${fmtDue(due)}`;
   top.appendChild(txt); top.appendChild(meta);
-
   const rem=document.createElement('div'); rem.className='task-remaining'; rem.id=`tr-${task.key}`;
   if(!done){rem.textContent=fmtRemaining(ms);rem.style.color=remColor(ms);}
-  else{rem.textContent=task.recurring?'✅ รอบนี้เสร็จแล้ว':'✅ เสร็จแล้ว';rem.style.color='var(--green)';}
-
-  // recurring badge
-  let badge2='';
-  if(task.recurring){
-    badge2=`<div class="recur-badge">🔁 ${FREQ_LABEL[task.recurFreq]||task.recurFreq}</div>`;
-  }
-
+  else{rem.textContent=task.recurring?'✅ รอบนี้เสร็จ':'✅ เสร็จแล้ว';rem.style.color='var(--green)';}
   const track=document.createElement('div'); track.className='prog-track';
   const fill=document.createElement('div'); fill.className='prog-track-fill';
   if(!done){
@@ -825,93 +823,80 @@ function makeTaskEl(task,done){
     fill.style.width=total>0?Math.min(100,Math.max(0,elapsed/total*100))+'%':'0%';
     if(ms<0) fill.style.background='var(--red)';
     else if(ms<86400000) fill.style.background='linear-gradient(90deg,var(--gold),var(--red))';
-    else if(task.recurring) fill.style.background='linear-gradient(90deg,#818cf8,#6366f1)';
-  } else{fill.style.width='100%';fill.style.background=task.recurring?'#6366f1':'var(--green)';}
+    else if(task.recurring) fill.style.background='linear-gradient(90deg,var(--indigo),#6366f1)';
+  } else{fill.style.width='100%';fill.style.background=task.recurring?'var(--indigo)':'var(--green)';}
   track.appendChild(fill);
-
   const btns=document.createElement('div'); btns.className='task-buttons';
-  if(!done){
-    btns.innerHTML=`
-      <button class="btn-priority" data-key="${task.key}" data-action="priority">${task.priority?'★ ยกเลิก':'⭐ สำคัญ'}</button>
-      <button class="btn-edit"     data-key="${task.key}" data-action="edit">✏️ แก้ไข</button>
-      <button class="btn-complete" data-key="${task.key}" data-action="complete">${task.recurring?'✅ รอบนี้เสร็จ':'✅ เสร็จ'}</button>`;
+  if(!done) btns.innerHTML=`
+    <button class="btn-priority btn-sm" data-key="${task.key}" data-action="priority">${task.priority?'★ ยกเลิก':'⭐ สำคัญ'}</button>
+    <button class="btn-edit btn-sm" data-key="${task.key}" data-action="edit">✏️ แก้ไข</button>
+    <button class="btn-complete btn-sm" data-key="${task.key}" data-action="complete">${task.recurring?'✅ รอบนี้เสร็จ':'✅ เสร็จ'}</button>`;
+  btns.innerHTML+=`<button class="btn-delete btn-sm" data-key="${task.key}" data-action="delete">🗑 ลบ</button>`;
+  el.appendChild(top); el.appendChild(rem);
+  // badges row
+  const brow=document.createElement('div'); brow.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;';
+  if(task.recurring){
+    const rb=document.createElement('span'); rb.className='recur-badge';
+    let lbl=FREQ_LABEL[task.recurFreq]||task.recurFreq;
+    if(task.recurFreq==='specific'&&task.specificDates?.length) lbl=`วันที่ระบุ (${task.specificDates.length})`;
+    rb.textContent='🔁 '+lbl; brow.appendChild(rb);
   }
-  btns.innerHTML+=`<button class="btn-delete" data-key="${task.key}" data-action="delete">🗑 ลบ</button>`;
-
-  el.appendChild(top);
-  el.appendChild(rem);
-  if(badge2){const b=document.createElement('div');b.innerHTML=badge2;el.appendChild(b.firstChild);}
-  el.appendChild(track);
-  el.appendChild(btns);
+  (task.subjects||[]).forEach(s=>{const t=document.createElement('span');t.className='subj-tag';t.textContent=s;brow.appendChild(t);});
+  if(brow.children.length) el.appendChild(brow);
+  el.appendChild(track); el.appendChild(btns);
   return el;
 }
 
-/* recurring auto-advance when past due */
+/* ══ RECURRING ══ */
 function checkRecurring(){
   Object.entries(tasks).forEach(([key,t])=>{
     if(!t.recurring||t.completed) return;
     const due=new Date(t.due);
     if(Date.now()>due.getTime()){
-      // advance to next occurrence and reset
-      const nextDue=advanceDue(t.due,t.recurFreq);
-      tasksRef.child(key).update({due:nextDue,completed:false,completedAt:null});
+      let nextDue;
+      if(t.recurFreq==='specific'&&t.specificDates?.length){
+        const nxt=nextSpecificDate(t.specificDates.filter(d=>d>new Date().toISOString().slice(0,10)));
+        if(!nxt) return;
+        const time=due.toTimeString().slice(0,5);
+        nextDue=new Date(`${nxt}T${time}`).toISOString();
+      } else {nextDue=advanceDue(t.due,t.recurFreq);}
+      tasksRef.child(key).update({due:nextDue,completed:false,completedAt:null,_warned:false});
       showToast(`🔁 ${t.text} — รอบถัดไป: ${fmtDue(new Date(nextDue))}`,'🔁');
     }
   });
 }
-
 setInterval(()=>{
   Object.entries(tasks).forEach(([key,t])=>{
     if(t.completed) return;
     const ms=new Date(t.due)-Date.now(),rem=$(`tr-${key}`);
     if(rem){rem.textContent=fmtRemaining(ms);rem.style.color=remColor(ms);}
-    // toast warning 5 min before due
-    if(ms>0&&ms<5*60*1000&&!t._warned){
-      showToast(`⏰ ${t.text} — เหลือ ${fmtRemaining(ms)}`,'⏰');
-      tasksRef.child(key).update({_warned:true});
-    }
+    if(ms>0&&ms<5*60*1000&&!t._warned){showToast(`⏰ ${t.text} — เหลือ ${fmtRemaining(ms)}`,'⏰');tasksRef.child(key).update({_warned:true});}
   });
   checkRecurring();
 },30000);
 
-/* ══ FIREBASE LISTENER ══ */
+/* ══ FIREBASE ══ */
 tasksRef.on('value',snap=>{
   tasks=snap.val()||{};
   const cut=Date.now()-7*24*60*60*1000;
-  snap.forEach(c=>{
-    const t=c.val();
-    // only auto-delete non-recurring completed tasks after 7 days
-    if(t.completed&&!t.recurring&&t.completedAt&&t.completedAt<cut) c.ref.remove();
-  });
-  render();
-  setSync('synced','ซิงค์แล้ว ☁️');
+  snap.forEach(c=>{const t=c.val();if(t.completed&&!t.recurring&&t.completedAt&&t.completedAt<cut)c.ref.remove();});
+  render(); setSync('synced','ซิงค์แล้ว ☁️');
 },()=>setSync('error','เชื่อมไม่ได้ ⚠️'));
 
-/* ══ ADD/EDIT ══ */
+/* ══ ADD / EDIT ══ */
 $('add-task').addEventListener('click',()=>{
   const text=($('task-text').value||'').trim();
   const due=makeDue($('task-date').value,$('task-time').value);
   if(!text){alert('กรุณาพิมพ์รายละเอียดงาน');return;}
   if(!due){alert('กรุณาเลือกวันและเวลาส่งให้ครบ');return;}
-  setSync('syncing','กำลังบันทึก...');
-  const isRecurring=repeatOn;
   const freq=$('repeat-freq').value;
-  if(editingId){
-    tasksRef.child(editingId).update({text,due:due.toISOString(),recurring:isRecurring,recurFreq:isRecurring?freq:null});
-    editingId=null; $('add-task').textContent='＋ เพิ่มงาน'; $('add-task').className='btn-main';
-  } else {
-    tasksRef.push({
-      text, due:due.toISOString(),
-      completed:false, createdAt:Date.now(), completedAt:null, priority:false,
-      recurring:isRecurring, recurFreq:isRecurring?freq:null, _warned:false
-    });
-  }
-  $('task-text').value='';
-  // reset repeat toggle
-  repeatOn=false;
-  $('repeat-toggle').textContent='ไม่ซ้ำ';
-  $('repeat-toggle').classList.remove('active');
-  $('repeat-options').classList.remove('visible');
+  if(repeatOn&&freq==='specific'&&specificDates.length===0){alert('กรุณาเพิ่มวันที่อย่างน้อย 1 วัน');return;}
+  setSync('syncing','กำลังบันทึก...');
+  const payload={text,due:due.toISOString(),completed:false,createdAt:Date.now(),completedAt:null,priority:false,
+    recurring:repeatOn,recurFreq:repeatOn?freq:null,specificDates:repeatOn&&freq==='specific'?specificDates:[],
+    subjects:linkedSubjects,_warned:false};
+  if(editingId){tasksRef.child(editingId).update(payload);} else{tasksRef.push(payload);}
+  resetForm();
 });
 
 function handleClick(e){
@@ -921,15 +906,17 @@ function handleClick(e){
   if(action==='delete') tasksRef.child(key).remove();
   if(action==='complete'){
     if(t.recurring){
-      // mark done this round, auto-advance handled by checkRecurring interval
+      let nextDue;
+      if(t.recurFreq==='specific'&&t.specificDates?.length){
+        const today=new Date().toISOString().slice(0,10);
+        const nxt=t.specificDates.find(d=>d>today)||t.specificDates[0];
+        const time=new Date(t.due).toTimeString().slice(0,5);
+        nextDue=new Date(`${nxt}T${time}`).toISOString();
+      } else{nextDue=advanceDue(t.due,t.recurFreq);}
       tasksRef.child(key).update({completed:true,completedAt:Date.now()});
-      // immediately advance so it reappears
-      const nextDue=advanceDue(t.due,t.recurFreq);
       setTimeout(()=>tasksRef.child(key).update({due:nextDue,completed:false,completedAt:null,_warned:false}),1500);
       showToast(`✅ ${t.text} เสร็จรอบนี้ · รอบถัดไป: ${fmtDue(new Date(nextDue))}`,'🔁');
-    } else {
-      tasksRef.child(key).update({completed:true,completedAt:Date.now()});
-    }
+    } else{tasksRef.child(key).update({completed:true,completedAt:Date.now()});}
   }
   if(action==='priority') tasksRef.child(key).update({priority:!t.priority});
   if(action==='edit'){
@@ -937,18 +924,14 @@ function handleClick(e){
     $('task-text').value=t.text;
     $('task-date').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     $('task-time').value=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    editingId=key;
-    $('add-task').textContent='💾 บันทึกการแก้ไข'; $('add-task').className='btn-edit';
-    // restore repeat state
+    linkedSubjects=[...(t.subjects||[])]; renderSubjectPreview();
+    editingId=key; $('add-task').textContent='💾 บันทึกการแก้ไข'; $('add-task').className='btn-edit';
     if(t.recurring){
-      repeatOn=true;
-      $('repeat-toggle').textContent='🔁 ซ้ำ';
-      $('repeat-toggle').classList.add('active');
-      $('repeat-options').classList.add('visible');
-      $('repeat-freq').value=t.recurFreq||'weekly';
+      repeatOn=true; $('repeat-toggle').textContent='🔁 ซ้ำ'; $('repeat-toggle').classList.add('active');
+      $('repeat-options').classList.add('visible'); $('repeat-freq').value=t.recurFreq||'weekly';
+      if(t.recurFreq==='specific'){specificDates=[...(t.specificDates||[])];renderDateChips();$('specific-dates-wrap').classList.add('visible');}
     }
-    window.scrollTo({top:0,behavior:'smooth'});
-    setSync('synced','ซิงค์แล้ว ☁️');
+    window.scrollTo({top:0,behavior:'smooth'}); setSync('synced','ซิงค์แล้ว ☁️');
   }
 }
 $('pending-list').addEventListener('click',handleClick);
@@ -956,17 +939,12 @@ $('completed-list').addEventListener('click',handleClick);
 
 /* ══ TIMETABLE CLOCK ══ */
 const PSEC=600;
-const toMin=(h,m,s=0)=>h*60+m+s/60;
-const hmMin=([h,m])=>h*60+m;
+const toMin=(h,m,s=0)=>h*60+m+s/60, hmMin=([h,m])=>h*60+m;
 const fmtHM=mf=>{const t=Math.floor(mf),h=Math.floor(t/60),m=t%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');};
 const fmtMS=sec=>{const s=Math.max(0,Math.ceil(sec));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
 function lerp(a,b,t){return a+(b-a)*t;}
-function cdrColor(sec){
-  const t=1-Math.min(Math.max(sec,0),PSEC)/PSEC;
-  return`rgb(${Math.round(lerp(34,248,t))},${Math.round(lerp(211,113,t))},${Math.round(lerp(238,113,t))})`;
-}
+function cdrColor(sec){const t=1-Math.min(Math.max(sec,0),PSEC)/PSEC;return`rgb(${Math.round(lerp(34,248,t))},${Math.round(lerp(211,113,t))},${Math.round(lerp(238,113,t))})`;}
 function fmtCell(cell){return(cell.innerText||'').trim().split(/\s*[\r\n]+\s*/).map(s=>s.trim()).filter(Boolean).join(' ');}
-
 function buildSegs(row){
   const segs=[];
   for(let i=0;i<PERIODS.length;i++){
@@ -978,39 +956,31 @@ function buildSegs(row){
   }
   return segs.sort((a,b)=>a.start-b.start);
 }
-function findSeg(segs,nowMin){for(let i=0;i<segs.length;i++)if(nowMin>=segs[i].start&&nowMin<segs[i].end)return i;return -1;}
+function findSeg(segs,n){for(let i=0;i<segs.length;i++)if(n>=segs[i].start&&n<segs[i].end)return i;return -1;}
 
 function ttTick(){
   const now=new Date(),h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
   const tstr=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
   $('digital-clock').textContent=tstr; $('hv-time').textContent=tstr;
-
   const dayIdx=now.getDay(),tbody=document.getElementById('tt-tbody'),rowIdx=dayIdx-1;
   const cdr=$('countdown-clock');
-
   if(dayIdx===0||dayIdx===6||!tbody.rows[rowIdx]){
-    $('cur-subject').textContent='วันหยุด 🎉';
-    $('cur-label').textContent='วันหยุด';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
+    $('cur-subject').textContent='วันหยุด 🎉';$('cur-label').textContent='วันหยุด';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
     cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');
     $('nxt-label').textContent='-';$('nxt-after').style.display='none';$('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';
     $('hv-period').textContent='วันหยุด'; return;
   }
-
   const row=tbody.rows[rowIdx],segs=buildSegs(row),nowMin=toMin(h,m,s);
   const idx=findSeg(segs,nowMin);
   document.querySelectorAll('td').forEach(td=>td.classList.remove('highlighted'));
   document.querySelectorAll('.period-row').forEach(r=>r.classList.remove('highlighted-row'));
-
-  if(idx===-1){
-    $('cur-label').textContent='ขณะนี้ไม่มีคาบเรียน';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
-    $('cur-subject').textContent='ขณะนี้ไม่มีคาบเรียน';$('hv-period').textContent='ว่าง';
-  } else {
+  if(idx===-1){$('cur-label').textContent='ขณะนี้ไม่มีคาบเรียน';$('cur-prog').style.width='0%';$('cur-eta').textContent='';$('cur-subject').textContent='ขณะนี้ไม่มีคาบเรียน';$('hv-period').textContent='ว่าง';}
+  else{
     const cur=segs[idx],dur=cur.end-cur.start,elapsed=Math.max(0,nowMin-cur.start),remain=Math.max(0,cur.end-nowMin);
     $('cur-prog').style.width=Math.min(100,elapsed/dur*100)+'%';
     $('cur-eta').textContent=`เหลือ ${fmtMS(remain*60)} (สิ้นสุด ${fmtHM(cur.end)})`;
-    if(cur.type==='lunch'){
-      $('cur-label').textContent='พักกลางวัน 🍱';$('cur-subject').textContent='🍱 พักกลางวัน';$('hv-period').textContent='พักกลางวัน';
-    } else {
+    if(cur.type==='lunch'){$('cur-label').textContent='พักกลางวัน 🍱';$('cur-subject').textContent='🍱 พักกลางวัน';$('hv-period').textContent='พักกลางวัน';}
+    else{
       $('cur-label').textContent=`คาบปัจจุบัน: ${cur.label}`;
       $('cur-subject').textContent='ขณะนี้เรียน: '+cur.label;
       $('hv-period').textContent=cur.label.length>22?cur.label.slice(0,22)+'…':cur.label;
@@ -1024,7 +994,6 @@ function ttTick(){
       }
     }
   }
-
   const ui=segs.findIndex(s=>nowMin<s.start),next=ui!==-1?segs[ui]:null;
   $('nxt-label').textContent=next?(next.type==='lunch'?'ถัดไป: พักกลางวัน':next.type==='break'?'ถัดไป: พักระยะสั้น':`ถัดไป: ${next.label}`):'-';
   $('nxt-after').style.display='none';
@@ -1035,33 +1004,95 @@ function ttTick(){
     $('nxt-prog').style.width=diff>PSEC?'0%':Math.min(100,(PSEC-diff)/PSEC*100)+'%';
     if(diff===0){cdr.textContent='00:00';cdr.classList.add('blink');}
     else if(diff>PSEC){cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');}
-    else{
-      cdr.textContent=fmtMS(diff);const c=cdrColor(diff);
-      cdr.style.color=c;cdr.style.boxShadow=`0 0 18px ${c.replace('rgb','rgba').replace(')',',0.7)')}`;
-      if(diff<=30)cdr.classList.add('blink');else cdr.classList.remove('blink');
-    }
-  } else {
-    $('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';
-    cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');
-  }
+    else{cdr.textContent=fmtMS(diff);const c=cdrColor(diff);cdr.style.color=c;cdr.style.boxShadow=`0 0 18px ${c.replace('rgb','rgba').replace(')',',0.7)')}`;if(diff<=30)cdr.classList.add('blink');else cdr.classList.remove('blink');}
+  } else{$('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');}
 }
 setInterval(ttTick,1000); ttTick();
 
 /* ══ HUD TOGGLE ══ */
 const hudPanel=$('hud-panel'),hudToggle=$('hud-toggle');
-hudToggle.onclick=()=>{
-  const open=hudPanel.classList.toggle('open');
-  hudToggle.classList.toggle('open',open);
-  hudToggle.textContent=open?'◀':'▶';
-};
+hudToggle.onclick=()=>{const open=hudPanel.classList.toggle('open');hudToggle.classList.toggle('open',open);hudToggle.textContent=open?'◀':'▶';};
 
 /* ══ UPTIME ══ */
 const startT=Date.now();
-setInterval(()=>{
-  let s=Math.floor((Date.now()-startT)/1000);
-  const h=Math.floor(s/3600);s%=3600;const mn=Math.floor(s/60);s%=60;
-  $('hv-uptime').textContent=[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':');
-},1000);
+setInterval(()=>{let s=Math.floor((Date.now()-startT)/1000);const h=Math.floor(s/3600);s%=3600;const mn=Math.floor(s/60);s%=60;$('hv-uptime').textContent=[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':');},1000);
+
+/* ══ KERNEL LOG ══ */
+const klog=$('kernel-log');
+const KERNEL_LINES=[
+  ()=>`[sys] schoolos kernel v2.4.${Math.floor(Math.random()*9)} · arch:wasm32`,
+  ()=>`[mem] heap ${(Math.random()*40+20).toFixed(1)}MB / 128MB · rss ${(Math.random()*10+5).toFixed(0)}MB`,
+  ()=>`[net] rtdb ping ${Math.floor(Math.random()*40+8)}ms · ws:OPEN`,
+  ()=>`[sched] period_check() → ${Math.floor(Math.random()*12)} slots scanned`,
+  ()=>`[task] db snapshot: ${Object.keys(tasks).length} records · pending:${Object.values(tasks).filter(t=>!t.completed).length}`,
+  ()=>`[sync] pull @${new Date().toTimeString().slice(0,8)} · delta: ${Math.floor(Math.random()*5)} ops`,
+  ()=>`[cpu] load 0.0${Math.floor(Math.random()*9)} · threads:4 · gc:idle`,
+  ()=>`[io] firebase bw ${(Math.random()*2+0.1).toFixed(2)}KB/s · reads:${Math.floor(Math.random()*20)+1}`,
+  ()=>`[auth] uid:anon · session ${Math.floor((Date.now()-startT)/60000)}min`,
+  ()=>`[cron] recur_check() → ${Object.values(tasks).filter(t=>t.recurring).length} recurring tasks`,
+  ()=>`[ttbl] 5×12 grid indexed · gaps: [10:10,13:40,17:10]`,
+  ()=>`[font] Orbitron+Sarabun · glyphs cached: ${Math.floor(Math.random()*800+400)}`,
+  ()=>`[gc] sweep: freed ${Math.floor(Math.random()*24)} refs · heap stable`,
+  ()=>`[rtdb] onValue() active · latency ${Math.floor(Math.random()*30+5)}ms`,
+  ()=>`[uptime] ${Math.floor((Date.now()-startT)/60000)}m${Math.floor(((Date.now()-startT)%60000)/1000)}s · pid:${Math.floor(Math.random()*9999)+1000}`,
+  ()=>`[render] tick ${Math.floor(Math.random()*6+1)}ms · dom_nodes:${document.querySelectorAll('*').length}`,
+  ()=>`[dot] subject_map rebuilt · entries:${Object.keys(tasks).length}`,
+  ()=>`[bg] jpcity.jfif · 1920×1080 · blend:overlay`,
+  ()=>`[period] PERIODS[${Math.floor(Math.random()*12)}] = ${['08:30','09:20','10:20','11:10','12:00','12:50','13:50','14:40','15:30','16:00','17:20','18:20'][Math.floor(Math.random()*12)]}`,
+  ()=>`[ws] keepalive → pong ${Math.floor(Math.random()*20)+1}ms`,
+  ()=>`[cache] hit_rate ${Math.floor(Math.random()*20+78)}% · misses:${Math.floor(Math.random()*4)}`,
+  ()=>`[store] localStorage N/A · using rtdb as source of truth`,
+];
+const WARN_LINES=[
+  ()=>`[warn] task overdue by ${Math.floor(Math.random()*72)+1}h → notify pending`,
+  ()=>`[warn] firebase quota ${Math.floor(Math.random()*30+60)}% · throttle at 95%`,
+  ()=>`[warn] period gap 10:10→10:20 (10min break)`,
+  ()=>`[warn] clock drift +${Math.floor(Math.random()*9)}ms · ntp resync`,
+];
+const ERR_LINES=[
+  ()=>`[err] img prefetch miss · retry in 3s`,
+  ()=>`[err] ntp drift +${Math.floor(Math.random()*4)}ms · correcting`,
+  ()=>`[err] ws reconnect attempt ${Math.floor(Math.random()*3)+1}/5`,
+];
+const INFO_LINES=[
+  ()=>`[ok] all services nominal · health:GREEN`,
+  ()=>`[ok] firebase rules validated · auth:OK`,
+  ()=>`[ok] dot indicators refreshed · ready`,
+  ()=>`[ok] recurring scheduler alive`,
+];
+
+function pickLine(){
+  const r=Math.random();
+  if(r<0.06) return{text:ERR_LINES[Math.floor(Math.random()*ERR_LINES.length)](),cls:'err'};
+  if(r<0.14) return{text:WARN_LINES[Math.floor(Math.random()*WARN_LINES.length)](),cls:'warn'};
+  if(r<0.22) return{text:INFO_LINES[Math.floor(Math.random()*INFO_LINES.length)](),cls:'info'};
+  return{text:KERNEL_LINES[Math.floor(Math.random()*KERNEL_LINES.length)](),cls:''};
+}
+
+const MAX_KLINES=18;
+function addKernelLine(){
+  const{text,cls}=pickLine();
+  const span=document.createElement('span');
+  span.className='kline'+(cls?' '+cls:'');
+  const now=new Date(),ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  span.textContent=`${ts} ${text}`;
+  // keep old lines dim
+  klog.querySelectorAll('.kline').forEach(l=>l.classList.add('dim'));
+  klog.appendChild(span);
+  // cursor
+  let cur=klog.querySelector('.kcursor');
+  if(!cur){cur=document.createElement('span');cur.className='kcursor';klog.appendChild(cur);}
+  else klog.appendChild(cur);
+  // trim
+  const lines=klog.querySelectorAll('.kline');
+  if(lines.length>MAX_KLINES) lines[0].remove();
+  klog.scrollTop=klog.scrollHeight;
+}
+// initial burst
+for(let i=0;i<6;i++) addKernelLine();
+// random interval 1.5-4.5s
+function scheduleKernel(){setTimeout(()=>{addKernelLine();scheduleKernel();},Math.random()*3000+1500);}
+scheduleKernel();
 </script>
 </body>
 </html>
