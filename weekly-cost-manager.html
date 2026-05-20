@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Cost Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #7c6af7;
+    --accent2: #f7c26a;
+    --accent3: #6af7b8;
+    --danger: #f76a6a;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -40%;
+    left: -20%;
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(ellipse, rgba(124,106,247,0.07) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .clock-block {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.5;
+  }
+  .clock-block .time {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  /* MAIN */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* WEEK SUMMARY BAR */
+  .week-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(124,106,247,0.06) 0%, transparent 60%);
+  }
+  .summary-card .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .summary-card .value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .summary-card.accent .value { color: var(--accent); }
+  .summary-card.gold .value { color: var(--accent2); }
+  .summary-card.green .value { color: var(--accent3); }
+  .summary-card .sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 28px;
+    width: fit-content;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); background: var(--surface2); }
+
+  /* DASHBOARD */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* WEEK CHART */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .day-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: border-color .2s, transform .2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .day-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .day-stat.today { border-color: var(--accent); background: rgba(124,106,247,0.08); }
+  .day-stat.today::after {
+    content: 'TODAY';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .day-stat .day-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .day-stat .day-amount {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent2);
+  }
+  .day-stat .day-items {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* BAR CHART */
+  .bar-chart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+  }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 140px;
+  }
+  .bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .bar-val {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--accent) 0%, rgba(124,106,247,0.4) 100%);
+    transition: height .5s cubic-bezier(.4,0,.2,1);
+    min-height: 4px;
+    position: relative;
+  }
+  .bar.today-bar { background: linear-gradient(180deg, var(--accent2) 0%, rgba(247,194,106,0.4) 100%); }
+  .bar-day {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* CUSTOMIZER */
+  .customizer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .customizer-header h2 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .week-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .day-customizer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .day-card:hover { border-color: rgba(124,106,247,0.4); }
+  .day-card.today-card { border-color: var(--accent); }
+
+  .day-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .day-card-header .day-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .day-card-header .day-total {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--accent2);
+  }
+
+  .cost-list {
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 60px;
+  }
+
+  .cost-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn .2s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .cost-item input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .cost-item input:focus { border-color: var(--accent); }
+  .cost-item .inp-name { flex: 1; }
+  .cost-item .inp-amount { width: 110px; }
+  .cost-item .inp-amount::placeholder { color: var(--muted); }
+
+  .btn-remove {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all .2s;
+    flex-shrink: 0;
+  }
+  .btn-remove:hover { border-color: var(--danger); color: var(--danger); background: rgba(247,106,106,0.08); }
+
+  .day-card-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .btn-add {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-add:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,106,247,0.08); }
+
+  .btn-save-day {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity .2s, transform .2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-save-day:hover { opacity: 0.85; transform: scale(1.02); }
+  .btn-save-day:active { transform: scale(0.98); }
+  .btn-save-day.saved { background: var(--accent3); color: #000; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+    max-width: 280px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-left-color: var(--danger); }
+
+  /* LOADER */
+  .loader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .loader.show { display: flex; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 24px 0 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  /* STATUS DOT */
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent3);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  @media (max-width: 700px) {
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .week-summary { grid-template-columns: 1fr 1fr; }
+    .week-summary .summary-card:last-child { grid-column: span 2; }
+    .day-customizer { grid-template-columns: 1fr; }
+    header { padding: 0 16px; }
+    main { padding: 24px 12px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="logo">Cost<span>Flow</span></div>
+  <div class="clock-block">
+    <div class="time" id="clock">--:--:--</div>
+    <div id="dateDisplay">--- --, ----</div>
+  </div>
+</header>
+
+<main>
+  <!-- SUMMARY -->
+  <div class="week-summary">
+    <div class="summary-card accent">
+      <div class="label">Total This Week</div>
+      <div class="value" id="totalWeek">฿0</div>
+      <div class="sub" id="weekRange">Loading...</div>
+    </div>
+    <div class="summary-card gold">
+      <div class="label">Today's Spending</div>
+      <div class="value" id="todayTotal">฿0</div>
+      <div class="sub" id="todayItemCount">0 items</div>
+    </div>
+    <div class="summary-card green">
+      <div class="label">Daily Average</div>
+      <div class="value" id="avgDay">฿0</div>
+      <div class="sub">across active days</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('customizer')">✏️ Customizer</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="tab-dashboard">
+    <div class="week-grid" id="weekGrid"></div>
+    <div class="bar-chart">
+      <div class="chart-title"><span class="status-dot"></span>Weekly Spending Overview</div>
+      <div class="bars" id="barChart"></div>
+    </div>
+  </div>
+
+  <!-- CUSTOMIZER -->
+  <div class="section" id="tab-customizer">
+    <div class="customizer-header">
+      <h2>Manage Costs</h2>
+      <select class="week-select" id="weekSelect" onchange="loadWeekData()"></select>
+    </div>
+    <div class="day-customizer" id="dayCustomizer"></div>
+  </div>
+</main>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDGGc9u68YdFemwm6vMi0g2WVTvXYgp-eA",
+  authDomain: "cost-management-ac491.firebaseapp.com",
+  databaseURL: "https://cost-management-ac491-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cost-management-ac491",
+  storageBucket: "cost-management-ac491.firebasestorage.app",
+  messagingSenderId: "123993791131",
+  appId: "1:123993791131:web:ffa2fce3ac99742c8e443e",
+  measurementId: "G-F26BVVJ78N"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let currentWeekKey = getWeekKey(new Date());
+let weekData = {};
+
+// ── UTILITIES ──────────────────────────────────────────────────────────────
+
+function getWeekKey(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d.setDate(diff));
+  return `${mon.getFullYear()}-W${String(getISOWeek(mon)).padStart(2,'0')}`;
+}
+
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function getWeekDates(weekKey) {
+  const [year, week] = weekKey.split('-W').map(Number);
+  const jan4 = new Date(year, 0, 4);
+  const startOfWeek = new Date(jan4.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1 + (week - 1) * 7));
+  return DAYS.map((_, i) => {
+    const d = new Date(startOfWeek);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+}
+
+function fmt(n) { return '฿' + (n||0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
+
+function isToday(date) {
+  const t = new Date();
+  return date.getDate() === t.getDate() && date.getMonth() === t.getMonth() && date.getFullYear() === t.getFullYear();
+}
+
+function getTodayDayIndex() {
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function setLoader(v) {
+  document.getElementById('loader').className = 'loader' + (v ? ' show' : '');
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────────────────
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', { hour12: false });
+  document.getElementById('dateDisplay').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── WEEK SELECT ────────────────────────────────────────────────────────────
+
+function populateWeekSelect() {
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = '';
+  const now = new Date();
+  for (let i = -4; i <= 2; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i * 7);
+    const wk = getWeekKey(d);
+    const dates = getWeekDates(wk);
+    const label = `${dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+    const opt = document.createElement('option');
+    opt.value = wk;
+    opt.textContent = label;
+    if (wk === currentWeekKey) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+// ── FIREBASE ───────────────────────────────────────────────────────────────
+
+async function loadWeekData() {
+  const sel = document.getElementById('weekSelect');
+  currentWeekKey = sel ? sel.value : currentWeekKey;
+  setLoader(true);
+  try {
+    const snap = await get(ref(db, `weeks/${currentWeekKey}`));
+    weekData = snap.exists() ? snap.val() : {};
+  } catch(e) {
+    showToast('Failed to load data', true);
+    weekData = {};
+  }
+  setLoader(false);
+  renderAll();
+}
+
+async function saveDayData(dayIdx) {
+  const key = `day${dayIdx}`;
+  const items = gatherDayItems(dayIdx);
+  try {
+    await set(ref(db, `weeks/${currentWeekKey}/${key}`), items);
+    if (!weekData[key]) weekData[key] = {};
+    weekData[key] = items;
+    renderSummary();
+    renderDashboard();
+    showToast('✓ Saved successfully');
+    const btn = document.getElementById(`saveBtn-${dayIdx}`);
+    if (btn) { btn.textContent = 'Saved!'; btn.classList.add('saved'); setTimeout(() => { btn.textContent = 'Save'; btn.classList.remove('saved'); }, 2000); }
+  } catch(e) {
+    showToast('Save failed: ' + e.message, true);
+  }
+}
+
+function gatherDayItems(dayIdx) {
+  const container = document.getElementById(`costList-${dayIdx}`);
+  if (!container) return {};
+  const rows = container.querySelectorAll('.cost-item');
+  const items = {};
+  let i = 0;
+  rows.forEach(row => {
+    const name = row.querySelector('.inp-name').value.trim();
+    const amt = parseFloat(row.querySelector('.inp-amount').value) || 0;
+    if (name || amt) { items[`item${i}`] = { name: name || 'Unnamed', amount: amt }; i++; }
+  });
+  return items;
+}
+
+function getDayTotal(dayIdx) {
+  const key = `day${dayIdx}`;
+  const d = weekData[key] || {};
+  return Object.values(d).reduce((s, v) => s + (parseFloat(v.amount) || 0), 0);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+
+function renderAll() {
+  renderSummary();
+  renderDashboard();
+  renderCustomizer();
+}
+
+function renderSummary() {
+  const dates = getWeekDates(currentWeekKey);
+  const todayIdx = getTodayDayIndex();
+  let total = 0, todayTotal = 0, activeDays = 0;
+  for (let i = 0; i < 7; i++) {
+    const t = getDayTotal(i);
+    total += t;
+    if (t > 0) activeDays++;
+    if (isToday(dates[i])) todayTotal = t;
+  }
+  document.getElementById('totalWeek').textContent = fmt(total);
+  document.getElementById('todayTotal').textContent = fmt(todayTotal);
+  document.getElementById('avgDay').textContent = fmt(activeDays ? total / activeDays : 0);
+
+  const d0 = dates[0], d6 = dates[6];
+  document.getElementById('weekRange').textContent =
+    `${d0.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${d6.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+
+  const todayItems = Object.keys(weekData[`day${todayIdx}`] || {}).length;
+  document.getElementById('todayItemCount').textContent = `${todayItems} item${todayItems !== 1 ? 's' : ''}`;
+}
+
+function renderDashboard() {
+  const dates = getWeekDates(currentWeekKey);
+  const totals = DAYS.map((_, i) => getDayTotal(i));
+  const maxVal = Math.max(...totals, 1);
+
+  // Week grid
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const t = totals[i];
+    const items = Object.keys(weekData[`day${i}`] || {}).length;
+    const div = document.createElement('div');
+    div.className = 'day-stat' + (isToday(dates[i]) ? ' today' : '');
+    div.onclick = () => { switchTab('customizer'); setTimeout(() => scrollToDay(i), 100); };
+    div.innerHTML = `
+      <div class="day-name">${d}</div>
+      <div class="day-amount">${fmt(t)}</div>
+      <div class="day-items">${items} item${items !== 1 ? 's' : ''}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Bar chart
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const t = totals[i];
+    const h = Math.max((t / maxVal) * 120, t > 0 ? 8 : 4);
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+    wrap.innerHTML = `
+      <div class="bar-val">${t > 0 ? fmt(t) : ''}</div>
+      <div class="bar${isToday(dates[i]) ? ' today-bar' : ''}" style="height:${h}px"></div>
+      <div class="bar-day">${d}</div>
+    `;
+    barChart.appendChild(wrap);
+  });
+}
+
+function renderCustomizer() {
+  const container = document.getElementById('dayCustomizer');
+  container.innerHTML = '';
+  const dates = getWeekDates(currentWeekKey);
+
+  DAYS.forEach((d, i) => {
+    const items = weekData[`day${i}`] || {};
+    const total = getDayTotal(i);
+    const today = isToday(dates[i]);
+    const dateStr = dates[i].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const card = document.createElement('div');
+    card.className = 'day-card' + (today ? ' today-card' : '');
+    card.id = `dayCard-${i}`;
+
+    card.innerHTML = `
+      <div class="day-card-header">
+        <div class="day-label">${DAY_FULL[i]} <span style="color:var(--muted);font-size:12px;font-family:var(--font-mono)">${dateStr}</span></div>
+        <div class="day-total" id="dayTotal-${i}">${fmt(total)}</div>
+      </div>
+      <div class="cost-list" id="costList-${i}"></div>
+      <div class="day-card-footer">
+        <button class="btn-add" onclick="addCostRow(${i})">+ Add Cost</button>
+        <button class="btn-save-day" id="saveBtn-${i}" onclick="saveDayData(${i})">Save</button>
+      </div>
+    `;
+    container.appendChild(card);
+
+    // Populate items
+    const list = document.getElementById(`costList-${i}`);
+    const itemArr = Object.values(items);
+    if (itemArr.length === 0) {
+      addCostRow(i);
+    } else {
+      itemArr.forEach(item => addCostRow(i, item.name, item.amount));
+    }
+  });
+}
+
+function addCostRow(dayIdx, name = '', amount = '') {
+  const list = document.getElementById(`costList-${dayIdx}`);
+  const row = document.createElement('div');
+  row.className = 'cost-item';
+  row.innerHTML = `
+    <input class="inp-name" type="text" placeholder="Description" value="${name}" oninput="updateDayTotal(${dayIdx})">
+    <input class="inp-amount" type="number" placeholder="฿ Amount" value="${amount||''}" min="0" step="0.01" oninput="updateDayTotal(${dayIdx})">
+    <button class="btn-remove" onclick="removeCostRow(this, ${dayIdx})">×</button>
+  `;
+  list.appendChild(row);
+  updateDayTotal(dayIdx);
+}
+
+window.addCostRow = addCostRow;
+window.saveDayData = saveDayData;
+
+window.removeCostRow = function(btn, dayIdx) {
+  const row = btn.closest('.cost-item');
+  const list = document.getElementById(`costList-${dayIdx}`);
+  row.style.animation = 'none';
+  row.style.opacity = '0';
+  row.style.transform = 'translateX(10px)';
+  row.style.transition = 'all .15s';
+  setTimeout(() => {
+    row.remove();
+    if (list.querySelectorAll('.cost-item').length === 0) addCostRow(dayIdx);
+    updateDayTotal(dayIdx);
+  }, 150);
+};
+
+window.updateDayTotal = function(dayIdx) {
+  const items = gatherDayItems(dayIdx);
+  const total = Object.values(items).reduce((s, v) => s + (v.amount || 0), 0);
+  const el = document.getElementById(`dayTotal-${dayIdx}`);
+  if (el) el.textContent = fmt(total);
+};
+
+function scrollToDay(i) {
+  const card = document.getElementById(`dayCard-${i}`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── TAB SWITCH ─────────────────────────────────────────────────────────────
+
+window.switchTab = function(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  event && event.target && event.target.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes(name)) b.classList.add('active');
+  });
+};
+
+window.loadWeekData = loadWeekData;
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+
+populateWeekSelect();
+loadWeekData();
+
+// Real-time listener for current week
+onValue(ref(db, `weeks/${currentWeekKey}`), (snap) => {
+  weekData = snap.exists() ? snap.val() : {};
+  renderAll();
+});
+</script>
+</body>
+</html>
