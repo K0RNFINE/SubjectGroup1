@@ -3,568 +3,903 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weekly Cost Manager</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
+<title>CostFlow — Weekly Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c28;
-    --border: #2a2a3d;
-    --accent: #7c6af7;
-    --accent2: #f7c26a;
-    --accent3: #6af7b8;
-    --danger: #f76a6a;
-    --text: #e8e8f0;
-    --muted: #7070a0;
-    --font-display: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
-  }
+:root {
+  --bg: #050508;
+  --surface: #0d0d14;
+  --surface2: #141420;
+  --surface3: #1a1a2e;
+  --border: #1f1f35;
+  --border2: #2a2a45;
+  --accent: #00d4ff;
+  --accent-dim: rgba(0,212,255,0.12);
+  --accent2: #ffb800;
+  --accent2-dim: rgba(255,184,0,0.12);
+  --accent3: #00ff9d;
+  --accent3-dim: rgba(0,255,157,0.1);
+  --danger: #ff4466;
+  --text: #ccd6f6;
+  --text2: #8892b0;
+  --muted: #495680;
+  --font-hud: 'Orbitron', monospace;
+  --font-data: 'Share Tech Mono', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+  --glow: 0 0 12px rgba(0,212,255,0.3);
+  --glow2: 0 0 12px rgba(255,184,0,0.3);
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-display);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: -40%;
-    left: -20%;
-    width: 80vw;
-    height: 80vw;
-    background: radial-gradient(ellipse, rgba(124,106,247,0.07) 0%, transparent 65%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  /* HEADER */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+/* Ambient glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120vw;
+  height: 60vh;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.04) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  .logo {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .logo span { color: var(--accent); }
+/* ── HEADER ─────────────────────────────────────────────────────────── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,5,8,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  .clock-block {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--muted);
-    text-align: right;
-    line-height: 1.5;
-  }
-  .clock-block .time {
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: 2px;
-  }
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 30%, var(--accent) 70%, transparent 100%);
+  opacity: 0.3;
+}
 
-  /* MAIN */
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
+.logo {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: var(--glow);
+}
+.logo em { color: var(--text2); font-style: normal; }
 
-  /* WEEK SUMMARY BAR */
-  .week-summary {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 36px;
-  }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
 
-  .summary-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  .summary-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(124,106,247,0.06) 0%, transparent 60%);
-  }
-  .summary-card .label {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .summary-card .value {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -1px;
-  }
-  .summary-card.accent .value { color: var(--accent); }
-  .summary-card.gold .value { color: var(--accent2); }
-  .summary-card.green .value { color: var(--accent3); }
-  .summary-card .sub {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+.status-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.dot-live {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent3);
+  box-shadow: 0 0 6px var(--accent3);
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 28px;
-    width: fit-content;
-  }
-  .tab-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 13px;
-    padding: 8px 18px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all .2s;
-    letter-spacing: 0.3px;
-  }
-  .tab-btn.active {
-    background: var(--accent);
-    color: #fff;
-  }
-  .tab-btn:hover:not(.active) { color: var(--text); background: var(--surface2); }
+.clock-block { text-align: right; }
+.clock-block .time {
+  font-family: var(--font-hud);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: var(--glow);
+  letter-spacing: 3px;
+}
+.clock-block .date-line {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
 
-  /* DASHBOARD */
-  .section { display: none; }
-  .section.active { display: block; }
+/* ── MAIN ───────────────────────────────────────────────────────────── */
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
 
-  /* WEEK CHART */
-  .week-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
-    margin-bottom: 40px;
-  }
+/* ── SUMMARY CARDS ──────────────────────────────────────────────────── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
 
-  .day-stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 12px;
-    text-align: center;
-    transition: border-color .2s, transform .2s;
-    cursor: pointer;
-    position: relative;
-  }
-  .day-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .day-stat.today { border-color: var(--accent); background: rgba(124,106,247,0.08); }
-  .day-stat.today::after {
-    content: 'TODAY';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
+.s-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 18px 22px;
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.s-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+.s-card.gold::before { background: var(--accent2); }
+.s-card.green::before { background: var(--accent3); }
 
-  .day-stat .day-name {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .day-stat .day-amount {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--accent2);
-  }
-  .day-stat .day-items {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+.s-card .lbl {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.s-card .val {
+  font-family: var(--font-hud);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-shadow: var(--glow);
+}
+.s-card.gold .val { color: var(--accent2); text-shadow: var(--glow2); }
+.s-card.green .val { color: var(--accent3); text-shadow: 0 0 12px rgba(0,255,157,0.4); }
+.s-card .sub {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: 1px;
+}
 
-  /* BAR CHART */
-  .bar-chart {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin-bottom: 24px;
-  }
-  .chart-title {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 20px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    height: 140px;
-  }
-  .bar-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: flex-end;
-    gap: 6px;
-  }
-  .bar-val {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-  }
-  .bar {
-    width: 100%;
-    border-radius: 6px 6px 0 0;
-    background: linear-gradient(180deg, var(--accent) 0%, rgba(124,106,247,0.4) 100%);
-    transition: height .5s cubic-bezier(.4,0,.2,1);
-    min-height: 4px;
-    position: relative;
-  }
-  .bar.today-bar { background: linear-gradient(180deg, var(--accent2) 0%, rgba(247,194,106,0.4) 100%); }
-  .bar-day {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
+/* ── TABS ───────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border2);
+  padding-bottom: 0;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-hud);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+  margin-bottom: -1px;
+}
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-shadow: var(--glow);
+}
+.tab-btn:hover:not(.active) { color: var(--text2); }
 
-  /* CUSTOMIZER */
-  .customizer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .customizer-header h2 {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
+.section { display: none; }
+.section.active { display: block; }
 
-  .week-select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    outline: none;
-  }
+/* ── WEEK STRIP ─────────────────────────────────────────────────────── */
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
 
-  .day-customizer {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 20px;
-  }
+.day-chip {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  position: relative;
+}
+.day-chip:hover { border-color: var(--accent); background: var(--accent-dim); }
+.day-chip.today { border-color: var(--accent); background: var(--accent-dim); }
+.day-chip.today::before {
+  content: 'NOW';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-hud);
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.day-chip .dc-name {
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.day-chip .dc-amt {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent2);
+  text-shadow: var(--glow2);
+}
+.day-chip .dc-items {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
 
-  .day-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: border-color .2s;
-  }
-  .day-card:hover { border-color: rgba(124,106,247,0.4); }
-  .day-card.today-card { border-color: var(--accent); }
+/* ── HISTORY GRAPH ──────────────────────────────────────────────────── */
+.graph-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
 
-  .day-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-  .day-card-header .day-label {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .day-card-header .day-total {
-    font-family: var(--font-mono);
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--accent2);
-  }
+.graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
-  .cost-list {
-    padding: 14px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 60px;
-  }
+.graph-title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
 
-  .cost-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: slideIn .2s ease;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+.graph-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
-  .cost-item input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color .2s;
-  }
-  .cost-item input:focus { border-color: var(--accent); }
-  .cost-item .inp-name { flex: 1; }
-  .cost-item .inp-amount { width: 110px; }
-  .cost-item .inp-amount::placeholder { color: var(--muted); }
+.range-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.range-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.range-btn:hover:not(.active) { color: var(--text2); border-color: var(--border2); background: var(--surface2); }
 
-  .btn-remove {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all .2s;
-    flex-shrink: 0;
-  }
-  .btn-remove:hover { border-color: var(--danger); color: var(--danger); background: rgba(247,106,106,0.08); }
+.graph-wrap {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
 
-  .day-card-footer {
-    padding: 12px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+#historyGraph {
+  width: 100%;
+  display: block;
+}
 
-  .btn-add {
-    background: none;
-    border: 1px dashed var(--border);
-    color: var(--muted);
-    font-family: var(--font-display);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 7px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all .2s;
-    letter-spacing: 0.5px;
-  }
-  .btn-add:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,106,247,0.08); }
+.graph-tooltip {
+  position: absolute;
+  background: var(--surface3);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 8px 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: var(--glow);
+}
+.graph-tooltip .tt-lbl { color: var(--muted); font-size: 10px; letter-spacing: 1px; margin-bottom: 2px; }
+.graph-tooltip .tt-val { color: var(--accent2); font-size: 14px; font-weight: bold; }
 
-  .btn-save-day {
-    background: var(--accent);
-    border: none;
-    color: #fff;
-    font-family: var(--font-display);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: opacity .2s, transform .2s;
-    letter-spacing: 0.5px;
-  }
-  .btn-save-day:hover { opacity: 0.85; transform: scale(1.02); }
-  .btn-save-day:active { transform: scale(0.98); }
-  .btn-save-day.saved { background: var(--accent3); color: #000; }
+/* ── CUSTOMIZER ─────────────────────────────────────────────────────── */
+.cust-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.cust-top h2 {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
 
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent3);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    padding: 14px 20px;
-    border-radius: 10px;
-    z-index: 999;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all .3s cubic-bezier(.4,0,.2,1);
-    max-width: 280px;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.error { border-left-color: var(--danger); }
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: var(--font-data);
+  font-size: 14px;
+  width: 32px; height: 32px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* LOADER */
-  .loader {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(10,10,15,0.7);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-  }
-  .loader.show { display: flex; }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+.week-label {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--text2);
+  letter-spacing: 1px;
+  min-width: 200px;
+  text-align: center;
+}
+.week-label .wl-key {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
 
-  /* EMPTY STATE */
-  .empty-state {
-    text-align: center;
-    padding: 24px 0 12px;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 12px;
-  }
+.btn-today {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+.btn-today:hover { background: var(--accent-dim); }
 
-  /* STATUS DOT */
-  .status-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent3);
-    margin-right: 6px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+/* ── GLOBAL TEMPLATE ─────────────────────────────────────────────────── */
+.template-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
 
-  @media (max-width: 700px) {
-    .week-grid { grid-template-columns: repeat(4, 1fr); }
-    .week-summary { grid-template-columns: 1fr 1fr; }
-    .week-summary .summary-card:last-child { grid-column: span 2; }
-    .day-customizer { grid-template-columns: 1fr; }
-    header { padding: 0 16px; }
-    main { padding: 24px 12px 60px; }
-  }
+.template-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+}
+.template-header:hover { background: var(--surface3); }
+.template-header h3 {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--accent3);
+  text-transform: uppercase;
+}
+.template-header .th-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--muted);
+}
+.template-arrow { transition: transform .2s; display: inline-block; }
+.template-arrow.open { transform: rotate(180deg); }
+
+.template-body {
+  display: none;
+  padding: 16px 20px;
+}
+.template-body.open { display: block; }
+
+.template-note {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.template-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tpl-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  animation: slideIn .15s ease;
+}
+
+.template-footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.day-selector {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.day-tog {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .15s;
+  text-transform: uppercase;
+}
+.day-tog.sel { border-color: var(--accent3); color: var(--accent3); background: var(--accent3-dim); }
+
+.btn-apply-tpl {
+  background: linear-gradient(135deg, rgba(0,255,157,0.15), rgba(0,255,157,0.05));
+  border: 1px solid var(--accent3);
+  color: var(--accent3);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 9px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+.btn-apply-tpl:hover { background: var(--accent3-dim); box-shadow: 0 0 10px rgba(0,255,157,0.2); }
+
+.btn-add-tpl {
+  background: none;
+  border: 1px dashed var(--border2);
+  color: var(--muted);
+  font-family: var(--font-data);
+  font-size: 11px;
+  padding: 7px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: 1px;
+}
+.btn-add-tpl:hover { border-color: var(--accent3); color: var(--accent3); }
+
+/* ── DAY CARDS ───────────────────────────────────────────────────────── */
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.day-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color .2s;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.day-card:hover { border-color: rgba(0,212,255,0.3); }
+.day-card.today-card { border-color: var(--accent); }
+.day-card.today-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(0,212,255,0.04), transparent 60%);
+  pointer-events: none;
+}
+
+.dc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--surface2);
+  position: relative;
+}
+.dc-head::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+  opacity: 0.2;
+}
+.dc-day-name {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.dc-day-date {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.dc-total {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent2);
+  text-shadow: var(--glow2);
+  letter-spacing: 1px;
+}
+
+.cost-list {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 52px;
+}
+
+.cost-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn .18s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+
+.cost-item input {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-data);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.cost-item input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.08);
+}
+.cost-item input::placeholder { color: var(--muted); }
+.cost-item .inp-name { flex: 1; }
+.cost-item .inp-amount { width: 100px; }
+
+.btn-rm {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: 3px;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.btn-rm:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,68,102,0.08); }
+
+.dc-foot {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-add-cost {
+  background: none;
+  border: 1px dashed var(--border2);
+  color: var(--muted);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-add-cost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+.btn-save {
+  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05));
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 7px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.btn-save:hover { background: var(--accent-dim); box-shadow: var(--glow); }
+.btn-save.saved { border-color: var(--accent3); color: var(--accent3); background: var(--accent3-dim); }
+
+/* ── TOAST ───────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  font-family: var(--font-data);
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 12px 18px;
+  border-radius: 4px;
+  z-index: 999;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  box-shadow: var(--glow);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: var(--danger); border-left-color: var(--danger); box-shadow: 0 0 12px rgba(255,68,102,0.3); }
+
+/* ── LOADER ──────────────────────────────────────────────────────────── */
+.loader {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,8,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.loader.show { display: flex; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  box-shadow: var(--glow);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .summary-grid .s-card:last-child { grid-column: span 2; }
+  .week-strip { grid-template-columns: repeat(4, 1fr); }
+  header { padding: 0 16px; }
+  main { padding: 20px 12px 60px; }
+  .cust-top { flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
 
 <div class="loader" id="loader"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
+<div class="graph-tooltip" id="tooltip">
+  <div class="tt-lbl" id="tt-lbl"></div>
+  <div class="tt-val" id="tt-val"></div>
+</div>
 
 <header>
-  <div class="logo">Cost<span>Flow</span></div>
-  <div class="clock-block">
-    <div class="time" id="clock">--:--:--</div>
-    <div id="dateDisplay">--- --, ----</div>
+  <div class="logo">COST<em>FLOW</em></div>
+  <div class="header-right">
+    <div class="status-panel">
+      <div class="dot-live"></div>
+      LIVE SYNC
+    </div>
+    <div class="clock-block">
+      <div class="time" id="clock">00:00:00</div>
+      <div class="date-line" id="dateDisp">--- -- ----</div>
+    </div>
   </div>
 </header>
 
 <main>
   <!-- SUMMARY -->
-  <div class="week-summary">
-    <div class="summary-card accent">
-      <div class="label">Total This Week</div>
-      <div class="value" id="totalWeek">฿0</div>
-      <div class="sub" id="weekRange">Loading...</div>
+  <div class="summary-grid">
+    <div class="s-card">
+      <div class="lbl">// WEEK TOTAL</div>
+      <div class="val" id="totalWeek">฿0</div>
+      <div class="sub" id="weekRange">---</div>
     </div>
-    <div class="summary-card gold">
-      <div class="label">Today's Spending</div>
-      <div class="value" id="todayTotal">฿0</div>
-      <div class="sub" id="todayItemCount">0 items</div>
+    <div class="s-card gold">
+      <div class="lbl">// TODAY</div>
+      <div class="val" id="todayTotal">฿0</div>
+      <div class="sub" id="todayItems">0 ENTRIES</div>
     </div>
-    <div class="summary-card green">
-      <div class="label">Daily Average</div>
-      <div class="value" id="avgDay">฿0</div>
-      <div class="sub">across active days</div>
+    <div class="s-card green">
+      <div class="lbl">// DAILY AVG</div>
+      <div class="val" id="avgDay">฿0</div>
+      <div class="sub">ACTIVE DAYS</div>
     </div>
   </div>
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-    <button class="tab-btn" onclick="switchTab('customizer')">✏️ Customizer</button>
+    <button class="tab-btn active" data-tab="dashboard">⬡ DASHBOARD</button>
+    <button class="tab-btn" data-tab="history">◈ HISTORY</button>
+    <button class="tab-btn" data-tab="customizer">✦ CUSTOMIZER</button>
   </div>
 
   <!-- DASHBOARD -->
   <div class="section active" id="tab-dashboard">
-    <div class="week-grid" id="weekGrid"></div>
-    <div class="bar-chart">
-      <div class="chart-title"><span class="status-dot"></span>Weekly Spending Overview</div>
-      <div class="bars" id="barChart"></div>
+    <div class="week-strip" id="weekStrip"></div>
+
+    <div class="graph-panel">
+      <div class="graph-header">
+        <div class="graph-title">◈ CURRENT WEEK — DAILY BREAKDOWN</div>
+      </div>
+      <div class="graph-wrap" style="height:160px; position:relative;">
+        <svg id="weekGraph" width="100%" height="160"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section" id="tab-history">
+    <div class="graph-panel">
+      <div class="graph-header">
+        <div class="graph-title">◈ SPENDING HISTORY</div>
+        <div class="graph-controls">
+          <button class="range-btn active" data-range="4w">4 WEEKS</button>
+          <button class="range-btn" data-range="3m">3 MONTHS</button>
+          <button class="range-btn" data-range="6m">6 MONTHS</button>
+          <button class="range-btn" data-range="1y">1 YEAR</button>
+        </div>
+      </div>
+      <div class="graph-wrap" style="position:relative; min-height:280px;">
+        <svg id="historyGraph" height="280"></svg>
+      </div>
     </div>
   </div>
 
   <!-- CUSTOMIZER -->
   <div class="section" id="tab-customizer">
-    <div class="customizer-header">
-      <h2>Manage Costs</h2>
-      <select class="week-select" id="weekSelect" onchange="loadWeekData()"></select>
+    <div class="cust-top">
+      <h2>✦ WEEK EDITOR</h2>
+      <div class="week-nav">
+        <button class="nav-btn" id="prevWeek">‹</button>
+        <div class="week-label">
+          <span id="wNavLabel">---</span>
+          <span class="wl-key" id="wNavKey">---</span>
+        </div>
+        <button class="nav-btn" id="nextWeek">›</button>
+        <button class="btn-today" id="jumpToday">NOW</button>
+      </div>
     </div>
-    <div class="day-customizer" id="dayCustomizer"></div>
+
+    <!-- GLOBAL TEMPLATE -->
+    <div class="template-panel">
+      <div class="template-header" id="tplToggle">
+        <h3>⬡ GLOBAL TEMPLATE — Apply to Multiple Days</h3>
+        <div class="th-right">
+          <span>ADD RECURRING COSTS ACROSS DAYS</span>
+          <span class="template-arrow" id="tplArrow">▼</span>
+        </div>
+      </div>
+      <div class="template-body" id="tplBody">
+        <div class="template-note">
+          // Add items below → select which days → hit APPLY.<br>
+          // These will be ADDED (not replaced) to the selected days and auto-saved.
+        </div>
+        <div class="template-items" id="tplItems"></div>
+        <div style="margin-bottom:14px">
+          <button class="btn-add-tpl" onclick="addTplRow()">+ ADD ITEM</button>
+        </div>
+        <div style="margin-bottom:8px; font-family:var(--font-data); font-size:10px; letter-spacing:2px; color:var(--muted);">// APPLY TO DAYS:</div>
+        <div class="day-selector" id="daySelector"></div>
+        <div class="template-footer">
+          <button class="btn-apply-tpl" onclick="applyTemplate()">⬡ APPLY TO SELECTED DAYS</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-grid" id="dayGrid"></div>
   </div>
 </main>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
@@ -583,18 +918,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const DAY_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAYS_SHORT = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+const DAYS_FULL  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
 let currentWeekKey = getWeekKey(new Date());
 let weekData = {};
+let allWeeksCache = {};
+let historyRange = '4w';
+let rtListener = null;
 
-// ── UTILITIES ──────────────────────────────────────────────────────────────
+// ── DATE UTILITIES ──────────────────────────────────────────────────────
 
 function getWeekKey(date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const mon = new Date(d.setDate(diff));
+  const mon = new Date(d);
+  mon.setDate(diff);
+  mon.setHours(0,0,0,0);
   return `${mon.getFullYear()}-W${String(getISOWeek(mon)).padStart(2,'0')}`;
 }
 
@@ -609,19 +950,25 @@ function getISOWeek(date) {
 function getWeekDates(weekKey) {
   const [year, week] = weekKey.split('-W').map(Number);
   const jan4 = new Date(year, 0, 4);
-  const startOfWeek = new Date(jan4.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1 + (week - 1) * 7));
-  return DAYS.map((_, i) => {
+  const startOfWeek = new Date(jan4);
+  startOfWeek.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1 + (week - 1) * 7);
+  return DAYS_SHORT.map((_, i) => {
     const d = new Date(startOfWeek);
     d.setDate(d.getDate() + i);
     return d;
   });
 }
 
-function fmt(n) { return '฿' + (n||0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
+function shiftWeek(key, delta) {
+  const dates = getWeekDates(key);
+  const d = new Date(dates[0]);
+  d.setDate(d.getDate() + delta * 7);
+  return getWeekKey(d);
+}
 
 function isToday(date) {
   const t = new Date();
-  return date.getDate() === t.getDate() && date.getMonth() === t.getMonth() && date.getFullYear() === t.getFullYear();
+  return date.getDate()===t.getDate() && date.getMonth()===t.getMonth() && date.getFullYear()===t.getFullYear();
 }
 
 function getTodayDayIndex() {
@@ -629,276 +976,539 @@ function getTodayDayIndex() {
   return d === 0 ? 6 : d - 1;
 }
 
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => { t.className = 'toast'; }, 3000);
+function fmt(n) {
+  return '฿' + (n||0).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
 }
 
+// ── TOAST / LOADER ──────────────────────────────────────────────────────
+
+function toast(msg, err=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (err ? ' error' : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = 'toast'; }, 3000);
+}
 function setLoader(v) {
-  document.getElementById('loader').className = 'loader' + (v ? ' show' : '');
+  document.getElementById('loader').className = 'loader'+(v?' show':'');
 }
 
-// ── CLOCK ──────────────────────────────────────────────────────────────────
+// ── CLOCK ───────────────────────────────────────────────────────────────
 
 function updateClock() {
   const now = new Date();
-  document.getElementById('clock').textContent =
-    now.toLocaleTimeString('en-US', { hour12: false });
-  document.getElementById('dateDisplay').textContent =
-    now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour12:false});
+  document.getElementById('dateDisp').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'2-digit',year:'numeric'}).toUpperCase();
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── WEEK SELECT ────────────────────────────────────────────────────────────
+// ── FIREBASE ────────────────────────────────────────────────────────────
 
-function populateWeekSelect() {
-  const sel = document.getElementById('weekSelect');
-  sel.innerHTML = '';
-  const now = new Date();
-  for (let i = -4; i <= 2; i++) {
-    const d = new Date(now);
-    d.setDate(d.getDate() + i * 7);
-    const wk = getWeekKey(d);
-    const dates = getWeekDates(wk);
-    const label = `${dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
-    const opt = document.createElement('option');
-    opt.value = wk;
-    opt.textContent = label;
-    if (wk === currentWeekKey) opt.selected = true;
-    sel.appendChild(opt);
-  }
-}
-
-// ── FIREBASE ───────────────────────────────────────────────────────────────
-
-async function loadWeekData() {
-  const sel = document.getElementById('weekSelect');
-  currentWeekKey = sel ? sel.value : currentWeekKey;
+async function loadWeek(key) {
+  currentWeekKey = key;
   setLoader(true);
+
+  // Detach old listener
+  if (rtListener) { rtListener(); rtListener = null; }
+
   try {
-    const snap = await get(ref(db, `weeks/${currentWeekKey}`));
+    const snap = await get(ref(db, `weeks/${key}`));
     weekData = snap.exists() ? snap.val() : {};
   } catch(e) {
-    showToast('Failed to load data', true);
+    toast('Load failed', true);
     weekData = {};
   }
   setLoader(false);
   renderAll();
+  updateWeekNav();
+
+  // Attach real-time listener
+  rtListener = onValue(ref(db, `weeks/${currentWeekKey}`), snap => {
+    weekData = snap.exists() ? snap.val() : {};
+    renderAll();
+  });
 }
 
-async function saveDayData(dayIdx) {
-  const key = `day${dayIdx}`;
+async function saveDay(dayIdx) {
   const items = gatherDayItems(dayIdx);
   try {
-    await set(ref(db, `weeks/${currentWeekKey}/${key}`), items);
-    if (!weekData[key]) weekData[key] = {};
-    weekData[key] = items;
+    await set(ref(db, `weeks/${currentWeekKey}/day${dayIdx}`), items);
+    weekData[`day${dayIdx}`] = items;
     renderSummary();
-    renderDashboard();
-    showToast('✓ Saved successfully');
+    renderWeekStrip();
+    renderWeekGraph();
+    toast('✓ SAVED');
     const btn = document.getElementById(`saveBtn-${dayIdx}`);
-    if (btn) { btn.textContent = 'Saved!'; btn.classList.add('saved'); setTimeout(() => { btn.textContent = 'Save'; btn.classList.remove('saved'); }, 2000); }
+    if (btn) { btn.textContent = 'SAVED'; btn.classList.add('saved'); setTimeout(()=>{btn.textContent='SAVE';btn.classList.remove('saved');},2000); }
   } catch(e) {
-    showToast('Save failed: ' + e.message, true);
+    toast('Save failed: '+e.message, true);
   }
 }
 
+// ── DATA HELPERS ─────────────────────────────────────────────────────────
+
 function gatherDayItems(dayIdx) {
-  const container = document.getElementById(`costList-${dayIdx}`);
-  if (!container) return {};
-  const rows = container.querySelectorAll('.cost-item');
+  const list = document.getElementById(`costList-${dayIdx}`);
+  if (!list) return {};
   const items = {};
   let i = 0;
-  rows.forEach(row => {
+  list.querySelectorAll('.cost-item').forEach(row => {
     const name = row.querySelector('.inp-name').value.trim();
-    const amt = parseFloat(row.querySelector('.inp-amount').value) || 0;
-    if (name || amt) { items[`item${i}`] = { name: name || 'Unnamed', amount: amt }; i++; }
+    const amt  = parseFloat(row.querySelector('.inp-amount').value) || 0;
+    if (name || amt) { items[`item${i}`] = {name: name||'Unnamed', amount: amt}; i++; }
   });
   return items;
 }
 
 function getDayTotal(dayIdx) {
-  const key = `day${dayIdx}`;
-  const d = weekData[key] || {};
-  return Object.values(d).reduce((s, v) => s + (parseFloat(v.amount) || 0), 0);
+  return Object.values(weekData[`day${dayIdx}`]||{}).reduce((s,v)=>s+(parseFloat(v.amount)||0),0);
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────────────
+function getWeekTotal() {
+  return DAYS_SHORT.reduce((_,__,i)=>_+getDayTotal(i),0);
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
 
 function renderAll() {
   renderSummary();
-  renderDashboard();
+  renderWeekStrip();
+  renderWeekGraph();
   renderCustomizer();
 }
 
+// ── SUMMARY ───────────────────────────────────────────────────────────────
+
 function renderSummary() {
   const dates = getWeekDates(currentWeekKey);
+  let total=0, todayTotal=0, activeDays=0;
   const todayIdx = getTodayDayIndex();
-  let total = 0, todayTotal = 0, activeDays = 0;
-  for (let i = 0; i < 7; i++) {
+  for (let i=0;i<7;i++) {
     const t = getDayTotal(i);
     total += t;
-    if (t > 0) activeDays++;
-    if (isToday(dates[i])) todayTotal = t;
+    if (t>0) activeDays++;
+    if (isToday(dates[i])) todayTotal=t;
   }
   document.getElementById('totalWeek').textContent = fmt(total);
   document.getElementById('todayTotal').textContent = fmt(todayTotal);
-  document.getElementById('avgDay').textContent = fmt(activeDays ? total / activeDays : 0);
+  document.getElementById('avgDay').textContent = fmt(activeDays ? total/activeDays : 0);
 
-  const d0 = dates[0], d6 = dates[6];
+  const d0=dates[0], d6=dates[6];
   document.getElementById('weekRange').textContent =
-    `${d0.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${d6.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    d0.toLocaleDateString('en-US',{month:'short',day:'numeric'}) +
+    ' — ' +
+    d6.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
-  const todayItems = Object.keys(weekData[`day${todayIdx}`] || {}).length;
-  document.getElementById('todayItemCount').textContent = `${todayItems} item${todayItems !== 1 ? 's' : ''}`;
+  const tItems = Object.keys(weekData[`day${todayIdx}`]||{}).length;
+  document.getElementById('todayItems').textContent = `${tItems} ${tItems===1?'ENTRY':'ENTRIES'}`;
 }
 
-function renderDashboard() {
+// ── WEEK STRIP ────────────────────────────────────────────────────────────
+
+function renderWeekStrip() {
   const dates = getWeekDates(currentWeekKey);
-  const totals = DAYS.map((_, i) => getDayTotal(i));
-  const maxVal = Math.max(...totals, 1);
-
-  // Week grid
-  const grid = document.getElementById('weekGrid');
-  grid.innerHTML = '';
-  DAYS.forEach((d, i) => {
-    const t = totals[i];
-    const items = Object.keys(weekData[`day${i}`] || {}).length;
-    const div = document.createElement('div');
-    div.className = 'day-stat' + (isToday(dates[i]) ? ' today' : '');
-    div.onclick = () => { switchTab('customizer'); setTimeout(() => scrollToDay(i), 100); };
-    div.innerHTML = `
-      <div class="day-name">${d}</div>
-      <div class="day-amount">${fmt(t)}</div>
-      <div class="day-items">${items} item${items !== 1 ? 's' : ''}</div>
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = '';
+  DAYS_SHORT.forEach((d, i) => {
+    const t = getDayTotal(i);
+    const cnt = Object.keys(weekData[`day${i}`]||{}).length;
+    const chip = document.createElement('div');
+    chip.className = 'day-chip' + (isToday(dates[i]) ? ' today' : '');
+    chip.onclick = () => { switchTab('customizer'); setTimeout(()=>scrollToDay(i),100); };
+    chip.innerHTML = `
+      <div class="dc-name">${d}</div>
+      <div class="dc-amt">${fmt(t)}</div>
+      <div class="dc-items">${cnt} ITEM${cnt!==1?'S':''}</div>
     `;
-    grid.appendChild(div);
-  });
-
-  // Bar chart
-  const barChart = document.getElementById('barChart');
-  barChart.innerHTML = '';
-  DAYS.forEach((d, i) => {
-    const t = totals[i];
-    const h = Math.max((t / maxVal) * 120, t > 0 ? 8 : 4);
-    const wrap = document.createElement('div');
-    wrap.className = 'bar-wrap';
-    wrap.innerHTML = `
-      <div class="bar-val">${t > 0 ? fmt(t) : ''}</div>
-      <div class="bar${isToday(dates[i]) ? ' today-bar' : ''}" style="height:${h}px"></div>
-      <div class="bar-day">${d}</div>
-    `;
-    barChart.appendChild(wrap);
+    strip.appendChild(chip);
   });
 }
+
+// ── WEEK GRAPH (SVG bars) ─────────────────────────────────────────────────
+
+function renderWeekGraph() {
+  const svg = document.getElementById('weekGraph');
+  const W = svg.parentElement.clientWidth || 600;
+  const H = 160;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+
+  const totals = DAYS_SHORT.map((_,i)=>getDayTotal(i));
+  const dates = getWeekDates(currentWeekKey);
+  const maxVal = Math.max(...totals, 1);
+  const pad = 40, barW = (W - pad*2) / 7;
+  const chartH = H - 40;
+
+  // Grid lines
+  for (let g=0; g<=4; g++) {
+    const y = 10 + (chartH * g / 4);
+    const line = mkSVG('line',{x1:pad,y1:y,x2:W-pad,y2:y,stroke:'#1f1f35','stroke-width':'1'});
+    svg.appendChild(line);
+    const lbl = mkSVG('text',{x:pad-6,y:y+4,'text-anchor':'end',fill:'#495680','font-family':'Share Tech Mono','font-size':'9'});
+    lbl.textContent = fmt(maxVal*(1-g/4));
+    svg.appendChild(lbl);
+  }
+
+  // Bars
+  totals.forEach((t, i) => {
+    const x = pad + i * barW + barW * 0.15;
+    const bw = barW * 0.7;
+    const bh = Math.max((t/maxVal)*chartH, t>0?4:2);
+    const y = 10 + chartH - bh;
+    const today = isToday(dates[i]);
+
+    // Glow filter inline
+    const rect = mkSVG('rect',{
+      x, y, width: bw, height: bh, rx:'3',
+      fill: today ? 'rgba(255,184,0,0.7)' : 'rgba(0,212,255,0.55)',
+      stroke: today ? '#ffb800' : '#00d4ff',
+      'stroke-width': '1',
+    });
+    svg.appendChild(rect);
+
+    // Amount label
+    if (t > 0) {
+      const vl = mkSVG('text',{x:x+bw/2,y:y-5,'text-anchor':'middle',fill: today?'#ffb800':'#00d4ff','font-family':'Share Tech Mono','font-size':'10'});
+      vl.textContent = fmt(t);
+      svg.appendChild(vl);
+    }
+
+    // Day label
+    const dl = mkSVG('text',{x:x+bw/2,y:H-2,'text-anchor':'middle',fill: today?'#ffb800':'#495680','font-family':'Orbitron','font-size':'8','letter-spacing':'1'});
+    dl.textContent = DAYS_SHORT[i];
+    svg.appendChild(dl);
+  });
+}
+
+function mkSVG(tag, attrs={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v)));
+  return el;
+}
+
+// ── HISTORY GRAPH (SVG line) ──────────────────────────────────────────────
+
+async function loadAndRenderHistory() {
+  setLoader(true);
+  try {
+    const snap = await get(ref(db, 'weeks'));
+    allWeeksCache = snap.exists() ? snap.val() : {};
+  } catch(e) { allWeeksCache = {}; }
+  setLoader(false);
+  renderHistoryGraph();
+}
+
+function renderHistoryGraph() {
+  const svg = document.getElementById('historyGraph');
+  const W = svg.parentElement.clientWidth || 900;
+  const H = 280;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.innerHTML = '';
+
+  // Build ordered weekly data
+  const allKeys = Object.keys(allWeeksCache).sort();
+  const now = new Date();
+
+  // Filter by range
+  let weeksBack = 4;
+  if (historyRange==='3m') weeksBack=13;
+  else if (historyRange==='6m') weeksBack=26;
+  else if (historyRange==='1y') weeksBack=52;
+
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - weeksBack*7);
+  const cutoffKey = getWeekKey(cutoff);
+
+  const filtered = allKeys.filter(k => k >= cutoffKey);
+  // Also fill in current and nearby weeks even if empty
+  const curKey = getWeekKey(now);
+  if (!filtered.includes(curKey)) filtered.push(curKey);
+  filtered.sort();
+
+  if (filtered.length === 0) {
+    const t = mkSVG('text',{x:W/2,y:H/2,'text-anchor':'middle',fill:'#495680','font-family':'Share Tech Mono','font-size':'13'});
+    t.textContent = 'NO DATA YET — START ADDING COSTS';
+    svg.appendChild(t);
+    return;
+  }
+
+  const points = filtered.map(key => {
+    const data = allWeeksCache[key] || {};
+    let total = 0;
+    for (let i=0;i<7;i++) {
+      total += Object.values(data[`day${i}`]||{}).reduce((s,v)=>s+(parseFloat(v.amount)||0),0);
+    }
+    return { key, total };
+  });
+
+  const padL=56, padR=20, padT=24, padB=40;
+  const chartW = W-padL-padR;
+  const chartH = H-padT-padB;
+  const maxVal = Math.max(...points.map(p=>p.total), 1);
+
+  // Grid
+  for (let g=0;g<=5;g++) {
+    const y = padT + chartH*g/5;
+    const line = mkSVG('line',{x1:padL,y1:y,x2:W-padR,y2:y,stroke:'#1a1a2e','stroke-width':'1'});
+    svg.appendChild(line);
+    if (g<5) {
+      const lbl = mkSVG('text',{x:padL-6,y:y+4,'text-anchor':'end',fill:'#495680','font-family':'Share Tech Mono','font-size':'9'});
+      lbl.textContent = fmt(maxVal*(1-g/5));
+      svg.appendChild(lbl);
+    }
+  }
+
+  // Compute x,y
+  const pts = points.map((p,i) => {
+    const x = padL + (i/(Math.max(points.length-1,1)))*chartW;
+    const y = padT + (1 - p.total/maxVal)*chartH;
+    return {x, y, ...p};
+  });
+
+  // Area fill
+  if (pts.length > 1) {
+    const pathD = `M${pts[0].x},${padT+chartH} ` +
+      pts.map(p=>`L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') +
+      ` L${pts[pts.length-1].x},${padT+chartH} Z`;
+    const area = mkSVG('path',{d:pathD,fill:'rgba(0,212,255,0.06)',stroke:'none'});
+    svg.appendChild(area);
+
+    // Line
+    const linePath = `M${pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')}`;
+    const lp = mkSVG('path',{d:linePath,fill:'none',stroke:'#00d4ff','stroke-width':'1.5','stroke-linejoin':'round','stroke-linecap':'round'});
+    svg.appendChild(lp);
+  }
+
+  // Points + labels
+  pts.forEach((p,i) => {
+    const isCurr = p.key === curKey;
+
+    const circle = mkSVG('circle',{cx:p.x,cy:p.y,r: isCurr?5:3.5,fill: isCurr?'#ffb800':'#00d4ff',stroke:'#050508','stroke-width':'2'});
+    if (isCurr) circle.setAttribute('filter','drop-shadow(0 0 5px #ffb800)');
+    svg.appendChild(circle);
+
+    // X-axis label (show every Nth)
+    const step = Math.max(1, Math.floor(pts.length/10));
+    if (i%step===0 || i===pts.length-1 || isCurr) {
+      const xLbl = mkSVG('text',{x:p.x,y:H-4,'text-anchor':'middle',fill: isCurr?'#ffb800':'#2a2a45','font-family':'Share Tech Mono','font-size':'8','letter-spacing':'0.5'});
+      xLbl.textContent = p.key.replace('-W','/W');
+      svg.appendChild(xLbl);
+    }
+
+    // Tooltip hit area
+    const hit = mkSVG('rect',{x:p.x-12,y:padT,width:24,height:chartH,fill:'transparent',cursor:'pointer'});
+    const tooltip = document.getElementById('tooltip');
+    hit.addEventListener('mouseenter', e => {
+      document.getElementById('tt-lbl').textContent = p.key;
+      document.getElementById('tt-val').textContent = fmt(p.total);
+      tooltip.style.opacity='1';
+    });
+    hit.addEventListener('mousemove', e => {
+      const rect = svg.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left + 14)+'px';
+      tooltip.style.top  = (e.clientY - rect.top  - 36)+'px';
+    });
+    hit.addEventListener('mouseleave', ()=>{ tooltip.style.opacity='0'; });
+    svg.appendChild(hit);
+  });
+}
+
+// ── WEEK NAV ──────────────────────────────────────────────────────────────
+
+function updateWeekNav() {
+  const dates = getWeekDates(currentWeekKey);
+  const d0=dates[0], d6=dates[6];
+  document.getElementById('wNavLabel').textContent =
+    d0.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' — ' +
+    d6.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+  document.getElementById('wNavKey').textContent = currentWeekKey;
+}
+
+document.getElementById('prevWeek').onclick = () => loadWeek(shiftWeek(currentWeekKey,-1));
+document.getElementById('nextWeek').onclick = () => loadWeek(shiftWeek(currentWeekKey,+1));
+document.getElementById('jumpToday').onclick = () => loadWeek(getWeekKey(new Date()));
+
+// ── CUSTOMIZER ────────────────────────────────────────────────────────────
 
 function renderCustomizer() {
-  const container = document.getElementById('dayCustomizer');
-  container.innerHTML = '';
+  const grid = document.getElementById('dayGrid');
   const dates = getWeekDates(currentWeekKey);
+  grid.innerHTML = '';
 
-  DAYS.forEach((d, i) => {
+  DAYS_SHORT.forEach((d, i) => {
     const items = weekData[`day${i}`] || {};
     const total = getDayTotal(i);
     const today = isToday(dates[i]);
-    const dateStr = dates[i].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const dateStr = dates[i].toLocaleDateString('en-US',{month:'short',day:'numeric'});
 
     const card = document.createElement('div');
-    card.className = 'day-card' + (today ? ' today-card' : '');
+    card.className = 'day-card' + (today?' today-card':'');
     card.id = `dayCard-${i}`;
-
     card.innerHTML = `
-      <div class="day-card-header">
-        <div class="day-label">${DAY_FULL[i]} <span style="color:var(--muted);font-size:12px;font-family:var(--font-mono)">${dateStr}</span></div>
-        <div class="day-total" id="dayTotal-${i}">${fmt(total)}</div>
+      <div class="dc-head">
+        <div>
+          <div class="dc-day-name">${DAYS_FULL[i].toUpperCase()}</div>
+          <div class="dc-day-date">${dateStr.toUpperCase()}</div>
+        </div>
+        <div class="dc-total" id="dayTotal-${i}">${fmt(total)}</div>
       </div>
       <div class="cost-list" id="costList-${i}"></div>
-      <div class="day-card-footer">
-        <button class="btn-add" onclick="addCostRow(${i})">+ Add Cost</button>
-        <button class="btn-save-day" id="saveBtn-${i}" onclick="saveDayData(${i})">Save</button>
+      <div class="dc-foot">
+        <button class="btn-add-cost" onclick="addCostRow(${i})">+ ADD ITEM</button>
+        <button class="btn-save" id="saveBtn-${i}" onclick="saveDay(${i})">SAVE</button>
       </div>
     `;
-    container.appendChild(card);
+    grid.appendChild(card);
 
-    // Populate items
     const list = document.getElementById(`costList-${i}`);
     const itemArr = Object.values(items);
-    if (itemArr.length === 0) {
-      addCostRow(i);
-    } else {
-      itemArr.forEach(item => addCostRow(i, item.name, item.amount));
-    }
+    if (itemArr.length===0) addCostRow(i);
+    else itemArr.forEach(item=>addCostRow(i, item.name, item.amount));
   });
+
+  renderDaySelector();
 }
 
-function addCostRow(dayIdx, name = '', amount = '') {
+function addCostRow(dayIdx, name='', amount='') {
   const list = document.getElementById(`costList-${dayIdx}`);
+  if (!list) return;
   const row = document.createElement('div');
   row.className = 'cost-item';
   row.innerHTML = `
-    <input class="inp-name" type="text" placeholder="Description" value="${name}" oninput="updateDayTotal(${dayIdx})">
-    <input class="inp-amount" type="number" placeholder="฿ Amount" value="${amount||''}" min="0" step="0.01" oninput="updateDayTotal(${dayIdx})">
-    <button class="btn-remove" onclick="removeCostRow(this, ${dayIdx})">×</button>
+    <input class="inp-name" type="text" placeholder="Description" value="${escHtml(String(name))}" oninput="liveTotal(${dayIdx})">
+    <input class="inp-amount" type="number" placeholder="Amount" value="${amount||''}" min="0" step="0.01" oninput="liveTotal(${dayIdx})">
+    <button class="btn-rm" onclick="removeRow(this,${dayIdx})">×</button>
   `;
   list.appendChild(row);
-  updateDayTotal(dayIdx);
+  liveTotal(dayIdx);
 }
 
-window.addCostRow = addCostRow;
-window.saveDayData = saveDayData;
+function escHtml(s) { return s.replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-window.removeCostRow = function(btn, dayIdx) {
+window.addCostRow = addCostRow;
+window.saveDay = saveDay;
+
+window.removeRow = function(btn, dayIdx) {
   const row = btn.closest('.cost-item');
   const list = document.getElementById(`costList-${dayIdx}`);
-  row.style.animation = 'none';
-  row.style.opacity = '0';
-  row.style.transform = 'translateX(10px)';
-  row.style.transition = 'all .15s';
-  setTimeout(() => {
-    row.remove();
-    if (list.querySelectorAll('.cost-item').length === 0) addCostRow(dayIdx);
-    updateDayTotal(dayIdx);
-  }, 150);
+  row.style.opacity='0'; row.style.transform='translateX(8px)'; row.style.transition='all .12s';
+  setTimeout(()=>{ row.remove(); if (!list.querySelectorAll('.cost-item').length) addCostRow(dayIdx); liveTotal(dayIdx); }, 120);
 };
 
-window.updateDayTotal = function(dayIdx) {
+window.liveTotal = function(dayIdx) {
   const items = gatherDayItems(dayIdx);
-  const total = Object.values(items).reduce((s, v) => s + (v.amount || 0), 0);
+  const total = Object.values(items).reduce((s,v)=>s+(v.amount||0),0);
   const el = document.getElementById(`dayTotal-${dayIdx}`);
   if (el) el.textContent = fmt(total);
 };
 
 function scrollToDay(i) {
   const card = document.getElementById(`dayCard-${i}`);
-  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (card) card.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-// ── TAB SWITCH ─────────────────────────────────────────────────────────────
+// ── TEMPLATE ─────────────────────────────────────────────────────────────
 
-window.switchTab = function(name) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tab-${name}`).classList.add('active');
-  event && event.target && event.target.classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.getAttribute('onclick')?.includes(name)) b.classList.add('active');
-  });
+document.getElementById('tplToggle').onclick = () => {
+  const body = document.getElementById('tplBody');
+  const arrow = document.getElementById('tplArrow');
+  const open = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+  if (open && !document.getElementById('tplItems').children.length) addTplRow();
 };
 
-window.loadWeekData = loadWeekData;
+function addTplRow(name='', amount='') {
+  const container = document.getElementById('tplItems');
+  const row = document.createElement('div');
+  row.className = 'tpl-row';
+  row.innerHTML = `
+    <input class="inp-name" type="text" placeholder="Description (e.g. Lunch)" value="${escHtml(String(name))}" style="flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--font-data);font-size:12px;padding:7px 10px;border-radius:3px;outline:none;">
+    <input class="inp-amount" type="number" placeholder="Amount" value="${amount||''}" min="0" step="0.01" style="width:100px;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--font-data);font-size:12px;padding:7px 10px;border-radius:3px;outline:none;">
+    <button class="btn-rm" onclick="this.closest('.tpl-row').remove()">×</button>
+  `;
+  container.appendChild(row);
+}
+window.addTplRow = addTplRow;
 
-// ── INIT ───────────────────────────────────────────────────────────────────
+function renderDaySelector() {
+  const sel = document.getElementById('daySelector');
+  sel.innerHTML = '';
+  DAYS_SHORT.forEach((d,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-tog';
+    btn.textContent = d;
+    btn.dataset.day = i;
+    btn.onclick = () => btn.classList.toggle('sel');
+    sel.appendChild(btn);
+  });
+}
 
-populateWeekSelect();
-loadWeekData();
+window.applyTemplate = async function() {
+  const rows = document.getElementById('tplItems').querySelectorAll('.tpl-row');
+  const tplItems = [];
+  rows.forEach(r => {
+    const name = r.querySelector('.inp-name').value.trim();
+    const amt  = parseFloat(r.querySelector('.inp-amount').value) || 0;
+    if (name || amt) tplItems.push({name: name||'Unnamed', amount: amt});
+  });
+  if (!tplItems.length) { toast('// No template items to apply', true); return; }
 
-// Real-time listener for current week
-onValue(ref(db, `weeks/${currentWeekKey}`), (snap) => {
-  weekData = snap.exists() ? snap.val() : {};
+  const selectedDays = [...document.getElementById('daySelector').querySelectorAll('.day-tog.sel')].map(b=>parseInt(b.dataset.day));
+  if (!selectedDays.length) { toast('// Select at least one day', true); return; }
+
+  setLoader(true);
+  for (const dayIdx of selectedDays) {
+    const existing = weekData[`day${dayIdx}`] || {};
+    const merged = {...existing};
+    let nextIdx = Object.keys(merged).length;
+    tplItems.forEach(item => { merged[`item${nextIdx}`] = item; nextIdx++; });
+    try {
+      await set(ref(db, `weeks/${currentWeekKey}/day${dayIdx}`), merged);
+      weekData[`day${dayIdx}`] = merged;
+    } catch(e) { toast('Save error: '+e.message, true); }
+  }
+  setLoader(false);
   renderAll();
+  toast(`✓ APPLIED TO ${selectedDays.length} DAY${selectedDays.length!==1?'S':''}`);
+};
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{ if(b.dataset.tab===name) b.classList.add('active'); });
+  if (name==='history') loadAndRenderHistory();
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+
+window.switchTab = switchTab;
+
+// ── HISTORY RANGE BUTTONS ─────────────────────────────────────────────────
+
+document.querySelectorAll('.range-btn').forEach(btn=>{
+  btn.onclick = () => {
+    document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    historyRange = btn.dataset.range;
+    renderHistoryGraph();
+  };
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+
+loadWeek(currentWeekKey);
+
+// Re-render graphs on resize
+window.addEventListener('resize', ()=>{
+  renderWeekGraph();
+  if (document.getElementById('tab-history').classList.contains('active')) renderHistoryGraph();
 });
 </script>
 </body>
