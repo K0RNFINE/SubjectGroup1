@@ -446,6 +446,29 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
+/* ══ KERNEL LOG — real event log ══ */
+const klog=document.getElementById('kernel-log');
+const MAX_KLINES=22;
+
+// Central log — call from anywhere
+function klog_push(text, cls=''){
+  const span=document.createElement('span');
+  span.className='kline'+(cls?' '+cls:'');
+  const now=new Date();
+  const ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  span.textContent=`${ts} ${text}`;
+  if(klog){
+    klog.querySelectorAll('.kline').forEach(l=>l.classList.add('dim'));
+    klog.appendChild(span);
+    let cur=klog.querySelector('.kcursor');
+    if(!cur){cur=document.createElement('span');cur.className='kcursor';}
+    klog.appendChild(cur);
+    const lines=klog.querySelectorAll('.kline');
+    if(lines.length>MAX_KLINES) lines[0].remove();
+    klog.scrollTop=klog.scrollHeight;
+  }
+}
+
 /* ══ FIREBASE ══ */
 firebase.initializeApp({
   apiKey:"AIzaSyCewMoKe7elxb0wi2iIPBGkCVEHKzyp6Sk",
@@ -1085,43 +1108,24 @@ setInterval(()=>{
   }
 },1000);
 
-/* ══ KERNEL LOG — real event log ══ */
-const klog=$('kernel-log');
-const MAX_KLINES=22;
 
-// Central log function — call this from anywhere in the app
-function klog_push(text, cls=''){
-  const span=document.createElement('span');
-  span.className='kline'+(cls?' '+cls:'');
-  const now=new Date();
-  const ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
-  span.textContent=`${ts} ${text}`;
-  klog.querySelectorAll('.kline').forEach(l=>l.classList.add('dim'));
-  klog.appendChild(span);
-  let cur=klog.querySelector('.kcursor');
-  if(!cur){cur=document.createElement('span');cur.className='kcursor';}
-  klog.appendChild(cur);
-  const lines=klog.querySelectorAll('.kline');
-  if(lines.length>MAX_KLINES) lines[0].remove();
-  klog.scrollTop=klog.scrollHeight;
-}
-
-// Boot sequence on load
+// Boot sequence
 (function bootLog(){
   const bootLines=[
     {t:0,   cls:'',    msg:'[sys] schoolos kernel v2.4 initialising...'},
-    {t:120, cls:'',    msg:'[mem] allocating heap · target: 128MB'},
-    {t:260, cls:'',    msg:'[net] opening firebase websocket...'},
-    {t:420, cls:'info',msg:'[net] ws:OPEN · rtdb connected'},
-    {t:560, cls:'',    msg:'[auth] session: anonymous · uid assigned'},
-    {t:700, cls:'',    msg:'[db] subscribing to tasks ref...'},
-    {t:900, cls:'',    msg:'[ttbl] parsing 5×12 timetable grid'},
-    {t:1050,cls:'',    msg:'[ttbl] period gaps: 10:10 13:40 17:10'},
-    {t:1200,cls:'',    msg:'[sched] recurring checker: armed'},
-    {t:1380,cls:'info',msg:'[ok] all subsystems nominal · ready'},
+    {t:130, cls:'',    msg:'[mem] allocating heap · target: 128MB'},
+    {t:270, cls:'',    msg:'[net] opening firebase websocket...'},
+    {t:440, cls:'info',msg:'[net] ws:OPEN · rtdb connected'},
+    {t:580, cls:'',    msg:'[auth] session: anonymous · uid assigned'},
+    {t:720, cls:'',    msg:'[db] subscribing to tasks ref...'},
+    {t:920, cls:'',    msg:'[ttbl] parsing 5×12 timetable grid'},
+    {t:1060,cls:'',    msg:'[ttbl] period gaps: 10:10 13:40 17:10'},
+    {t:1220,cls:'',    msg:'[sched] recurring checker: armed'},
+    {t:1400,cls:'info',msg:'[ok] all subsystems nominal · ready'},
   ];
   bootLines.forEach(({t,cls,msg})=>setTimeout(()=>klog_push(msg,cls),t));
 })();
+
 </script>
 </body>
 </html>
