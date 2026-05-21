@@ -470,6 +470,7 @@ function showToast(msg,icon='🔔'){
   $('toast').querySelector('.toast-icon').textContent=icon;
   $('toast').classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>$('toast').classList.remove('show'),4500);
+  klog_push(`[notify] ${msg.slice(0,50)}`,'info');
 }
 
 /* ══ ALL UNIQUE SUBJECT NAMES from table ══ */
@@ -719,64 +720,105 @@ function showPopup(anchorEl,subjectName,isRecur){
   popup.style.top=top+'px'; popup.style.left=left+'px';
 }
 
-/* ══ TASK DOTS — exact subject match ══ */
+/* ══ TASK DOTS ══
+   Strategy:
+   1. If a task has explicit subjects[] → show dot on EVERY cell that matches those subject names
+      (across all days — because the same subject appears on multiple days)
+   2. If a task has NO subjects[] → fall back to day-of-due-date: put dot on the
+      correct day column but mark ALL subject cells in that row (so you know there's
+      something due that day — user can click to see what)
+   Gold  (bottom-right) = one-time task
+   Indigo (top-right)   = recurring reminder
+*/
 function updateTaskDots(){
   document.querySelectorAll('.task-dot').forEach(d=>d.remove());
   document.querySelectorAll('.mob-task-dot').forEach(d=>d.remove());
   const pending=Object.values(tasks).filter(t=>!t.completed);
   if(!pending.length) return;
   const tbody=document.getElementById('tt-tbody');
+  const DAY_MAP={1:0,2:1,3:2,4:3,5:4}; // JS getDay() -> tbody row index
 
-  // Build a map: subjectName -> {hasTask, hasRecur}
-  const subMap={};
+  // cell key = "rowIdx-colIdx"  →  {hasTask, hasRecur, subjects}
+  const cellMap={};
+  function markCell(rowIdx,colIdx,isRecur){
+    const key=`${rowIdx}-${colIdx}`;
+    if(!cellMap[key]) cellMap[key]={hasTask:false,hasRecur:false};
+    if(isRecur) cellMap[key].hasRecur=true;
+    else        cellMap[key].hasTask=true;
+  }
+
   pending.forEach(t=>{
-    (t.subjects||[]).forEach(s=>{
-      if(!subMap[s]) subMap[s]={hasTask:false,hasRecur:false};
-      if(t.recurring) subMap[s].hasRecur=true;
-      else subMap[s].hasTask=true;
-    });
+    const isRecur=!!t.recurring;
+    const subs=t.subjects||[];
+
+    if(subs.length>0){
+      // ── Explicit subject link: mark every cell across all days that has that name ──
+      Array.from(tbody.rows).forEach((row,rowIdx)=>{
+        Array.from(row.cells).forEach((cell,colIdx)=>{
+          if(colIdx===0) return;
+          const cellName=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
+          if(subs.includes(cellName)) markCell(rowIdx,colIdx,isRecur);
+        });
+      });
+    } else {
+      // ── No subject linked: fall back to due-date day ──
+      const due=new Date(t.due);
+      const dayIdx=due.getDay(); // 0=Sun..6=Sat
+      const rowIdx=DAY_MAP[dayIdx];
+      if(rowIdx===undefined) return; // weekend, skip
+      const row=tbody.rows[rowIdx];
+      if(!row) return;
+      // Mark all real subject cells in that row (not "-" cells)
+      Array.from(row.cells).forEach((cell,colIdx)=>{
+        if(colIdx===0) return;
+        const cellName=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
+        if(!cellName||cellName==='-') return;
+        markCell(rowIdx,colIdx,isRecur);
+      });
+    }
   });
 
-  Array.from(tbody.rows).forEach((row,rowIdx)=>{
+  // Now materialise dots from cellMap
+  Object.entries(cellMap).forEach(([key,info])=>{
+    const [rowIdx,colIdx]=[...key.split('-').map(Number)];
+    const row=tbody.rows[rowIdx]; if(!row) return;
+    const cell=row.cells[colIdx]; if(!cell) return;
+    const name=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
     const dayIndex=rowIdx+1;
-    Array.from(row.cells).forEach((cell,colIdx)=>{
-      if(colIdx===0) return;
-      const name=cell.textContent.trim().split(/[\r\n]+/)[0].trim();
-      if(!name||name==='-') return;
-      const info=subMap[name]; if(!info) return;
+    const periodIdx=colIdx-1;
 
-      // Desktop dots
-      if(info.hasTask){
-        const dot=document.createElement('div');
-        dot.className='task-dot dot-task';
-        dot.title='🟡 งานปกติ: คลิกเพื่อดู';
-        cell.appendChild(dot);
-        dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,false);});
-      }
-      if(info.hasRecur){
-        const dot=document.createElement('div');
-        dot.className='task-dot dot-recur';
-        dot.title='แจ้งเตือนซ้ำ: คลิกเพื่อดู';
-        cell.appendChild(dot);
-        dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,true);});
-      }
+    // Desktop
+    if(info.hasTask && !cell.querySelector('.dot-task')){
+      const dot=document.createElement('div');
+      dot.className='task-dot dot-task';
+      dot.title='🟡 งานปกติ · คลิกดู';
+      cell.appendChild(dot);
+      dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,false);});
+    }
+    if(info.hasRecur && !cell.querySelector('.dot-recur')){
+      const dot=document.createElement('div');
+      dot.className='task-dot dot-recur';
+      dot.title='🟣 แจ้งเตือนซ้ำ · คลิกดู';
+      cell.appendChild(dot);
+      dot.addEventListener('click',e=>{e.stopPropagation();showPopup(dot,name,true);});
+    }
 
-      // Mobile dots
-      const periodIdx=colIdx-1;
-      const wrap=document.querySelector(`.mob-dot-wrap[data-day-index="${dayIndex}"][data-period-index="${periodIdx}"]`);
-      if(!wrap) return;
-      if(info.hasTask&&!wrap.querySelector('.dot-task')){
-        const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-task';
-        wrap.appendChild(mdot);
-        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,false);});
-      }
-      if(info.hasRecur&&!wrap.querySelector('.dot-recur')){
-        const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-recur';
-        wrap.appendChild(mdot);
-        mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,true);});
-      }
-    });
+    // Mobile
+    const wrap=document.querySelector(`.mob-dot-wrap[data-day-index="${dayIndex}"][data-period-index="${periodIdx}"]`);
+    if(!wrap) return;
+    if(info.hasTask && !wrap.querySelector('.dot-task')){
+      const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-task';
+      wrap.appendChild(mdot);
+      mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,false);});
+    }
+    if(info.hasRecur && !wrap.querySelector('.dot-recur')){
+      const mdot=document.createElement('div'); mdot.className='mob-task-dot dot-recur';
+      wrap.appendChild(mdot);
+      mdot.addEventListener('click',e=>{e.stopPropagation();showPopup(mdot,name,true);});
+    }
   });
+  const dotCount=document.querySelectorAll('.task-dot').length;
+  if(dotCount>0) klog_push(`[dot] ${dotCount} indicator(s) placed on timetable`);
 }
 
 /* ══ RENDER TASKS ══ */
@@ -879,9 +921,15 @@ setInterval(()=>{
 tasksRef.on('value',snap=>{
   tasks=snap.val()||{};
   const cut=Date.now()-7*24*60*60*1000;
-  snap.forEach(c=>{const t=c.val();if(t.completed&&!t.recurring&&t.completedAt&&t.completedAt<cut)c.ref.remove();});
+  let cleaned=0;
+  snap.forEach(c=>{const t=c.val();if(t.completed&&!t.recurring&&t.completedAt&&t.completedAt<cut){c.ref.remove();cleaned++;}});
+  const total=Object.keys(tasks).length;
+  const pend=Object.values(tasks).filter(t=>!t.completed).length;
+  const recur=Object.values(tasks).filter(t=>t.recurring).length;
+  klog_push(`[sync] snapshot: ${total} tasks · pending:${pend} · recur:${recur}`);
+  if(cleaned>0) klog_push(`[gc] pruned ${cleaned} expired completed tasks`,'warn');
   render(); setSync('synced','ซิงค์แล้ว ☁️');
-},()=>setSync('error','เชื่อมไม่ได้ ⚠️'));
+},e=>{setSync('error','เชื่อมไม่ได้ ⚠️');klog_push('[err] firebase rtdb disconnected: '+e.message,'err');});
 
 /* ══ ADD / EDIT ══ */
 $('add-task').addEventListener('click',()=>{
@@ -895,7 +943,13 @@ $('add-task').addEventListener('click',()=>{
   const payload={text,due:due.toISOString(),completed:false,createdAt:Date.now(),completedAt:null,priority:false,
     recurring:repeatOn,recurFreq:repeatOn?freq:null,specificDates:repeatOn&&freq==='specific'?specificDates:[],
     subjects:linkedSubjects,_warned:false};
-  if(editingId){tasksRef.child(editingId).update(payload);} else{tasksRef.push(payload);}
+  if(editingId){
+    tasksRef.child(editingId).update(payload);
+    klog_push(`[task] updated "${text.slice(0,28)}" · due:${due.toISOString().slice(0,10)}`);
+  } else {
+    tasksRef.push(payload);
+    klog_push(`[task] added "${text.slice(0,28)}"${repeatOn?' 🔁 '+freq:''} · due:${due.toISOString().slice(0,10)}`);
+  }
   resetForm();
 });
 
@@ -903,7 +957,7 @@ function handleClick(e){
   const btn=e.target.closest('button[data-action]');if(!btn)return;
   const{key,action}=btn.dataset,t=tasks[key];if(!t)return;
   setSync('syncing','กำลังบันทึก...');
-  if(action==='delete') tasksRef.child(key).remove();
+  if(action==='delete'){tasksRef.child(key).remove();klog_push(`[task] deleted "${t.text.slice(0,28)}"`,'warn');}
   if(action==='complete'){
     if(t.recurring){
       let nextDue;
@@ -916,9 +970,10 @@ function handleClick(e){
       tasksRef.child(key).update({completed:true,completedAt:Date.now()});
       setTimeout(()=>tasksRef.child(key).update({due:nextDue,completed:false,completedAt:null,_warned:false}),1500);
       showToast(`✅ ${t.text} เสร็จรอบนี้ · รอบถัดไป: ${fmtDue(new Date(nextDue))}`,'🔁');
+      klog_push(`[recur] "${t.text.slice(0,24)}" done · next: ${nextDue.slice(0,10)}`,'info');
     } else{tasksRef.child(key).update({completed:true,completedAt:Date.now()});}
   }
-  if(action==='priority') tasksRef.child(key).update({priority:!t.priority});
+  if(action==='priority'){const np=!t.priority;tasksRef.child(key).update({priority:np});klog_push(`[task] "${t.text.slice(0,24)}" priority→${np?'HIGH':'normal'}`);}
   if(action==='edit'){
     const d=new Date(t.due),pad=v=>String(v).padStart(2,'0');
     $('task-text').value=t.text;
@@ -958,6 +1013,7 @@ function buildSegs(row){
 }
 function findSeg(segs,n){for(let i=0;i<segs.length;i++)if(n>=segs[i].start&&n<segs[i].end)return i;return -1;}
 
+let _lastPeriodLabel='';
 function ttTick(){
   const now=new Date(),h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
   const tstr=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
@@ -966,6 +1022,7 @@ function ttTick(){
   const cdr=$('countdown-clock');
   if(dayIdx===0||dayIdx===6||!tbody.rows[rowIdx]){
     $('cur-subject').textContent='วันหยุด 🎉';$('cur-label').textContent='วันหยุด';$('cur-prog').style.width='0%';$('cur-eta').textContent='';
+    if(_lastPeriodLabel!=='weekend'){_lastPeriodLabel='weekend';klog_push('[sched] no class today · weekend','warn');}
     cdr.textContent='--:--';cdr.style.color='var(--red)';cdr.style.boxShadow='';cdr.classList.remove('blink');
     $('nxt-label').textContent='-';$('nxt-after').style.display='none';$('nxt-eta').textContent='เริ่มเวลา --:--';$('nxt-prog').style.width='0%';
     $('hv-period').textContent='วันหยุด'; return;
@@ -982,6 +1039,7 @@ function ttTick(){
     if(cur.type==='lunch'){$('cur-label').textContent='พักกลางวัน 🍱';$('cur-subject').textContent='🍱 พักกลางวัน';$('hv-period').textContent='พักกลางวัน';}
     else{
       $('cur-label').textContent=`คาบปัจจุบัน: ${cur.label}`;
+      if(cur.label!==_lastPeriodLabel){_lastPeriodLabel=cur.label;klog_push(`[sched] period started: ${cur.label.slice(0,30)}`,'info');}
       $('cur-subject').textContent='ขณะนี้เรียน: '+cur.label;
       $('hv-period').textContent=cur.label.length>22?cur.label.slice(0,22)+'…':cur.label;
       for(let i=0;i<PERIODS.length;i++){
@@ -1015,84 +1073,55 @@ hudToggle.onclick=()=>{const open=hudPanel.classList.toggle('open');hudToggle.cl
 
 /* ══ UPTIME ══ */
 const startT=Date.now();
-setInterval(()=>{let s=Math.floor((Date.now()-startT)/1000);const h=Math.floor(s/3600);s%=3600;const mn=Math.floor(s/60);s%=60;$('hv-uptime').textContent=[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':');},1000);
+let _lastUptimeLog=0;
+setInterval(()=>{
+  let s=Math.floor((Date.now()-startT)/1000);
+  const h=Math.floor(s/3600);s%=3600;const mn=Math.floor(s/60);s%=60;
+  $('hv-uptime').textContent=[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':');
+  const totMin=Math.floor((Date.now()-startT)/60000);
+  if(totMin>0&&totMin%5===0&&totMin!==_lastUptimeLog){
+    _lastUptimeLog=totMin;
+    klog_push(`[sys] uptime ${[h,mn,s].map(v=>String(v).padStart(2,'0')).join(':')} · tasks:${Object.values(tasks).filter(t=>!t.completed).length} pending`);
+  }
+},1000);
 
-/* ══ KERNEL LOG ══ */
+/* ══ KERNEL LOG — real event log ══ */
 const klog=$('kernel-log');
-const KERNEL_LINES=[
-  ()=>`[sys] schoolos kernel v2.4.${Math.floor(Math.random()*9)} · arch:wasm32`,
-  ()=>`[mem] heap ${(Math.random()*40+20).toFixed(1)}MB / 128MB · rss ${(Math.random()*10+5).toFixed(0)}MB`,
-  ()=>`[net] rtdb ping ${Math.floor(Math.random()*40+8)}ms · ws:OPEN`,
-  ()=>`[sched] period_check() → ${Math.floor(Math.random()*12)} slots scanned`,
-  ()=>`[task] db snapshot: ${Object.keys(tasks).length} records · pending:${Object.values(tasks).filter(t=>!t.completed).length}`,
-  ()=>`[sync] pull @${new Date().toTimeString().slice(0,8)} · delta: ${Math.floor(Math.random()*5)} ops`,
-  ()=>`[cpu] load 0.0${Math.floor(Math.random()*9)} · threads:4 · gc:idle`,
-  ()=>`[io] firebase bw ${(Math.random()*2+0.1).toFixed(2)}KB/s · reads:${Math.floor(Math.random()*20)+1}`,
-  ()=>`[auth] uid:anon · session ${Math.floor((Date.now()-startT)/60000)}min`,
-  ()=>`[cron] recur_check() → ${Object.values(tasks).filter(t=>t.recurring).length} recurring tasks`,
-  ()=>`[ttbl] 5×12 grid indexed · gaps: [10:10,13:40,17:10]`,
-  ()=>`[font] Orbitron+Sarabun · glyphs cached: ${Math.floor(Math.random()*800+400)}`,
-  ()=>`[gc] sweep: freed ${Math.floor(Math.random()*24)} refs · heap stable`,
-  ()=>`[rtdb] onValue() active · latency ${Math.floor(Math.random()*30+5)}ms`,
-  ()=>`[uptime] ${Math.floor((Date.now()-startT)/60000)}m${Math.floor(((Date.now()-startT)%60000)/1000)}s · pid:${Math.floor(Math.random()*9999)+1000}`,
-  ()=>`[render] tick ${Math.floor(Math.random()*6+1)}ms · dom_nodes:${document.querySelectorAll('*').length}`,
-  ()=>`[dot] subject_map rebuilt · entries:${Object.keys(tasks).length}`,
-  ()=>`[bg] jpcity.jfif · 1920×1080 · blend:overlay`,
-  ()=>`[period] PERIODS[${Math.floor(Math.random()*12)}] = ${['08:30','09:20','10:20','11:10','12:00','12:50','13:50','14:40','15:30','16:00','17:20','18:20'][Math.floor(Math.random()*12)]}`,
-  ()=>`[ws] keepalive → pong ${Math.floor(Math.random()*20)+1}ms`,
-  ()=>`[cache] hit_rate ${Math.floor(Math.random()*20+78)}% · misses:${Math.floor(Math.random()*4)}`,
-  ()=>`[store] localStorage N/A · using rtdb as source of truth`,
-];
-const WARN_LINES=[
-  ()=>`[warn] task overdue by ${Math.floor(Math.random()*72)+1}h → notify pending`,
-  ()=>`[warn] firebase quota ${Math.floor(Math.random()*30+60)}% · throttle at 95%`,
-  ()=>`[warn] period gap 10:10→10:20 (10min break)`,
-  ()=>`[warn] clock drift +${Math.floor(Math.random()*9)}ms · ntp resync`,
-];
-const ERR_LINES=[
-  ()=>`[err] img prefetch miss · retry in 3s`,
-  ()=>`[err] ntp drift +${Math.floor(Math.random()*4)}ms · correcting`,
-  ()=>`[err] ws reconnect attempt ${Math.floor(Math.random()*3)+1}/5`,
-];
-const INFO_LINES=[
-  ()=>`[ok] all services nominal · health:GREEN`,
-  ()=>`[ok] firebase rules validated · auth:OK`,
-  ()=>`[ok] dot indicators refreshed · ready`,
-  ()=>`[ok] recurring scheduler alive`,
-];
+const MAX_KLINES=22;
 
-function pickLine(){
-  const r=Math.random();
-  if(r<0.06) return{text:ERR_LINES[Math.floor(Math.random()*ERR_LINES.length)](),cls:'err'};
-  if(r<0.14) return{text:WARN_LINES[Math.floor(Math.random()*WARN_LINES.length)](),cls:'warn'};
-  if(r<0.22) return{text:INFO_LINES[Math.floor(Math.random()*INFO_LINES.length)](),cls:'info'};
-  return{text:KERNEL_LINES[Math.floor(Math.random()*KERNEL_LINES.length)](),cls:''};
-}
-
-const MAX_KLINES=18;
-function addKernelLine(){
-  const{text,cls}=pickLine();
+// Central log function — call this from anywhere in the app
+function klog_push(text, cls=''){
   const span=document.createElement('span');
   span.className='kline'+(cls?' '+cls:'');
-  const now=new Date(),ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const now=new Date();
+  const ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
   span.textContent=`${ts} ${text}`;
-  // keep old lines dim
   klog.querySelectorAll('.kline').forEach(l=>l.classList.add('dim'));
   klog.appendChild(span);
-  // cursor
   let cur=klog.querySelector('.kcursor');
-  if(!cur){cur=document.createElement('span');cur.className='kcursor';klog.appendChild(cur);}
-  else klog.appendChild(cur);
-  // trim
+  if(!cur){cur=document.createElement('span');cur.className='kcursor';}
+  klog.appendChild(cur);
   const lines=klog.querySelectorAll('.kline');
   if(lines.length>MAX_KLINES) lines[0].remove();
   klog.scrollTop=klog.scrollHeight;
 }
-// initial burst
-for(let i=0;i<6;i++) addKernelLine();
-// random interval 1.5-4.5s
-function scheduleKernel(){setTimeout(()=>{addKernelLine();scheduleKernel();},Math.random()*3000+1500);}
-scheduleKernel();
+
+// Boot sequence on load
+(function bootLog(){
+  const bootLines=[
+    {t:0,   cls:'',    msg:'[sys] schoolos kernel v2.4 initialising...'},
+    {t:120, cls:'',    msg:'[mem] allocating heap · target: 128MB'},
+    {t:260, cls:'',    msg:'[net] opening firebase websocket...'},
+    {t:420, cls:'info',msg:'[net] ws:OPEN · rtdb connected'},
+    {t:560, cls:'',    msg:'[auth] session: anonymous · uid assigned'},
+    {t:700, cls:'',    msg:'[db] subscribing to tasks ref...'},
+    {t:900, cls:'',    msg:'[ttbl] parsing 5×12 timetable grid'},
+    {t:1050,cls:'',    msg:'[ttbl] period gaps: 10:10 13:40 17:10'},
+    {t:1200,cls:'',    msg:'[sched] recurring checker: armed'},
+    {t:1380,cls:'info',msg:'[ok] all subsystems nominal · ready'},
+  ];
+  bootLines.forEach(({t,cls,msg})=>setTimeout(()=>klog_push(msg,cls),t));
+})();
 </script>
 </body>
 </html>
