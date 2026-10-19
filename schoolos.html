@@ -323,32 +323,32 @@
       </tr></thead>
       <tbody id="tt-tbody">
         <tr><th>จันทร์</th>
-          <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
+          <td>English<br>เพียงขวัญ<br>337</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>การงาน<br>ปริญวันธนานันต์<br>ฝึกงาน1</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>-</td><td>-</td><td>-</td><td>-</td></tr>
         <tr><th>อังคาร</th>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>ดนตรี-นาฏศิลป์<br>ปภาวรินทร์<br>514</td>
+          <td>ภาษาไทย<br>สุวัฒน์ ต๊ะสุ<br>635</td>
           <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>ประชุมสี</td>
-          <td>ทำเวรห้อง 624 zoning</td>
+          <td>-</td><td>-</td></tr>
           <td>-</td><td>-</td></tr>
         <tr><th>พุธ</th>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>ภาษาไทย<br>สุวัฒน์ ต๊ะสุ<br>635</td>
+          <td>แนะแนว<br>ธรณิน<br>611</td>
           <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
@@ -357,21 +357,21 @@
         <tr><th>พฤหัสบดี</th>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>พละ<br>วิมลณัฐ<br>อเนกประสงค์6</td>
+          <td>สังคม<br>กัลยภิญญ์<br>523</td>
           <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>คณิตศาสตร์<br>ฉัตรณพัฒน์<br>233</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>ชุมนุม<br>N/A<br>---</td>
           <td>ซ่อมเสริม</td>
           <td>-</td><td>-</td><td>-</td></tr>
         <tr><th>ศุกร์</th>
-          <td>Subject<br>Teacher<br>---</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>English Com<br>MA.Fabie(ft.Maria)<br>326</td>
+          <td>คณิตศาสตร์<br>ฉัตรณพัฒน์<br>233</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>พักกลางวัน<br>-<br>โรงอาหาร</td>
-          <td>Subject<br>Teacher<br>---</td>
+          <td>English<br>เพียงขวัญ<br>337</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>Subject<br>Teacher<br>---</td>
           <td>-</td><td>-</td><td>-</td><td>-</td></tr>
@@ -616,69 +616,98 @@ const PERIODS=[
   {start:[15,30],end:[16,20]},{start:[16,0],end:[17,0]},
   {start:[17,20],end:[18,20]},{start:[18,20],end:[20,10]},
 ];
-const DAYS=[
-  {name:'จันทร์',dayIndex:1,periods:[
-    {time:'08.30-09.20',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'09.20-10.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'10.20-11.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'11.10-12.00',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
-    {time:'12.50-13.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'13.50-14.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'14.40-15.30',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
-  ]},
-  {name:'อังคาร',dayIndex:2,periods:[
-    {time:'08.30-09.20',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'09.20-10.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'10.20-11.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'11.10-12.00',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
-    {time:'12.50-13.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'13.50-14.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'14.40-15.30',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'15.30-16.20',subject:'ประชุมสี'},
-    {time:'16.00-17.00',subject:'ทำเวรห้อง 624 zoning'},
-    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
-  ]},
-  {name:'พุธ',dayIndex:3,periods:[
-    {time:'08.30-09.20',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'09.20-10.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'10.20-11.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'11.10-12.00',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
-    {time:'12.50-13.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'13.50-14.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'14.40-15.30',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
-  ]},
-  {name:'พฤหัสบดี',dayIndex:4,periods:[
-    {time:'08.30-09.20',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'09.20-10.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'10.20-11.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'11.10-12.00',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
-    {time:'12.50-13.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'13.50-14.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'14.40-15.30',subject:'ชุมนุม',teacher:'N/A',room:'---'},
-    {time:'15.30-16.20',subject:'ซ่อมเสริม'},
-    {time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
-  ]},
-  {name:'ศุกร์',dayIndex:5,periods:[
-    {time:'08.30-09.20',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'09.20-10.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'10.20-11.10',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'11.10-12.00',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'12.00-12.50',subject:'พักกลางวัน',lunch:true},
-    {time:'12.50-13.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'13.50-14.40',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'14.40-15.30',subject:'Subject',teacher:'teacher',room:'---'},
-    {time:'15.30-16.20',subject:'-',empty:true},{time:'16.00-17.00',subject:'-',empty:true},
-    {time:'17.20-18.20',subject:'-',empty:true},{time:'18.20-20.10',subject:'-',empty:true},
-  ]},
+
+const DAYS = [
+  {
+    name: 'จันทร์',
+    dayIndex: 1,
+    periods: [
+      { time: '08.30-09.20', subject: 'สังคม', teacher: 'กัลยภิญญ์', room: '523' },
+      { time: '09.20-10.10', subject: 'English', teacher: 'เพียงขวัญ', room: '337' },
+      { time: '10.20-11.10', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '11.10-12.00', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '12.00-12.50', subject: 'พักกลางวัน', lunch: true },
+      { time: '12.50-13.40', subject: 'การงาน', teacher: 'ปริวันธนานันต์', room: 'ฝึกงาน1' },
+      { time: '13.50-14.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '14.40-15.30', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '15.30-16.20', subject: '-', empty: true },
+      { time: '16.00-17.00', subject: '-', empty: true },
+      { time: '17.20-18.20', subject: '-', empty: true },
+      { time: '18.20-20.10', subject: '-', empty: true },
+    ]
+  },
+  {
+    name: 'อังคาร',
+    dayIndex: 2,
+    periods: [
+      { time: '08.30-09.20', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '09.20-10.10', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '10.20-11.10', subject: 'ดนตรี-นาฏศิลป์', teacher: 'ปภาวรินทร์', room: '514' },
+      { time: '11.10-12.00', subject: 'ภาษาไทย', teacher: 'สุวัฒน์ ต๊ะสุ', room: '635' },
+      { time: '12.00-12.50', subject: 'พักกลางวัน', lunch: true },
+      { time: '12.50-13.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '13.50-14.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '14.40-15.30', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '15.30-16.20', subject: 'ประชุมสี' },
+      { time: '16.00-17.00', subject: '-', empty: true },
+      { time: '17.20-18.20', subject: '-', empty: true },
+      { time: '18.20-20.10', subject: '-', empty: true },
+    ]
+  },
+  {
+    name: 'พุธ',
+    dayIndex: 3,
+    periods: [
+      { time: '08.30-09.20', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '09.20-10.10', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '10.20-11.10', subject: 'ภาษาไทย', teacher: 'สุวัฒน์ ต๊ะสุ', room: '635' },
+      { time: '11.10-12.00', subject: 'แนะแนว', teacher: 'ธรณิน', room: '611' },
+      { time: '12.00-12.50', subject: 'พักกลางวัน', lunch: true },
+      { time: '12.50-13.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '13.50-14.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '14.40-15.30', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '15.30-16.20', subject: '-', empty: true },
+      { time: '16.00-17.00', subject: '-', empty: true },
+      { time: '17.20-18.20', subject: '-', empty: true },
+      { time: '18.20-20.10', subject: '-', empty: true },
+    ]
+  },
+  {
+    name: 'พฤหัสบดี',
+    dayIndex: 4,
+    periods: [
+      { time: '08.30-09.20', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '09.20-10.10', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '10.20-11.10', subject: 'พละ', teacher: 'วิมลณัฐ', room: 'อเนกประสงค์6' },
+      { time: '11.10-12.00', subject: 'สังคม', teacher: 'กัลยภิญญ์', room: '523' },
+      { time: '12.00-12.50', subject: 'พักกลางวัน', lunch: true },
+      { time: '12.50-13.40', subject: 'คณิตศาสตร์', teacher: 'ฉัตรณพัฒน์', room: '233' },
+      { time: '13.50-14.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '14.40-15.30', subject: 'ชุมนุม', teacher: 'N/A', room: '---' },
+      { time: '15.30-16.20', subject: 'ซ่อมเสริม' },
+      { time: '16.00-17.00', subject: '-', empty: true },
+      { time: '17.20-18.20', subject: '-', empty: true },
+      { time: '18.20-20.10', subject: '-', empty: true },
+    ]
+  },
+  {
+    name: 'ศุกร์',
+    dayIndex: 5,
+    periods: [
+      { time: '08.30-09.20', subject: 'English Com', teacher: 'MA.Fabie(ft.Maria)', room: '326' },
+      { time: '09.20-10.10', subject: 'คณิตศาสตร์', teacher: 'ฉัตรณพัฒน์', room: '233' },
+      { time: '10.20-11.10', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '11.10-12.00', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '12.00-12.50', subject: 'พักกลางวัน', lunch: true },
+      { time: '12.50-13.40', subject: 'English', teacher: 'เพียงขวัญ', room: '337' },
+      { time: '13.50-14.40', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '14.40-15.30', subject: 'Subject', teacher: 'Teacher', room: '---' },
+      { time: '15.30-16.20', subject: '-', empty: true },
+      { time: '16.00-17.00', subject: '-', empty: true },
+      { time: '17.20-18.20', subject: '-', empty: true },
+      { time: '18.20-20.10', subject: '-', empty: true },
+    ]
+  },
 ];
 
 /* ══ BUILD MOBILE CARDS ══ */
