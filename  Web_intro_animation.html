@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tech intro animation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#04070d;--cy:#22e4ff;--vi:#7b5cff;--mg:#ff3d8b;--ease:cubic-bezier(.7,0,.2,1);box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden}
+body{font-family:"Chakra Petch",system-ui,sans-serif;color:#fff}
+
+#site{position:fixed;inset:0;background:var(--bg)}
+
+.intro{position:fixed;inset:0;z-index:10;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 50%,#0e1633 0,var(--bg) 70%);clip-path:inset(0)}
+.intro.play{animation:crt 1s var(--ease) 6.5s forwards}
+@keyframes crt{
+  0%{clip-path:inset(0);filter:brightness(1)}
+  55%{clip-path:inset(49.5% 0 49.5% 0);filter:brightness(3)}
+  100%{clip-path:inset(49.5% 50% 49.5% 50%);filter:brightness(3)}}
+.done .intro{display:none}
+.intro>*{position:absolute}
+
+.grid{inset:0;opacity:0;
+  background-image:linear-gradient(rgba(34,228,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(34,228,255,.08) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(circle at center,#000 15%,transparent 75%);mask-image:radial-gradient(circle at center,#000 15%,transparent 75%)}
+.play .grid{animation:fadein .8s ease .1s forwards,drift 6s linear infinite}
+@keyframes fadein{to{opacity:1}}
+@keyframes drift{to{background-position:44px 44px}}
+
+#cv{inset:0;width:100%;height:100%}
+
+.beam{left:0;right:0;top:0;height:2px;opacity:0;background:linear-gradient(90deg,transparent,var(--cy),transparent);box-shadow:0 0 24px 2px var(--cy)}
+.play .beam{animation:beam 1.5s ease-in-out .2s 2}
+@keyframes beam{0%{opacity:0;transform:translateY(0)}10%,90%{opacity:.9}100%{opacity:0;transform:translateY(100vh)}}
+
+.hud{width:min(70vmin,560px);height:min(70vmin,560px);inset:0;margin:auto;opacity:0;transform:scale(.7)}
+.play .hud{animation:hudIn 1s var(--ease) .3s forwards,hudDim 1.2s ease 3.8s forwards}
+@keyframes hudIn{to{opacity:1;transform:none}}
+@keyframes hudDim{to{opacity:.3;transform:scale(1.25)}}
+.hud *{fill:none;transform-box:fill-box;transform-origin:center}
+.r1{stroke:var(--cy);stroke-width:10;opacity:.5;animation:spin 40s linear infinite}
+.r2{stroke:var(--vi);stroke-width:3;animation:spin 16s linear infinite reverse}
+.r3{stroke:var(--cy);stroke-width:1.5;animation:spin 60s linear infinite}
+.r4{stroke:var(--mg);stroke-width:4;animation:spin 5s linear infinite}
+.prog{stroke:var(--cy);stroke-width:3;stroke-dasharray:360;stroke-dashoffset:360;filter:drop-shadow(0 0 4px var(--cy))}
+.play .prog{animation:prog 3.2s ease-in-out .4s forwards}
+.tick{stroke:var(--cy);stroke-width:2}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes prog{to{stroke-dashoffset:0}}
+
+.br{width:7vmin;height:7vmin;border:0 solid var(--cy);opacity:0}
+.tl{top:calc(4vmin + env(safe-area-inset-top,0px));left:4vmin;border-top-width:2px;border-left-width:2px}
+.tr{top:calc(4vmin + env(safe-area-inset-top,0px));right:4vmin;border-top-width:2px;border-right-width:2px}
+.bl{bottom:calc(4vmin + env(safe-area-inset-bottom,0px));left:4vmin;border-bottom-width:2px;border-left-width:2px}
+.brr{bottom:calc(4vmin + env(safe-area-inset-bottom,0px));right:4vmin;border-bottom-width:2px;border-right-width:2px}
+.play .br{animation:brIn .6s var(--ease) .6s forwards}
+@keyframes brIn{from{opacity:0;transform:scale(1.8)}to{opacity:1;transform:none}}
+
+.bars{top:50%;transform:translateY(-50%);width:min(9vw,70px);display:grid;gap:7px;opacity:0}
+.bars.l{left:6vmin}.bars.r{right:6vmin}
+.bars i{display:block;height:4px;background:var(--cy);transform-origin:left;transform:scaleX(var(--w));animation:eq .9s ease-in-out infinite alternate;animation-delay:var(--d)}
+.bars.r i{transform-origin:right;background:var(--vi)}
+.bars i:nth-child(3n){background:var(--mg)}
+.play .bars{animation:fadein .5s ease 1.2s forwards}
+@keyframes eq{to{transform:scaleX(calc(var(--w) * .25))}}
+
+.seg{left:50%;transform:translateX(-50%);bottom:calc(7vmin + env(safe-area-inset-bottom,0px));width:min(60vw,520px);display:flex;gap:3px}
+.seg i{flex:1;height:8px;background:rgba(34,228,255,.14)}
+.play .seg i{animation:seg .15s forwards;animation-delay:calc(.4s + var(--i) * .08s)}
+@keyframes seg{to{background:var(--cy);box-shadow:0 0 10px var(--cy)}}
+
+.flash{inset:0;opacity:0;background:radial-gradient(circle,rgba(255,255,255,.6),transparent 60%)}
+.play .flash{animation:flash .6s ease-out 3.6s}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+
+.copy{position:relative;display:grid;justify-items:center;text-align:center;padding:0 8vw}
+.rail{height:2px;width:0;margin-bottom:3vmin;background:linear-gradient(90deg,transparent,var(--cy),var(--vi),transparent)}
+.play .rail{animation:rail .8s var(--ease) 3.6s forwards}
+@keyframes rail{to{width:min(70vw,640px)}}
+
+.title{position:relative;margin:0;font-weight:700;font-size:clamp(2.2rem,9vw,6rem);line-height:1.05;letter-spacing:.04em;min-height:1.05em;clip-path:inset(0 100% 0 0)}
+.title::before,.title::after{content:attr(data-text);position:absolute;inset:0;mix-blend-mode:screen}
+.title::before{color:var(--mg);transform:translate(-3px,0)}
+.title::after{color:var(--cy);transform:translate(3px,0)}
+.play .title{animation:treveal .7s steps(14) 3.7s forwards,glitch .4s steps(3) 4.5s 2}
+@keyframes treveal{to{clip-path:inset(-10px -10px -10px -10px)}}
+@keyframes glitch{0%{transform:translate(0)}33%{transform:translate(-5px,2px)}66%{transform:translate(5px,-2px)}100%{transform:none}}
+
+.sub{margin:3vmin 0 0;font-weight:500;font-size:clamp(.9rem,2.6vw,1.3rem);letter-spacing:.3em;color:var(--cy);min-height:1.3em;display:flex;align-items:center;gap:.5em;opacity:0}
+.sub::after{content:"";width:.6em;height:1.1em;background:var(--cy);animation:blink 1s steps(1) infinite}
+.play .sub{animation:fadein .3s steps(3) 4.4s forwards}
+@keyframes blink{50%{opacity:0}}
+
+.ctrl{position:fixed;z-index:20;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;width:44px;height:44px;border-radius:50%;
+  border:2px solid var(--cy);background:rgba(4,7,13,.5);color:var(--cy);display:grid;place-items:center;cursor:pointer}
+.ctrl:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.ctrl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ctrl.replay{display:none}
+.done .ctrl.skip{display:none}
+.done .ctrl.replay{display:grid}
+
+@media (prefers-reduced-motion:reduce){.intro,.intro *{animation:none!important}}
+</style>
+</head>
+<body>
+
+<main id="site">
+  <!-- Your website starts here. The intro reveals it when finished. -->
+</main>
+
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="grid"></div>
+  <canvas id="cv"></canvas>
+  <div class="beam"></div>
+  <svg class="hud" viewBox="0 0 400 400">
+    <circle class="r1" cx="200" cy="200" r="196" pathLength="360" stroke-dasharray=".5 3.5"/>
+    <circle class="r2" cx="200" cy="200" r="178" pathLength="360" stroke-dasharray="90 15 30 15 60 15 20 115"/>
+    <circle class="r4" cx="200" cy="200" r="186" pathLength="360" stroke-dasharray="40 320"/>
+    <circle class="r3" cx="200" cy="200" r="160" pathLength="360" stroke-dasharray="1 5"/>
+    <circle class="prog" cx="200" cy="200" r="146" pathLength="360" transform="rotate(-90 200 200)"/>
+    <path class="tick" d="M200 36v16M200 348v16M36 200h16M348 200h16"/>
+  </svg>
+  <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i>
+  <div class="bars l" id="barsL"></div>
+  <div class="bars r" id="barsR"></div>
+  <div class="seg" id="seg"></div>
+  <div class="copy">
+    <div class="rail"></div>
+    <h1 class="title" id="title" data-text=""></h1>
+    <p class="sub"><span id="sub"></span></p>
+  </div>
+  <div class="flash"></div>
+</div>
+
+<button class="ctrl skip" id="skip" aria-label="Skip intro"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<button class="ctrl replay" id="replay" aria-label="Replay intro"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg></button>
+
+<script>
+// ---- Fill these in whenever you're ready. Empty = nothing shown. ----
+var TEXT = { title: "", subtitle: "" };
+var TOTAL = 7.6; // seconds
+
+var body = document.body, intro = document.getElementById("intro");
+var cv = document.getElementById("cv"), cx = cv.getContext("2d");
+var W, H, DPR, parts = [], raf, t0, timer;
+var CY = "34,228,255", VI = "123,92,255";
+
+function ss(x){ x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+
+function buildDecor(){
+  ["barsL","barsR"].forEach(function(id){
+    var el = document.getElementById(id); el.innerHTML = "";
+    for (var i = 0; i < 10; i++){
+      var b = document.createElement("i");
+      b.style.setProperty("--w", (0.3 + Math.random() * 0.7).toFixed(2));
+      b.style.setProperty("--d", (-Math.random() * 0.9).toFixed(2) + "s");
+      el.appendChild(b);
+    }
+  });
+  var seg = document.getElementById("seg"); seg.innerHTML = "";
+  for (var j = 0; j < 40; j++){
+    var s = document.createElement("i"); s.style.setProperty("--i", j); seg.appendChild(s);
+  }
+}
+
+function buildText(){
+  var t = document.getElementById("title");
+  t.textContent = TEXT.title; t.setAttribute("data-text", TEXT.title);
+  document.getElementById("sub").textContent = TEXT.subtitle;
+}
+
+function size(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  var n = Math.round(Math.min(240, W * H / 7000)); parts = [];
+  for (var i = 0; i < n; i++){
+    parts.push({x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*50, vy:(Math.random()-.5)*50,
+      a:i/n*Math.PI*2, ring:i%3===0?.6:1, v:Math.random()<.25, s:1+Math.random()*1.5});
+  }
+}
+
+function draw(t){
+  cx.clearRect(0, 0, W, H);
+  var S = Math.min(Math.min(W, H) * .7, 560), R = S * .4;
+  var ga = ss(t / .6), conv = ss((t - 1.6) / 1.8), k = ss((t - 3.6) / .9), disp = ss((t - 4.2) / 1.2);
+  var rot = t * .5 * conv, mx = W / 2, my = H / 2, i, j, p, q;
+
+  var g = cx.createRadialGradient(mx, my, 0, mx, my, R * 1.4);
+  g.addColorStop(0, "rgba(" + VI + "," + (conv * .28 * (1 - disp)) + ")"); g.addColorStop(1, "rgba(" + VI + ",0)");
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+
+  var pts = [];
+  for (i = 0; i < parts.length; i++){
+    p = parts[i];
+    var fx = ((p.x + p.vx * t) % W + W) % W, fy = ((p.y + p.vy * t) % H + H) % H;
+    var rr = R * p.ring * (1 + k * 1.6);
+    var hx = mx + Math.cos(p.a + rot) * rr, hy = my + Math.sin(p.a + rot) * rr;
+    var m = conv * (1 - disp);
+    pts.push({x: fx + (hx - fx) * m, y: fy + (hy - fy) * m, p: p});
+  }
+  var L = Math.min(140, W * .18); cx.lineWidth = 1;
+  for (i = 0; i < pts.length; i++){
+    for (j = i + 1; j < pts.length; j++){
+      var dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx*dx + dy*dy);
+      if (d < L){
+        cx.strokeStyle = "rgba(" + (pts[i].p.v ? VI : CY) + "," + ((1 - d / L) * .5 * ga * (.4 + conv * .6)) + ")";
+        cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
+      }
+    }
+  }
+  for (i = 0; i < pts.length; i++){
+    q = pts[i]; cx.fillStyle = "rgba(" + (q.p.v ? VI : CY) + "," + ga + ")";
+    cx.beginPath(); cx.arc(q.x, q.y, q.p.s, 0, 6.2832); cx.fill();
+  }
+  if (t > 3.6 && t < 4.9){
+    var waves = [[0, "255,255,255"], [.15, VI]];
+    for (i = 0; i < 2; i++){
+      var u = (t - 3.6 - waves[i][0]) / 1.1;
+      if (u > 0 && u < 1){
+        var e = 1 - Math.pow(1 - u, 3);
+        cx.strokeStyle = "rgba(" + waves[i][1] + "," + ((1 - u) * .6) + ")"; cx.lineWidth = 2 + (1 - u) * 6;
+        cx.beginPath(); cx.arc(mx, my, R * .9 + Math.max(W, H) * .7 * e, 0, 6.2832); cx.stroke();
+      }
+    }
+  }
+}
+
+function loop(ts){
+  if (!t0) t0 = ts;
+  var t = (ts - t0) / 1000; draw(t);
+  if (t < TOTAL) raf = requestAnimationFrame(loop);
+}
+
+function finish(){
+  clearTimeout(timer); cancelAnimationFrame(raf);
+  intro.classList.remove("play"); body.classList.add("done");
+}
+
+function play(){
+  clearTimeout(timer); cancelAnimationFrame(raf);
+  body.classList.remove("done"); intro.classList.remove("play"); void intro.offsetWidth;
+  buildDecor(); buildText();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches){ timer = setTimeout(finish, 300); return; }
+  size(); t0 = null; intro.classList.add("play");
+  raf = requestAnimationFrame(loop);
+  timer = setTimeout(finish, TOTAL * 1000);
+}
+
+addEventListener("resize", function(){ if (!body.classList.contains("done")) size(); });
+document.getElementById("skip").onclick = finish;
+document.getElementById("replay").onclick = play;
+play();
+</script>
+</body>
+</html>
